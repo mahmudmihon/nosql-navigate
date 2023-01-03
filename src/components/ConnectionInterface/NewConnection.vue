@@ -84,7 +84,7 @@
 
           case ButtonActionType.ValidateAndRedirectToHomePage: {
             connectButtonLoading.value = false;
-            router.push({name: 'Dashboard'});
+            router.push({path: '/dashboard'});
             break;
           }
 
