@@ -6,6 +6,7 @@
 mod services;
 mod models;
 
+use mongodb::bson::{doc, Document};
 use services::mongo_service;
 use models::dtos::DbWithCollections;
 use models::errors::CustomError;
@@ -21,9 +22,14 @@ async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomErro
   return mongo_service::get_dbs_with_collections().await;
 }
 
+#[tauri::command(async)]
+async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
+  return mongo_service::get_dbs_stats().await;
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

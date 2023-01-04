@@ -1,5 +1,5 @@
 use mongodb::{Client};
-use mongodb::bson::doc;
+use mongodb::bson::{doc, Document};
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
 
@@ -52,6 +52,25 @@ pub async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, Custom
                 return Ok(dbs_with_their_collections);
             },
             None => { return Err(CustomError::ClientNotFound) }
+        }
+    }
+}
+
+pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let mut dbs_stats: Vec<Document> = Vec::new();
+
+                for db_name in client.list_database_names(None, None).await? {
+                    let stats = client.database(&db_name).run_command(doc! { "dbStats": 1, "scale": 1024*1024*1024 }, None).await?;
+
+                    dbs_stats.push(stats);
+                }
+
+                return Ok(dbs_stats);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
         }
     }
 }
