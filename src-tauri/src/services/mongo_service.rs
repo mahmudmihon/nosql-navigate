@@ -1,5 +1,7 @@
 use mongodb::{Client};
-use mongodb::bson::doc;
+use mongodb::bson::{doc, Document};
+use crate::models::dtos::DbWithCollections;
+use crate::models::errors::CustomError;
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -30,24 +32,45 @@ pub async fn validate_url(url: &str) -> bool {
     };
 }
 
-pub fn connection_check() -> () {
-
-    //let connected = get_connected_client();
-
+pub async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
-            Some(client) => {print!("{:?}", client)},
-            None => {print!("client not found")}
-        }
+            Some(client) => {
+                let mut dbs_with_their_collections: Vec<DbWithCollections> = Vec::new();
 
+                for db_name in client.list_database_names(None, None).await? {
+                    let mut db_data: DbWithCollections = DbWithCollections::new();
+                    db_data.db_name = db_name;
+
+                    for collection_name in client.database(&db_data.db_name).list_collection_names(None).await? {
+                        db_data.db_collections.push(collection_name);
+                    }
+
+                    dbs_with_their_collections.push(db_data);
+                }
+
+                return Ok(dbs_with_their_collections);
+            },
+            None => { return Err(CustomError::ClientNotFound) }
+        }
     }
 }
 
-// fn get_connected_client() -> Client {
-//     unsafe {
-//         match &CONNECTED_CLIENT {
-//             Some(client) => return client,
-//             None => {print!("client not found")}
-//         }
-//     }
-// }
+pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let mut dbs_stats: Vec<Document> = Vec::new();
+
+                for db_name in client.list_database_names(None, None).await? {
+                    let stats = client.database(&db_name).run_command(doc! { "dbStats": 1, "scale": 1024*1024*1024 }, None).await?;
+
+                    dbs_stats.push(stats);
+                }
+
+                return Ok(dbs_stats);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}

@@ -44,7 +44,7 @@
   import { ButtonActionType } from "./models/ViewModels";
   import { useRouter, useRoute } from 'vue-router';
 
-  const connectionUrl = ref('');
+  const connectionUrl = ref('mongodb://localhost:27017');
   const toast = useToast();
   const router = useRouter();
   let testButtonLoading = ref(false);
@@ -84,7 +84,7 @@
 
           case ButtonActionType.ValidateAndRedirectToHomePage: {
             connectButtonLoading.value = false;
-            router.push({name: 'Dashboard'});
+            router.push({path: '/dashboard'});
             break;
           }
 
