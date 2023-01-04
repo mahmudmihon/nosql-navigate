@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-auto flex-nowrap">
+  <div class="flex flex-1_1_100% flex-nowrap">
     <ConnectionDatabasesVue />
     <router-view />
   </div>

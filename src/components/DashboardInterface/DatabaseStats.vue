@@ -3,15 +3,13 @@
     <GenericSkeletonVue />
   </div>
 
-  <div class="flex p-3 w-full h-screen g-4">
-    <div v-for="dbStats in dbStatsData">
-      <div class="bg-base rounded-lg p-3 g-4">
-        <p class="text-green-200 text-xl">{{dbStats.db}}</p>
-        <p class="text-sm">Collections: {{dbStats.collections}}</p>
-        <p class="text-sm">Documents: {{dbStats.objects}}</p>
-        <p class="text-sm">Indexes: {{dbStats.indexes}}</p>
-        <p class="text-sm">Views: {{dbStats.views}}</p>
-      </div>
+  <div class="flex flex-wrap p-3 content-start gap-4">
+    <div v-for="dbStats in dbStatsData" class="bg-base rounded-3xl pl-5 pt-3 pb-3 w-64 self-start">
+      <p class="text-green-200 text-xl mt-1 text-ellipsis">{{dbStats.db}}</p>
+      <p class="text-sm mt-5 text-ellipsis">Collections: {{dbStats.collections}}</p>
+      <p class="text-sm mt-2 text-ellipsis">Documents: {{dbStats.objects}}</p>
+      <p class="text-sm mt-2 text-ellipsis">Indexes: {{dbStats.indexes}}</p>
+      <p class="text-sm mt-2 text-ellipsis">Views: {{dbStats.views}}</p>
     </div>
   </div>
 </template>
