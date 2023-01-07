@@ -6,6 +6,6 @@
 </template>
 
 <script setup lang="ts">
-  import SavedConnectionsVue from './SavedConnections.vue';
-  import NewConnectionVue from './NewConnection.vue';
+  import SavedConnectionsVue from '../SavedConnections/SavedConnections.vue';
+  import NewConnectionVue from '../NewConnection/NewConnection.vue';
 </script>

@@ -1,8 +1,8 @@
 <template>
   <div class="w-6/12 p-4 bg-base rounded-lg m-auto">
-    <h5 class="text-xl font-medium text-gray-900 dark:text-white">New Connection</h5>
+    <h5 class="text-xl font-medium text-white">New Connection</h5>
     <div class="mt-5">
-        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">URL</label>
+        <label class="block mb-2 text-sm font-medium text-white">URL</label>
         <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="mongodb://localhost:27017" v-model.trim="connectionUrl">
     </div>
 
@@ -26,7 +26,7 @@
 
     <hr class="mt-8 mb-4 h-px bg-base border-0 dark:bg-gray-700">
 
-    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Save Connection</label>
+    <label class="block mb-2 text-sm font-medium text-white">Save Connection</label>
     <div class="mt-2">
         <input type="text" class="border-gray-300 text-[#ffffffde] text-sm rounded-lg w-full p-1 dark:bg-base dark:placeholder-gray-400" placeholder="Connection Name" required>
     </div>
@@ -40,19 +40,20 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { invoke } from '@tauri-apps/api/tauri';
-  import { useToast } from "primevue/usetoast";
-  import { ButtonActionType } from "./models/ViewModels";
-  import { useRouter, useRoute } from 'vue-router';
+  import { ButtonActionType } from "./Models/ViewModels";
+  import { useRouter } from 'vue-router';
+  import { useNotification } from 'naive-ui';
 
   const connectionUrl = ref('mongodb://localhost:27017');
-  const toast = useToast();
   const router = useRouter();
+  const notification = useNotification();
+
   let testButtonLoading = ref(false);
   let connectButtonLoading = ref(false);
 
   const checkURL = (actionType: ButtonActionType) => {
     if (connectionUrl.value == null || connectionUrl.value === '') {
-      toast.add({severity: 'error', summary: 'Connection URL is Empty.', life: 3000});
+      notification.error({title: 'Connection URL is empty.'});
 
       return;
     }
@@ -77,7 +78,7 @@
       if(value) {
         switch(actionType) {
           case ButtonActionType.ValidateAndShowMessage: {
-            toast.add({severity: 'success', summary: 'Connection successful.', life: 3000});
+            notification.success({title: 'Connected successfully.'});
             testButtonLoading.value = false;
             break;
           }
@@ -94,8 +95,7 @@
         }        
       }
       else {
-        toast.add({severity: 'error', summary: "Couldn't be connected.", life: 3000});
-
+        notification.error({title: "Couldn't connect to the URL."});
         testButtonLoading.value = false;
         connectButtonLoading.value = false;
       }      

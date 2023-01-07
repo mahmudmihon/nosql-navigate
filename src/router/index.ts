@@ -1,7 +1,8 @@
 import DashboardInterfaceVue from '../components/DashboardInterface/DashboardInterface.vue';
 import ConnectionInterfaceVue from '../components/ConnectionInterface/ConnectionInterface.vue';
-import DatabaseStatsVue from '../components/DashboardInterface/DatabaseStats.vue';
-import { createRouter, createMemoryHistory  } from 'vue-router'
+import DatabasesSummaryVue from '../components/DatabasesSummary/DatabasesSummary.vue';
+import CollectionTabsVue from '../components/CollectionTabs/CollectionTabs.vue';
+import { createRouter, createMemoryHistory  } from 'vue-router';
 
 const routes = [
     { name: '', path: '/', component: ConnectionInterfaceVue },
@@ -11,10 +12,14 @@ const routes = [
         children: [
             {
                 path: '',
-                component: DatabaseStatsVue
+                component: DatabasesSummaryVue
+            },
+            {
+                path: '/collection-tabs',
+                component: CollectionTabsVue
             }
         ]
-     }
+    }  
 ];
 
 export const router = createRouter({

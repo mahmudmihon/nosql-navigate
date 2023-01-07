@@ -1,8 +1,9 @@
 <template>
-  <Toast position="top-right" />
-  <router-view />
+  <n-notification-provider placement="bottom-right">
+    <router-view />
+  </n-notification-provider> 
 </template>
 
 <script setup lang="ts">
-  import Toast from 'primevue/toast';
+  import { NNotificationProvider } from 'naive-ui';
 </script>
