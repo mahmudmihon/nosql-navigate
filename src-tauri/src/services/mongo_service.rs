@@ -1,5 +1,6 @@
-use mongodb::{Client};
+use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
+use mongodb_cursor_pagination::{CursorDirections, FindResult, PaginatedCursor};
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
 
@@ -71,6 +72,24 @@ pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
                 return Ok(dbs_stats);
             },
             None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub fn test_pagination(db_name: &str, collection_name: &str) -> () {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let db = client.database(db_name);
+                let mut options = create_options(2, 0);
+
+                let mut find_results: FindResult<Document> = PaginatedCursor::new(Some(options), None, None)
+                    .find(&db.collection(collection_name), None)
+                    .expect("Unable to find data");
+
+                println!("First page: {:?}", find_results);
+            },
+            None => { }
         }
     }
 }

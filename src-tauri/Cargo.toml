@@ -18,6 +18,7 @@ mongodb = "2.3.1"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
+mongodb-cursor-pagination = "0.2.9"
 tauri = { version = "1.2", features = ["shell-open"] }
 
 [features]

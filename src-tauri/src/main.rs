@@ -18,6 +18,11 @@ async fn check_mongo_url(url: &str) -> Result<bool, ()> {
 }
 
 #[tauri::command]
+fn test_pagination(db_name: &str, collection_name: &str) {
+  mongo_service::test_pagination(db_name, collection_name);
+}
+
+#[tauri::command]
 async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomError> {
   return mongo_service::get_dbs_with_collections().await;
 }
