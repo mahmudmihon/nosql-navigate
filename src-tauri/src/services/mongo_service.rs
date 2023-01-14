@@ -1,8 +1,8 @@
 use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
-use mongodb_cursor_pagination::{CursorDirections, FindResult, PaginatedCursor};
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
+use futures::stream::{StreamExt, TryStreamExt};
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -76,20 +76,31 @@ pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
     }
 }
 
-pub fn test_pagination(db_name: &str, collection_name: &str) -> () {
+pub async fn test_pagination(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
-                let mut options = create_options(2, 0);
+                let options = create_options(100, 0);
 
-                let mut find_results: FindResult<Document> = PaginatedCursor::new(Some(options), None, None)
-                    .find(&db.collection(collection_name), None)
-                    .expect("Unable to find data");
+                let mut cursor = db.collection(collection_name).find(None, options).await?;
 
-                println!("First page: {:?}", find_results);
+                let mut collection_docs: Vec<Document> = Vec::new();
+
+                while let Some(doc) = cursor.next().await {
+                    collection_docs.push(doc?);
+                }
+
+                return Ok(collection_docs);
             },
-            None => { }
+            None => { return Err(CustomError::ClientNotFound); }
         }
     }
+}
+
+fn create_options(limit: i64, skip: u64) -> FindOptions {
+    FindOptions::builder()
+        .limit(limit)
+        .skip(skip)
+        .build()
 }

@@ -1,9 +1,11 @@
 <template>
     <n-tabs
+        v-model:value="valueRef"
         type="card"
         closable
-        tab-style="min-width: 100px; color: white; background-color: #ffffff0a; border: none"
+        tab-style="min-width: 100px; color: white; background-color: #ffffff0a"
         @close="handleClose"
+        trigger="click"
     >
         <n-tab-pane
         v-for="tab in tabList"
@@ -11,24 +13,30 @@
         :tab="tab.collectionName"
         :name="tab.id"
         >
-            {{ tab.collectionName }}
+            <CollectionCRUDVue :key="tab.id" :db-name="tab.dbName" :collection-name="tab.collectionName" />
         </n-tab-pane>
     </n-tabs>
 </template>
 
 <script setup lang="ts">
     import { useCollectionTabsStore } from '../../stores/collection-tabs';
-    import { CollectionTab } from '../../types/collection-tabs/CollectionTab';
+    import { CollectionTab } from '../../types/collection-tabs/CollectionTab';   
     import { NTabs, NTabPane } from 'naive-ui';
     import { useRouter } from 'vue-router';
+    import { ref } from 'vue';
+    import CollectionCRUDVue from '../CollectionCRUD/CollectionCRUD.vue';
 
     const tabsStore = useCollectionTabsStore();
     const router = useRouter();
 
     let tabList: CollectionTab[] = tabsStore.tabList;
 
+    const valueRef = ref<string>(tabList[0].id);
+
     tabsStore.$subscribe((mutation, state) => {
         tabList = state.tabList;
+        let lastTab = [...tabList].pop();
+        valueRef.value = lastTab?.id ?? "";
     });
     
     function handleClose (closedTab: string) {

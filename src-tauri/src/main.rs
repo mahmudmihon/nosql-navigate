@@ -17,9 +17,10 @@ async fn check_mongo_url(url: &str) -> Result<bool, ()> {
     return Ok(mongo_service::validate_url(url).await);
 }
 
-#[tauri::command]
-fn test_pagination(db_name: &str, collection_name: &str) {
-  mongo_service::test_pagination(db_name, collection_name);
+#[tauri::command(async)]
+async fn test_pagination(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
+  println!("Calling from main {} {}", db_name, collection_name);
+  return mongo_service::test_pagination(db_name, collection_name).await;
 }
 
 #[tauri::command]
@@ -34,7 +35,7 @@ async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats, test_pagination])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

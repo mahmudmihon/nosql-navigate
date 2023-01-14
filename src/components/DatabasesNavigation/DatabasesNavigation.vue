@@ -71,9 +71,9 @@
           <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
         </summary>
 
-        <nav v-for="collectionName in db.db_collections" aria-label="Teams Nav" class="mt-1 ml-3 flex flex-col">
-          <a href="#" class="flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white" @click="addCollectionTabInStore(db.db_name, collectionName)"> 
-            <span class="ml-3 text-xs font-medium">{{collectionName}}</span>
+        <nav v-for="collectionName in db.db_collections" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
+          <a href="#" class="flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white" @click="addCollectionTabInStore(db.db_name, collectionName)">
+            <span class="text-xs font-medium">{{collectionName}}</span>
           </a>
         </nav>
       </details>
@@ -115,9 +115,6 @@
 
   function addCollectionTabInStore(dbName: string, collectionName: string) {
     tabsStore.addNewTab({id: uid(), dbName: dbName, collectionName: collectionName, isActive: true});
-
-    console.log("adding tab");
-    console.log(tabsStore.tabList);
 
     router.push({path: '/collection-tabs'});
   }
