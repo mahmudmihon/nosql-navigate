@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
     import { useCollectionTabsStore } from '../../stores/collection-tabs';
-    import { CollectionTab } from '../../types/collection-tabs/CollectionTab';   
+    import { CollectionTab } from '../../types/CollectionTabs/collection-tabs';
     import { NTabs, NTabPane } from 'naive-ui';
     import { useRouter } from 'vue-router';
     import { ref } from 'vue';
@@ -38,7 +38,7 @@
         let lastTab = [...tabList].pop();
         valueRef.value = lastTab?.id ?? "";
     });
-    
+
     function handleClose (closedTab: string) {
         const index = tabList.findIndex(tab => tab.id == closedTab);
         tabList.splice(index, 1);

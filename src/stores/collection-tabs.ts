@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { CollectionTab } from '../types/collection-tabs/CollectionTab';
+import { CollectionTab } from '../types/CollectionTabs/collection-tabs';
 
 
 interface CollectionTabsState {
@@ -19,4 +19,3 @@ export const useCollectionTabsStore = defineStore('collection-tabs', {
         }
     }
 })
-  

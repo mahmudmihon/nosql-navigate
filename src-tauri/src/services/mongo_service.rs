@@ -76,7 +76,7 @@ pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
     }
 }
 
-pub async fn test_pagination(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
+pub async fn get_collection_documents(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
