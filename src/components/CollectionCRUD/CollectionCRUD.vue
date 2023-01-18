@@ -9,8 +9,10 @@
         <span class="ml-1.5 text-sm font-medium">{{$props.collectionName}}</span>
     </summary>
 
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col">
         <GenericSkeletonVue v-if="dataLoading" />
+
+        <CollectionFilterVue :db-name="props.dbName" :collection-name="props.collectionName" />
     </div>
 </template>
 
@@ -21,6 +23,7 @@
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { CollectionDocuments } from '../../types/CollectionDocuments/collection-documents';
+    import CollectionFilterVue from '../CollectionFilter/CollectionFilter.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
 
     const props = defineProps<{
