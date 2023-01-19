@@ -46,7 +46,8 @@
             if (value != 'error') {
                 if (value.length > 0) {
                     const firstDocument = value[0] as object;
-                    const objectKeys = extractObjectKeys('.', firstDocument) as string[];
+                    console.log(firstDocument);
+                    const objectKeys = extractObjectKeys(firstDocument) as string[];
                     fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
 
                     documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: value as object[] });
