@@ -2276,6 +2276,11 @@ uuid@^9.0.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
   integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
+vanilla-jsoneditor@^0.7.9:
+  version "0.7.11"
+  resolved "https://registry.yarnpkg.com/vanilla-jsoneditor/-/vanilla-jsoneditor-0.7.11.tgz#69c9caac5d6d303e4b5c150fe159e0ec1effb930"
+  integrity sha512-DFm6Fg6gzP4FlOaydDCRWpqEsmI5umpb9fOV3hKbbNDO1ZHTUpuMwi1SmMyoEsSgdDGGzRLFNCrW0URQ9Skx4w==
+
 vdirs@^0.1.4, vdirs@^0.1.8:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/vdirs/-/vdirs-0.1.8.tgz#a103bc43baca738f8dea912a7e9737154a19dbc2"
@@ -2349,7 +2354,15 @@ vue-tsc@^1.0.11:
     "@volar/vue-language-core" "1.0.19"
     "@volar/vue-typescript" "1.0.19"
 
-vue@^3.2.45:
+vue3-ts-jsoneditor@^2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/vue3-ts-jsoneditor/-/vue3-ts-jsoneditor-2.7.1.tgz#cd9914caf023d1375cbbc20847c38a899d13acab"
+  integrity sha512-u8dWSG21dK0+iwbY6yhpcyRstQEKbO53+4Ma4Qhf9ED/wbGURjLvX/GTMbVsU7xB4gJKEs1a01AxBIgIab+4uA==
+  dependencies:
+    vanilla-jsoneditor "^0.7.9"
+    vue "^3.2.37"
+
+vue@^3.2.37, vue@^3.2.45:
   version "3.2.45"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.2.45.tgz#94a116784447eb7dbd892167784619fef379b3c8"
   integrity sha512-9Nx/Mg2b2xWlXykmCwiTUCWHbWIj53bnkizBxKai1g61f2Xit700A1ljowpTIM11e3uipOeiPcSqnmBg6gyiaA==

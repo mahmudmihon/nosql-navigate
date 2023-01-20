@@ -20,6 +20,30 @@
   overflow: hidden;
 }
 
+::-webkit-scrollbar {
+  width: 1px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff0a; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+.jse-tree-mode.svelte-1chflnh .jse-contents.svelte-1chflnh {
+  border: none;
+}
+
+.jse-tree-mode.no-main-menu.svelte-1chflnh.svelte-1chflnh {
+  border: none;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;

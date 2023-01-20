@@ -11,7 +11,7 @@
             </n-switch>
         </div>
 
-        <div class="document-filtering w-full h-36 overflow-y-auto">
+        <div class="document-filtering w-full h-24 overflow-y-auto">
             <div v-if="simpleFiltering" class="flex flex-col gap-2">
                 <div v-for="(filterModel, index) in multipleFilters" :key="index" class="flex gap-2">
                     <div>
@@ -19,17 +19,17 @@
                     </div>
 
                     <div>
-                        <n-select size="small" v-model="filterModel.field" filterable :options="documentFields" :render-option="renderOption" />
+                        <n-select size="small" v-model="filterModel.field" filterable :options="documentFields" :render-option="renderOption" :placeholder="'Field'" />
                     </div>
 
                     <div class="w-48">
-                        <n-select size="small" v-model="filterModel.filterType" :options="filterTypes" :render-option="renderOption" />
+                        <n-select size="small" v-model="filterModel.filterType" :options="filterTypes" :render-option="renderOption" :placeholder="'Fiter type'" />
                     </div>
 
                     <div class="w-full flex pr-1">
                         <n-input-group>
-                            <n-select size="small" v-model="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" />
-                            <n-input size="small" v-model="filterModel.value" type="text" />
+                            <n-select size="small" v-model="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" />
+                            <n-input size="small" v-model="filterModel.value" type="text" :placeholder="'Value'" />
                         </n-input-group>
 
                         <svg v-if="index != 0" @click="removeFilter(index)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-red-600 hover:cursor-pointer">
@@ -41,25 +41,26 @@
                 </div>
             </div>
 
-            <codemirror
+            <vue-jsoneditor
                 v-if="!simpleFiltering"
-                v-model="rawQuery"
-                :style="{ height: '144px', 'border-radius': '20px', }"
-                :autofocus="true"
-                :indent-with-tab="true"
-                :tab-size="2"
-                :extensions="extensions"
+                height="50"
+                mode="text"
+                v-model:text="rawQuery"
+                :mainMenuBar="false"
+                :navigationBar="false"
+                :statusBar="false"
+                :darkTheme="true"
             />
         </div>
 
         <div class="flex justify-center w-20">
-            <svg v-if="simpleFiltering" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-green-400">
+            <svg v-if="simpleFiltering" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-green-400 hover:cursor-pointer">
                 <path fill-rule="evenodd"
                     d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
                     clip-rule="evenodd" />
             </svg>
 
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-blue-400 ml-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-blue-400 ml-1 hover:cursor-pointer" @click="searchDocuments">
                 <path d="M8.25 10.875a2.625 2.625 0 115.25 0 2.625 2.625 0 01-5.25 0z" />
                 <path fill-rule="evenodd"
                     d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.125 4.5a4.125 4.125 0 102.338 7.524l2.007 2.006a.75.75 0 101.06-1.06l-2.006-2.007a4.125 4.125 0 00-3.399-6.463z"
@@ -75,9 +76,7 @@
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
     import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup } from 'naive-ui';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
-    import { Codemirror } from 'vue-codemirror';
-    import { oneDark } from '@codemirror/theme-one-dark';
-    import { json } from '@codemirror/lang-json';
+    import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
         dbName: string
@@ -91,11 +90,9 @@
         });
     }
 
-    const extensions = [json(), oneDark];
-
     let simpleFiltering = ref<boolean>(true);
     let documentFields: SelectMixedOption[] = [];
-    let rawQuery = ref("");
+    let rawQuery = ref('{}');
     let multipleFilters: any[] = reactive([
         {
             shouldApply: false,
@@ -191,5 +188,9 @@
 
     const removeFilter = (index: number) => {
         multipleFilters.splice(index, 1);
+    }
+
+    const searchDocuments = () => {
+        
     }
 </script>
