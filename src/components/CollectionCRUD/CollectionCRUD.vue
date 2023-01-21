@@ -16,7 +16,7 @@
 
         <div class="px-3 py-1 text-white rounded-lg bg-base mt-3 mb-3"></div>
 
-        <div class="h-screen overflow-y-auto">
+        <div class="h-screen overflow-y-auto mb-1">
             <DocumentListVue 
                 :db-name="props.dbName" 
                 :collection-name="props.collectionName" 

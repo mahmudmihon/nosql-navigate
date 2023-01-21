@@ -2,7 +2,7 @@ use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
-use futures::stream::{StreamExt, TryStreamExt};
+use futures::stream::{StreamExt};
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -81,7 +81,7 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str) -> R
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
-                let options = create_options(100, 0);
+                let options = create_options(50, 0);
 
                 let mut cursor = db.collection(collection_name).find(None, options).await?;
 
