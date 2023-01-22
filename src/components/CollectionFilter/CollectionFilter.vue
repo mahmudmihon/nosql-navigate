@@ -15,22 +15,28 @@
             <div v-if="simpleFiltering" class="flex flex-col gap-2">
                 <div v-for="(filterModel, index) in multipleFilters" :key="index" class="flex gap-2">
                     <div>
-                        <n-checkbox size="large" v-model="filterModel.shouldApply"></n-checkbox>
+                        <n-checkbox size="large" v-model:value="filterModel.shouldApply"></n-checkbox>
                     </div>
 
                     <div>
-                        <n-select size="small" v-model="filterModel.field" filterable :options="documentFields" :render-option="renderOption" :placeholder="'Field'" />
+                        <n-select size="small" v-model:value="filterModel.field" filterable :options="documentFields" :render-option="renderOption" :placeholder="'Field'" />
                     </div>
 
                     <div class="w-48">
-                        <n-select size="small" v-model="filterModel.filterType" :options="filterTypes" :render-option="renderOption" :placeholder="'Fiter type'" />
+                        <n-select size="small" v-model:value="filterModel.filterType" :options="filterTypes" :render-option="renderOption" :placeholder="'Fiter type'" />
                     </div>
 
                     <div class="w-full flex pr-1">
                         <n-input-group>
-                            <n-select size="small" v-model="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" />
-                            <n-input size="small" v-model="filterModel.value" type="text" :placeholder="'Value'" />
+                            <n-select size="small" v-model:value="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" />
+                            <n-input size="small" v-model:value="filterModel.value" type="text" :placeholder="'Value'" />
                         </n-input-group>
+
+                        <svg v-if="simpleFiltering && index == 0" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-green-400 hover:cursor-pointer">
+                            <path fill-rule="evenodd"
+                                d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
+                                clip-rule="evenodd" />
+                        </svg>
 
                         <svg v-if="index != 0" @click="removeFilter(index)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-red-600 hover:cursor-pointer">
                             <path fill-rule="evenodd"
@@ -53,13 +59,7 @@
             />
         </div>
 
-        <div class="flex justify-center w-20">
-            <svg v-if="simpleFiltering" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-green-400 hover:cursor-pointer">
-                <path fill-rule="evenodd"
-                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
-                    clip-rule="evenodd" />
-            </svg>
-
+        <div class="flex justify-center w-8">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-blue-400 ml-1 hover:cursor-pointer" @click="searchDocuments">
                 <path d="M8.25 10.875a2.625 2.625 0 115.25 0 2.625 2.625 0 01-5.25 0z" />
                 <path fill-rule="evenodd"
@@ -191,6 +191,6 @@
     }
 
     const searchDocuments = () => {
-        
+        console.log(multipleFilters);
     }
 </script>
