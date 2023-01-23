@@ -3,7 +3,11 @@ pub enum CustomError {
     #[error("error")]
     ClientNotFound,
     #[error("error")]
-    MongoError(#[from] mongodb::error::Error)
+    MongoError(#[from] mongodb::error::Error),
+    #[error("error")]
+    SerdeError(#[from] serde_json::Error),
+    #[error("error")]
+    BsonDocError(#[from] mongodb::bson::extjson::de::Error)
 }
 
 impl serde::Serialize for CustomError {

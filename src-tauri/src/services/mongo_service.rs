@@ -1,5 +1,7 @@
 use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
+use serde_json::{Map, Value};
+use std::convert::TryFrom;
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
 use futures::stream::{StreamExt};
@@ -84,6 +86,30 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str) -> R
                 let options = create_options(50, 0);
 
                 let mut cursor = db.collection(collection_name).find(None, options).await?;
+
+                let mut collection_docs: Vec<Document> = Vec::new();
+
+                while let Some(doc) = cursor.next().await {
+                    collection_docs.push(doc?);
+                }
+
+                return Ok(collection_docs);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn get_collection_documents_by_filter(db_name: &str, collection_name: &str, filters: &str) -> Result<Vec<Document>, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let db = client.database(db_name);
+
+                let value: Map<String, Value> = serde_json::from_str(filters)?;
+                let document = Document::try_from(value)?;
+
+                let mut cursor = db.collection(collection_name).find(document, None).await?;
 
                 let mut collection_docs: Vec<Document> = Vec::new();
 

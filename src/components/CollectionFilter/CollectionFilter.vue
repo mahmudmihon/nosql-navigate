@@ -15,7 +15,7 @@
             <div v-if="simpleFiltering" class="flex flex-col gap-2">
                 <div v-for="(filterModel, index) in multipleFilters" :key="index" class="flex gap-2">
                     <div>
-                        <n-checkbox size="large" v-model:value="filterModel.shouldApply"></n-checkbox>
+                        <n-checkbox size="large" v-model:checked="filterModel.shouldApply"></n-checkbox>
                     </div>
 
                     <div>
@@ -83,6 +83,10 @@
         collectionName: string
     }>();
 
+    const emit = defineEmits<{
+        (e: 'triggerFilter', conditions: string): void
+    }>();
+
     const renderOption = ({ node, option }: { node: VNode; option: SelectOption }) => {
         return h(NTooltip, null, {
             trigger: () => node,
@@ -119,6 +123,10 @@
         {
             label: "In",
             value: "In"
+        },
+        {
+            label: "Not in",
+            value: "Not in"
         },
         {
             label: "Less than",
@@ -191,6 +199,42 @@
     }
 
     const searchDocuments = () => {
-        console.log(multipleFilters);
+        var shouldApplyFilters = multipleFilters.filter(x => x.shouldApply);
+
+        if(shouldApplyFilters != null && shouldApplyFilters.length > 0) {
+            var jsonData = {};
+
+            shouldApplyFilters.forEach(x => {
+                if (x.filterType == "Equal") {
+                    jsonData[x.field] = x.value;
+                }
+                else if (x.filterType == "Not equal") {
+                    jsonData[x.field] = {"$ne": x.value};
+                }
+                else if (x.filterType == "Contains") {
+                    jsonData[x.field] = { "$regex": x.value, "$options": "i" };
+                }
+                else if (x.filterType == "In") {
+                    jsonData[x.field] = { "$in": [x.value] };
+                }
+                else if (x.filterType == "Not in") {
+                    jsonData[x.field] = { "$nin": [x.value] };
+                }
+                else if (x.filterType == "Less than") {
+                    jsonData[x.field] = { "$lt": [x.value] };
+                }
+                else if (x.filterType == "Less than or equal") {
+                    jsonData[x.field] = { "$lte": [x.value] };
+                }
+                else if (x.filterType == "Greater than") {
+                    jsonData[x.field] = { "$gt": [x.value] };
+                }
+                else if (x.filterType == "Greater than or equal") {
+                    jsonData[x.field] = { "$gte": [x.value] };
+                }
+            });
+
+            emit('triggerFilter', JSON.stringify(jsonData));
+        }
     }
 </script>

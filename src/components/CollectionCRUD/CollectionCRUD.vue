@@ -12,14 +12,14 @@
     <div class="flex flex-col">
         <GenericSkeletonVue v-if="dataLoading" />
 
-        <CollectionFilterVue :db-name="props.dbName" :collection-name="props.collectionName" />
+        <CollectionFilterVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" />
 
         <div class="px-3 py-1 text-white rounded-lg bg-base mt-3 mb-3"></div>
 
         <div class="h-screen overflow-y-auto mb-1">
-            <DocumentListVue 
-                :db-name="props.dbName" 
-                :collection-name="props.collectionName" 
+            <DocumentListVue
+                :db-name="props.dbName"
+                :collection-name="props.collectionName"
                 :show-searched-data="false"
                 :searched-data="searchedData"
             />
@@ -68,5 +68,11 @@
                 dataLoading.value = false;
             }
         });
+    }
+
+    const triggerFilter = (conditions: string) => {
+        invoke('get_collection_documents_by_filter', { dbName: props.dbName, collectionName: props.collectionName, filters: conditions }).then((value: any) => {
+            console.log(value);
+        })
     }
 </script>
