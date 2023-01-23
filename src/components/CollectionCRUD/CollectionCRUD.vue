@@ -18,9 +18,10 @@
 
         <div class="h-screen overflow-y-auto mb-1">
             <DocumentListVue
+                :key="documentListKey"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
-                :show-searched-data="false"
+                :show-searched-data="showSearchedData"
                 :searched-data="searchedData"
             />
         </div>
@@ -34,6 +35,7 @@
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { CollectionDocuments } from '../../types/CollectionDocuments/collection-documents';
+    import { v4 as uid } from 'uuid';
     import CollectionFilterVue from '../CollectionFilter/CollectionFilter.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
     import DocumentListVue from '../DocumentList/DocumentList.vue';
@@ -47,7 +49,9 @@
     const documentsStore = useCollectionDocumentsStore();
 
     let dataLoading = ref<boolean>(true);
+    let showSearchedData = ref<boolean>(false);
     let searchedData = reactive<object[]>([]);
+    let documentListKey = ref<string>(uid());
 
     var collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
 
@@ -72,7 +76,11 @@
 
     const triggerFilter = (conditions: string) => {
         invoke('get_collection_documents_by_filter', { dbName: props.dbName, collectionName: props.collectionName, filters: conditions }).then((value: any) => {
-            console.log(value);
+            if(value != 'error') {
+                searchedData = value as object[];
+                showSearchedData.value = true;
+                documentListKey.value = uid();
+            }
         })
     }
 </script>
