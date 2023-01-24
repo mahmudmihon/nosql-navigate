@@ -18,8 +18,8 @@ async fn check_mongo_url(url: &str) -> Result<bool, ()> {
 }
 
 #[tauri::command(async)]
-async fn get_collection_documents(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
-  return mongo_service::get_collection_documents(db_name, collection_name).await;
+async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
+  return mongo_service::get_collection_documents(db_name, collection_name, filters, limit, skip).await;
 }
 
 #[tauri::command(async)]

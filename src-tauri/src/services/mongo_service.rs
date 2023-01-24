@@ -78,14 +78,19 @@ pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
     }
 }
 
-pub async fn get_collection_documents(db_name: &str, collection_name: &str) -> Result<Vec<Document>, CustomError> {
+pub async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
-                let options = create_options(50, 0);
 
-                let mut cursor = db.collection(collection_name).find(None, options).await?;
+                let options = create_options(limit, skip);
+
+                let filters_mapping: Map<String, Value> = serde_json::from_str(filters)?;
+                
+                let filters_doc = Document::try_from(filters_mapping)?;
+
+                let mut cursor = db.collection(collection_name).find(filters_doc, options).await?;
 
                 let mut collection_docs: Vec<Document> = Vec::new();
 

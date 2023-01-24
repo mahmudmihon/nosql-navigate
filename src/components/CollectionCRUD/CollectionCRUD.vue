@@ -59,7 +59,7 @@
         dataLoading.value = false;
     }
     else {
-        invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName }).then((value: any) => {
+        invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}", limit: 50, skip: 0 }).then((value: any) => {
             if (value != 'error') {
                 if (value.length > 0) {
                     const firstDocument = value[0] as object;
@@ -75,7 +75,7 @@
     }
 
     const triggerFilter = (conditions: string) => {
-        invoke('get_collection_documents_by_filter', { dbName: props.dbName, collectionName: props.collectionName, filters: conditions }).then((value: any) => {
+        invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: conditions, limit: 50, skip: 0 }).then((value: any) => {
             if(value != 'error') {
                 searchedData = value as object[];
                 showSearchedData.value = true;
