@@ -1,6 +1,6 @@
 <template>
-    <div v-if="documentList.length > 0" class="h-screen overflow-y-auto">
-        <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer">
+    <div v-if="documentList.length > 0" class="h-screen overflow-auto">
+        <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
             <div class="flex mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
                 <svg @click="editDoc(document)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-emerald-500 hover:cursor-pointer">
                     <path
@@ -19,28 +19,22 @@
             <JSONViewVue
                 :editor-value="document"
             />
-
-            <n-modal v-model:show="showDocEditModal" class="rounded-xl" preset="card"
-                style="width: 50%; background-color: #313131; border: #313131;" :bordered="true" size="medium">
-                <div class="mb-6 overflow-y-auto h-[400px]">
-                    <vue-jsoneditor
-                        mode="text"
-                        v-model:text="editableDoc"
-                        :mainMenuBar="false"
-                        :navigationBar="false"
-                        :statusBar="false"
-                        :darkTheme="true"
-                    />
-                </div>
-
-                <div class="flex justify-end mt-3 gap-2">
-                    <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6">
-                        Update
-                    </button>
-                </div>
-            </n-modal>
         </div>
     </div>
+
+    <n-modal v-model:show="showDocEditModal" class="rounded-xl" preset="card"
+        style="width: 50%; background-color: #313131; border: #313131;" :bordered="true" size="medium">
+        <div class="mb-6 overflow-y-auto h-[400px]">
+            <vue-jsoneditor mode="text" v-model:text="editableDoc" :mainMenuBar="false" :navigationBar="false"
+                :statusBar="false" :darkTheme="true" />
+        </div>
+
+        <div class="flex justify-end mt-3 gap-2">
+            <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6">
+                Update
+            </button>
+        </div>
+    </n-modal>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +56,7 @@
     let documentList = reactive<object[]>([]);
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
+    const updateButtonRef = ref(null);
 
     if(props.showSearchedData) {
         documentList = props.searchedData;

@@ -21,19 +21,20 @@
 }
 
 ::-webkit-scrollbar {
-  width: 1px;
+  width: 3px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #ffffff0a; 
+  background: #ffffff0a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
+  cursor: pointer;
 }
 
 .jse-tree-mode.svelte-1chflnh .jse-contents.svelte-1chflnh {
