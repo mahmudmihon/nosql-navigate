@@ -1,7 +1,7 @@
 <template>
     <div v-if="documentList.length > 0" class="h-screen overflow-auto">
         <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
-            <div class="flex mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
+            <div class="mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
                 <svg @click="editDoc(document)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-emerald-500 hover:cursor-pointer">
                     <path
                         d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
@@ -43,6 +43,7 @@
     import { NModal } from 'naive-ui';
     import JSONViewVue from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
+import { parse } from 'path';
 
     const props = defineProps<{
         dbName: string
@@ -57,6 +58,8 @@
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
     const updateButtonRef = ref(null);
+
+    console.log(documentsStore);
 
     if(props.showSearchedData) {
         documentList = props.searchedData;

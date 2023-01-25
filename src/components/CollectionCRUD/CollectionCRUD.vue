@@ -12,18 +12,20 @@
     <div class="flex flex-col">
         <GenericSkeletonVue v-if="dataLoading" />
 
-        <CollectionFilterVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" />
+        <div v-else>
+            <CollectionFilterVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" />
 
-        <div class="px-3 py-1 text-white rounded-lg bg-base mt-3 mb-3"></div>
+            <div class="px-3 py-1 text-white rounded-lg bg-base mt-3 mb-3"></div>
 
-        <div class="h-screen overflow-y-auto mb-1">
-            <DocumentListVue
-                :key="documentListKey"
-                :db-name="props.dbName"
-                :collection-name="props.collectionName"
-                :show-searched-data="showSearchedData"
-                :searched-data="searchedData"
-            />
+            <div class="h-screen overflow-y-auto mb-1">
+                <DocumentListVue
+                    :key="documentListKey"
+                    :db-name="props.dbName"
+                    :collection-name="props.collectionName"
+                    :show-searched-data="showSearchedData"
+                    :searched-data="searchedData"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -58,7 +60,7 @@
     if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
         dataLoading.value = false;
     }
-    else {
+    else {        
         invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}", limit: 50, skip: 0 }).then((value: any) => {
             if (value != 'error') {
                 if (value.length > 0) {
