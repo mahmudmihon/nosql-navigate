@@ -194,11 +194,51 @@
         });
     }
 
-    const removeFilter = (index: number) => {
+    const removeFilter = (index: number): void => {
         multipleFilters.splice(index, 1);
     }
 
-    const searchDocuments = () => {
+    const extractSimpleBuilderFilters = (): string => {
+        var filters = {};
+
+        var shouldApplyFilters = multipleFilters.filter(x => x.shouldApply);
+
+        if(shouldApplyFilters != null && shouldApplyFilters.length > 0) {
+            shouldApplyFilters.forEach(x => {
+                if (x.filterType == "Equal") {
+                    filters[x.field] = x.value;
+                }
+                else if (x.filterType == "Not equal") {
+                    filters[x.field] = {"$ne": x.value};
+                }
+                else if (x.filterType == "Contains") {
+                    filters[x.field] = { "$regex": x.value, "$options": "i" };
+                }
+                else if (x.filterType == "In") {
+                    filters[x.field] = { "$in": [x.value] };
+                }
+                else if (x.filterType == "Not in") {
+                    filters[x.field] = { "$nin": [x.value] };
+                }
+                else if (x.filterType == "Less than") {
+                    filters[x.field] = { "$lt": [x.value] };
+                }
+                else if (x.filterType == "Less than or equal") {
+                    filters[x.field] = { "$lte": [x.value] };
+                }
+                else if (x.filterType == "Greater than") {
+                    filters[x.field] = { "$gt": [x.value] };
+                }
+                else if (x.filterType == "Greater than or equal") {
+                    filters[x.field] = { "$gte": [x.value] };
+                }
+            });
+        }
+
+        return JSON.stringify(filters);
+    }
+
+    const searchDocuments = (): void => {
         var shouldApplyFilters = multipleFilters.filter(x => x.shouldApply);
 
         if(shouldApplyFilters != null && shouldApplyFilters.length > 0) {

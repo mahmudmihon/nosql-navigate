@@ -16,17 +16,21 @@
                 </svg>
             </div>
 
-            <JSONViewVue
-                :editor-value="document"
-            />
+            <JSONViewVue :editor-value="document" />
         </div>
     </div>
 
     <n-modal v-model:show="showDocEditModal" class="rounded-xl" preset="card"
         style="width: 50%; background-color: #313131; border: #313131;" :bordered="true" size="medium">
         <div class="mb-6 overflow-y-auto h-[400px]">
-            <vue-jsoneditor mode="text" v-model:text="editableDoc" :mainMenuBar="false" :navigationBar="false"
-                :statusBar="false" :darkTheme="true" />
+            <vue-jsoneditor 
+                mode="text" 
+                v-model:text="editableDoc" 
+                :mainMenuBar="false" 
+                :navigationBar="false"
+                :statusBar="false" 
+                :darkTheme="true" 
+            />
         </div>
 
         <div class="flex justify-end mt-3 gap-2">
@@ -40,10 +44,10 @@
 <script setup lang="ts">
     import { reactive, ref } from 'vue';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
-    import { NModal } from 'naive-ui';
+    import { NModal } from 'naive-ui';   
+    import { EJSON } from 'bson';
     import JSONViewVue from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-import { parse } from 'path';
 
     const props = defineProps<{
         dbName: string
@@ -54,12 +58,9 @@ import { parse } from 'path';
 
     const documentsStore = useCollectionDocumentsStore();
 
-    let documentList = reactive<object[]>([]);
+    let documentList = reactive<any[]>([]);
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
-    const updateButtonRef = ref(null);
-
-    console.log(documentsStore);
 
     if(props.showSearchedData) {
         documentList = props.searchedData;
@@ -68,7 +69,9 @@ import { parse } from 'path';
         const documents = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;
 
         if(documents != null && documents.length > 0) {
-            documentList = documents;
+            documentList = documents.map(x => {
+                return EJSON.parse(JSON.stringify(x));
+            });
         }
     }
 
