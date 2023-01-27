@@ -11,8 +11,8 @@
             </n-switch>
         </div>
 
-        <div class="document-filtering w-full h-24 overflow-y-auto">
-            <div v-if="simpleFiltering" class="flex flex-col gap-2">
+        <div class="document-filtering w-full">
+            <div v-if="simpleFiltering" class="flex flex-col gap-2 h-24 overflow-y-auto">
                 <div v-for="(filterModel, index) in multipleFilters" :key="index" class="flex gap-2">
                     <div>
                         <n-checkbox size="large" v-model:checked="filterModel.shouldApply"></n-checkbox>
@@ -28,7 +28,7 @@
 
                     <div class="w-full flex pr-1">
                         <n-input-group>
-                            <n-select size="small" v-model:value="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" />
+                            <n-select size="small" v-model:value="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" @update:value="updateValueBasedOnDatatype(index)" />
                             <n-input size="small" v-model:value="filterModel.value" type="text" :placeholder="'Value'" />
                         </n-input-group>
 
@@ -47,16 +47,25 @@
                 </div>
             </div>
 
-            <vue-jsoneditor
-                v-if="!simpleFiltering"
-                height="50"
-                mode="text"
-                v-model:text="rawQuery"
-                :mainMenuBar="false"
-                :navigationBar="false"
-                :statusBar="false"
-                :darkTheme="true"
-            />
+            <div v-if="!simpleFiltering" class="flex">
+                <div class="w-full h-24 overflow-y-auto">
+                    <vue-jsoneditor                   
+                        height="50"
+                        mode="text"
+                        v-model:text="rawQuery"
+                        :mainMenuBar="false"
+                        :navigationBar="false"
+                        :statusBar="false"
+                        :darkTheme="true"
+                    />
+                </div>
+
+                <div class="w-8" title="Import simple filters"> 
+                    <svg @click="importFiltersFromSimpleBuilder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-green-400 ml-1 hover:cursor-pointer">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-.53 14.03a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V8.25a.75.75 0 00-1.5 0v5.69l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3z" clip-rule="evenodd" />
+                    </svg>              
+                </div>
+            </div>
         </div>
 
         <div class="flex justify-center w-8">
@@ -198,7 +207,7 @@
         multipleFilters.splice(index, 1);
     }
 
-    const extractSimpleBuilderFilters = (): string => {
+    const extractSimpleBuilderFilters = (): object => {
         var filters = {};
 
         var shouldApplyFilters = multipleFilters.filter(x => x.shouldApply);
@@ -235,46 +244,29 @@
             });
         }
 
-        return JSON.stringify(filters);
+        return filters;
     }
 
     const searchDocuments = (): void => {
-        var shouldApplyFilters = multipleFilters.filter(x => x.shouldApply);
+        let filters = '';
 
-        if(shouldApplyFilters != null && shouldApplyFilters.length > 0) {
-            var jsonData = {};
-
-            shouldApplyFilters.forEach(x => {
-                if (x.filterType == "Equal") {
-                    jsonData[x.field] = x.value;
-                }
-                else if (x.filterType == "Not equal") {
-                    jsonData[x.field] = {"$ne": x.value};
-                }
-                else if (x.filterType == "Contains") {
-                    jsonData[x.field] = { "$regex": x.value, "$options": "i" };
-                }
-                else if (x.filterType == "In") {
-                    jsonData[x.field] = { "$in": [x.value] };
-                }
-                else if (x.filterType == "Not in") {
-                    jsonData[x.field] = { "$nin": [x.value] };
-                }
-                else if (x.filterType == "Less than") {
-                    jsonData[x.field] = { "$lt": [x.value] };
-                }
-                else if (x.filterType == "Less than or equal") {
-                    jsonData[x.field] = { "$lte": [x.value] };
-                }
-                else if (x.filterType == "Greater than") {
-                    jsonData[x.field] = { "$gt": [x.value] };
-                }
-                else if (x.filterType == "Greater than or equal") {
-                    jsonData[x.field] = { "$gte": [x.value] };
-                }
-            });
-
-            emit('triggerFilter', JSON.stringify(jsonData));
+        if(simpleFiltering.value) {
+            filters = JSON.stringify(extractSimpleBuilderFilters());
         }
+        else {
+            filters = rawQuery.value;
+        }
+
+        emit('triggerFilter', filters);
+    }
+
+    const importFiltersFromSimpleBuilder = (): void => {
+        const filters = extractSimpleBuilderFilters();
+        rawQuery.value = JSON.stringify(filters, null, 2);
+    }
+
+    const updateValueBasedOnDatatype = (index: number): void => {
+        console.log(index);
+        console.log(multipleFilters[index]);
     }
 </script>
