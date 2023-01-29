@@ -13,9 +13,7 @@
         <GenericSkeletonVue v-if="dataLoading" />
 
         <div v-else>
-            <CollectionFilterVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" />
-
-            <div class="px-3 py-1 text-white rounded-lg bg-base mt-3 mb-3"></div>
+            <DocumentsFilterAndPaginationVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" :documents-count="0" />
 
             <div class="h-screen overflow-y-auto mb-1">
                 <DocumentListVue
@@ -33,15 +31,17 @@
 <script setup lang="ts">
     import { invoke } from '@tauri-apps/api/tauri';
     import { reactive, ref } from 'vue';
-    import { extractObjectKeys } from '../../helpers/ObjectKeys';
+    import { extractObjectKeys } from '../../helpers/object-keys';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { CollectionDocuments } from '../../types/CollectionDocuments/collection-documents';
     import { v4 as uid } from 'uuid';
-    import CollectionFilterVue from '../CollectionFilter/CollectionFilter.vue';
+    import { EJSONService } from '../../services/ejson-service';
+    import { useDocumentsCountStore } from '../../stores/documents-count';
+    import DocumentsFilterAndPaginationVue from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
     import DocumentListVue from '../DocumentList/DocumentList.vue';
-
+    
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -49,6 +49,7 @@
 
     const fieldsStore = useDocumentFieldsStore();
     const documentsStore = useCollectionDocumentsStore();
+    const countStore = useDocumentsCountStore();
 
     let dataLoading = ref<boolean>(true);
     let showSearchedData = ref<boolean>(false);
@@ -60,19 +61,41 @@
     if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
         dataLoading.value = false;
     }
-    else {        
-        invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}", limit: 50, skip: 0 }).then((value: any) => {
-            if (value != 'error') {
-                if (value.length > 0) {
-                    const firstDocument = value[0] as object;
-                    const objectKeys = extractObjectKeys(firstDocument) as string[];
-                    fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
+    else { 
+        const promises = [
+            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}", limit: 50, skip: 0 }),
+            invoke('get_collection_documents_count', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}" })
+        ];
+        
+        Promise.allSettled(promises).then(results => {
+            const listResult = results[0];
+            const countResult = results[1];
 
-                    documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: value as object[] });
+            if(listResult.status == 'fulfilled') {
+                if(listResult.value != 'error') {
+                    const documentList = listResult.value as object[];
+
+                    if (documentList.length > 0) {
+                        const firstDocument = documentList[0];
+                        const parsedObject = EJSONService.BsonDocToObject(firstDocument);
+                        const objectKeys = extractObjectKeys(parsedObject) as string[];
+
+                        fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
+
+                        documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
+                    }                  
                 }
-
-                dataLoading.value = false;
             }
+
+            if(countResult.status == 'fulfilled') {
+                if(countResult.value != 'error') {
+                    const documentsCount = countResult.value as number;
+
+                    countStore.addNewCount({ documentsOf: `${props.dbName}.${props.collectionName}`, documentsCount: documentsCount });
+                }
+            }
+
+            dataLoading.value = false;
         });
     }
 

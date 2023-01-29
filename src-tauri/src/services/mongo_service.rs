@@ -1,3 +1,4 @@
+use futures::TryFutureExt;
 use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
 use serde_json::{Map, Value};
@@ -105,24 +106,20 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
     }
 }
 
-pub async fn get_collection_documents_by_filter(db_name: &str, collection_name: &str, filters: &str) -> Result<Vec<Document>, CustomError> {
+pub async fn get_collection_documents_count(db_name: &str, collection_name: &str, filters: &str) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
+
                 let db = client.database(db_name);
 
-                let value: Map<String, Value> = serde_json::from_str(filters)?;
-                let document = Document::try_from(value)?;
+                let filters_mapping: Map<String, Value> = serde_json::from_str(filters)?;
+                
+                let filters_doc = Document::try_from(filters_mapping)?;
 
-                let mut cursor = db.collection(collection_name).find(document, None).await?;
+                let documents_count = db.collection::<String>(collection_name).count_documents(filters_doc, None).await?;
 
-                let mut collection_docs: Vec<Document> = Vec::new();
-
-                while let Some(doc) = cursor.next().await {
-                    collection_docs.push(doc?);
-                }
-
-                return Ok(collection_docs);
+                return Ok(documents_count);
             },
             None => { return Err(CustomError::ClientNotFound); }
         }

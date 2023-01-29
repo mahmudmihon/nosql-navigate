@@ -45,10 +45,10 @@
     import { reactive, ref } from 'vue';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal } from 'naive-ui';   
-    import { EJSON } from 'bson';
+    import { EJSONService } from '../../services/ejson-service';
     import JSONViewVue from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-
+    
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -70,7 +70,7 @@
 
         if(documents != null && documents.length > 0) {
             documentList = documents.map(x => {
-                return EJSON.parse(JSON.stringify(x));
+                return EJSONService.BsonDocToObject(x);
             });
         }
     }

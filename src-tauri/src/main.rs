@@ -23,8 +23,8 @@ async fn get_collection_documents(db_name: &str, collection_name: &str, filters:
 }
 
 #[tauri::command(async)]
-async fn get_collection_documents_by_filter(db_name: &str, collection_name: &str, filters: &str) -> Result<Vec<Document>, CustomError> {
-  return mongo_service::get_collection_documents_by_filter(db_name, collection_name, filters).await;
+async fn get_collection_documents_count(db_name: &str, collection_name: &str, filters: &str) -> Result<u64, CustomError> {
+  return mongo_service::get_collection_documents_count(db_name, collection_name, filters).await;
 }
 
 #[tauri::command]
@@ -39,7 +39,7 @@ async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_by_filter])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
