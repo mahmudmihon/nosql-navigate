@@ -1,4 +1,3 @@
-use futures::TryFutureExt;
 use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
 use serde_json::{Map, Value};
@@ -6,6 +5,8 @@ use std::convert::TryFrom;
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
 use futures::stream::{StreamExt};
+use std::fs::OpenOptions;
+use std::io::{Write};
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -120,6 +121,33 @@ pub async fn get_collection_documents_count(db_name: &str, collection_name: &str
                 let documents_count = db.collection::<String>(collection_name).count_documents(filters_doc, None).await?;
 
                 return Ok(documents_count);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let mut file = OpenOptions::new()
+                                                .write(true)
+                                                .create(true)
+                                                .append(true)
+                                                .open(path)?;
+
+                let db = client.database(db_name);
+
+                let mut cursor = db.collection::<Document>(collection_name).find(None, None).await?;
+
+                while let Some(doc) = cursor.next().await {
+                    let docToString = serde_json::to_string_pretty(&doc?)?;
+                    writeln!(file, "{}", docToString)?;
+                }
+
+                return Ok("ok".to_string());
             },
             None => { return Err(CustomError::ClientNotFound); }
         }

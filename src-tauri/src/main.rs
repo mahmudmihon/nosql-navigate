@@ -37,9 +37,14 @@ async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
   return mongo_service::get_dbs_stats().await;
 }
 
+#[tauri::command(async)]
+async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+  return mongo_service::export_collection(db_name, collection_name, path).await;
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count, export_collection])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -1491,6 +1491,11 @@ evtd@^0.2.2, evtd@^0.2.4:
   resolved "https://registry.yarnpkg.com/evtd/-/evtd-0.2.4.tgz#0aac39ba44d6926e6668948ac27618e0795b9d07"
   integrity sha512-qaeGN5bx63s/AXgQo8gj6fBkxge+OoLddLniox5qtLAEY5HSnuSlISXVPxnSae1dWblvTh4/HoMIB+mbMsvZzw==
 
+export-from-json@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/export-from-json/-/export-from-json-1.7.0.tgz#2b13e259ae76df4a055d6336a2c4035ab000d94f"
+  integrity sha512-BE7MUOuSZy3uNwBt4mHxDgcknCC9yQWPvXHx1rrxWGKiQ9EYBZlxHWwMuOqQfo5TWkZ0+bSWJLEsWQ0wxrPA1Q==
+
 fast-glob@^3.2.12:
   version "3.2.12"
   resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.2.12.tgz#7f39ec99c2e6ab030337142da9e0c18f37afae80"

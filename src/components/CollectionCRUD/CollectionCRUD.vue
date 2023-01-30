@@ -10,12 +10,17 @@
     </summary>
 
     <div class="flex flex-col">
-        <GenericSkeletonVue v-if="dataLoading" />
+        <div v-if="fullPageLoading" class="mt-2">
+            <GenericSkeletonVue />
+        </div>
 
         <div v-else>
             <DocumentsFilterAndPaginationVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" :documents-count="0" />
 
-            <div class="h-screen overflow-y-auto mb-1">
+            <div v-if="searchedDataLoading" class="mt-1">
+                <GenericSkeletonVue />
+            </div>
+            <div v-else class="h-screen overflow-y-auto mb-1">
                 <DocumentListVue
                     :key="documentListKey"
                     :db-name="props.dbName"
@@ -38,10 +43,11 @@
     import { v4 as uid } from 'uuid';
     import { EJSONService } from '../../services/ejson-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
+    import { DocumentsFilteringPagination } from '../../types/documents-filtering-pagination';
     import DocumentsFilterAndPaginationVue from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
     import DocumentListVue from '../DocumentList/DocumentList.vue';
-    
+        
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -51,23 +57,25 @@
     const documentsStore = useCollectionDocumentsStore();
     const countStore = useDocumentsCountStore();
 
-    let dataLoading = ref<boolean>(true);
+    let fullPageLoading = ref<boolean>(true);
+    let searchedDataLoading = ref<boolean>(false);
     let showSearchedData = ref<boolean>(false);
     let searchedData = reactive<object[]>([]);
     let documentListKey = ref<string>(uid());
+    let collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
 
-    var collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
+    const getStoreCollectionDocumentsAndCount = (filters: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
 
-    if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
-        dataLoading.value = false;
-    }
-    else { 
         const promises = [
-            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}", limit: 50, skip: 0 }),
-            invoke('get_collection_documents_count', { dbName: props.dbName, collectionName: props.collectionName, filters: "{}" })
+            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: filters, limit: limit, skip: skip }),
+            invoke('get_collection_documents_count', { dbName: props.dbName, collectionName: props.collectionName, filters: filters })
         ];
+
+        if(triggeredFromFilterAndPagination) {
+            searchedDataLoading.value = true;
+        }
         
-        Promise.allSettled(promises).then(results => {
+        Promise.allSettled(promises).then(results => {            
             const listResult = results[0];
             const countResult = results[1];
 
@@ -75,15 +83,22 @@
                 if(listResult.value != 'error') {
                     const documentList = listResult.value as object[];
 
-                    if (documentList.length > 0) {
-                        const firstDocument = documentList[0];
-                        const parsedObject = EJSONService.BsonDocToObject(firstDocument);
-                        const objectKeys = extractObjectKeys(parsedObject) as string[];
+                    if(triggeredFromFilterAndPagination) {
+                        searchedData = documentList;
+                        showSearchedData.value = true;
+                        documentListKey.value = uid();
+                    }
+                    else {
+                        if (documentList.length > 0) {
+                            const firstDocument = documentList[0];
+                            const parsedObject = EJSONService.BsonDocToObject(firstDocument);
+                            const objectKeys = extractObjectKeys(parsedObject) as string[];
 
-                        fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
-
-                        documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
-                    }                  
+                            fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
+                            
+                            documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
+                        }                       
+                    }                             
                 }
             }
 
@@ -91,21 +106,23 @@
                 if(countResult.value != 'error') {
                     const documentsCount = countResult.value as number;
 
-                    countStore.addNewCount({ documentsOf: `${props.dbName}.${props.collectionName}`, documentsCount: documentsCount });
+                    countStore.upsertCount({ documentsOf: `${props.dbName}.${props.collectionName}`, documentsCount: documentsCount });
                 }
             }
 
-            dataLoading.value = false;
+            fullPageLoading.value = false;
+            searchedDataLoading.value = false;
         });
     }
 
-    const triggerFilter = (conditions: string) => {
-        invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: conditions, limit: 50, skip: 0 }).then((value: any) => {
-            if(value != 'error') {
-                searchedData = value as object[];
-                showSearchedData.value = true;
-                documentListKey.value = uid();
-            }
-        })
+    if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
+        fullPageLoading.value = false;
+    }
+    else { 
+        getStoreCollectionDocumentsAndCount('{}', 50, 0);
+    }
+
+    const triggerFilter = (data: DocumentsFilteringPagination) => {
+        getStoreCollectionDocumentsAndCount(data.filters, data.limit, data.skip, true);        
     }
 </script>

@@ -80,8 +80,29 @@
         </div>
 
         <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
-            <div class="max-w-[47%]">
-                <n-pagination v-model:page="pageNumber" :page-size="50" :page-count="totalPage" show-quick-jumper size="small" :on-update:page="updateDocumentListOnPageNumberChange">
+            <div class="flex">
+                <span class="hover:cursor-pointer" title="Import Documents">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 01-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875zm5.845 17.03a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V12a.75.75 0 00-1.5 0v4.19l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3z" clip-rule="evenodd" />
+                        <path d="M14.25 5.25a5.23 5.23 0 00-1.279-3.434 9.768 9.768 0 016.963 6.963A5.23 5.23 0 0016.5 7.5h-1.875a.375.375 0 01-.375-.375V5.25z" />
+                    </svg>
+                </span>
+
+                <span class="hover:cursor-pointer" title="Export Collection" @click="exportDocuments">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ml-2 mr-5">
+                        <path fill-rule="evenodd" d="M5.478 5.559A1.5 1.5 0 016.912 4.5H9A.75.75 0 009 3H6.912a3 3 0 00-2.868 2.118l-2.411 7.838a3 3 0 00-.133.882V18a3 3 0 003 3h15a3 3 0 003-3v-4.162c0-.299-.045-.596-.133-.882l-2.412-7.838A3 3 0 0017.088 3H15a.75.75 0 000 1.5h2.088a1.5 1.5 0 011.434 1.059l2.213 7.191H17.89a3 3 0 00-2.684 1.658l-.256.513a1.5 1.5 0 01-1.342.829h-3.218a1.5 1.5 0 01-1.342-.83l-.256-.512a3 3 0 00-2.684-1.658H3.265l2.213-7.191z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M12 2.25a.75.75 0 01.75.75v6.44l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 011.06-1.06l1.72 1.72V3a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            </div>
+            <div class="max-w-[50%]">
+                <n-pagination 
+                v-model:page="pageNumber" 
+                :page-size="50" 
+                :page-count="totalPage" 
+                size="small"
+                simple 
+                :on-update:page="updateDocumentListOnPageNumberChange">
                     <template #goto>
                         Go
                     </template>
@@ -99,8 +120,13 @@
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
+    import { DocumentsFilteringPagination } from '../../types/documents-filtering-pagination';    
+    import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
+    import { save } from '@tauri-apps/api/dialog';
+    import { invoke } from '@tauri-apps/api/tauri';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-
+    import exportFromJSON from 'export-from-json';
+    
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -108,7 +134,7 @@
     }>();
 
     const emit = defineEmits<{
-        (e: 'triggerFilter', conditions: string): void
+        (e: 'triggerFilter', data: DocumentsFilteringPagination): void
     }>();
 
     const renderOption = ({ node, option }: { node: VNode; option: SelectOption }) => {
@@ -121,8 +147,8 @@
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();
 
-    const calculateTotalPageCount = () => {
-        const countData = countStore.countsList.filter(x => x.documentsOf == `${props.dbName}.${props.collectionName}`)[0];
+    const calculateTotalPageCount = (counsData: DocumentsCount[]) => {
+        const countData = counsData.filter(x => x.documentsOf == `${props.dbName}.${props.collectionName}`)[0];
 
         if(countData != null) {
             return Math.ceil(countData.documentsCount / 50);
@@ -133,7 +159,8 @@
 
     let simpleFiltering = ref<boolean>(true);
     let pageNumber = ref<number>(1);
-    let totalPage = ref<number>(calculateTotalPageCount());
+    let totalPage = ref<number>(calculateTotalPageCount(countStore.countsList));
+    let searchInitiated = ref<boolean>(false);
     let documentFields: SelectMixedOption[] = [];
     let rawQuery = ref('{}');
     let multipleFilters: any[] = reactive([
@@ -161,6 +188,10 @@
         checkAndUpdateFields(state.fieldsList);
     });
 
+    countStore.$subscribe((mutation, state) => {
+        totalPage.value = calculateTotalPageCount(state.countsList);
+    });
+
     const addNewFilter = () => {
         multipleFilters.push({
             shouldApply: false,
@@ -176,6 +207,38 @@
     }
 
     const searchDocuments = (): void => {
+        const filters = getFilters();
+
+        if(filters != '{}') {
+            searchInitiated.value = true;        
+        }
+        else {
+            searchInitiated.value = false;         
+        }
+
+        pageNumber.value = 1;
+
+        emit('triggerFilter', {filters: filters, skip: ((pageNumber.value - 1) * 50), limit: 50});
+    }
+
+    const importFiltersFromSimpleBuilder = (): void => {
+        const filters = DocumentFiltering.extractSimpleBuilderFilters(multipleFilters);
+        rawQuery.value = JSON.stringify(filters, null, 2);
+    }
+
+    const updateDocumentListOnPageNumberChange = (page: number) => {
+        let filters = '{}';
+
+        if(searchInitiated.value) {
+            filters = getFilters();
+        }
+
+        emit('triggerFilter', {filters: filters, skip: ((page - 1) * 50), limit: 50});
+
+        pageNumber.value = page;
+    }
+
+    const getFilters = (): string => {
         let filters = '';
 
         if(simpleFiltering.value) {
@@ -185,15 +248,18 @@
             filters = rawQuery.value;
         }
 
-        emit('triggerFilter', filters);
+        return filters;
     }
 
-    const importFiltersFromSimpleBuilder = (): void => {
-        const filters = DocumentFiltering.extractSimpleBuilderFilters(multipleFilters);
-        rawQuery.value = JSON.stringify(filters, null, 2);
-    }
+    const exportDocuments = async () => {
+        const filePath = await save({
+            filters: [{
+                name: 'JSON',
+                extensions: ['json']
+            }]
+        });
 
-    const updateDocumentListOnPageNumberChange = (page: number) => {
-        pageNumber.value = page;
+        invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
+        });
     }
 </script>

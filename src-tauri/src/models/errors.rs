@@ -7,7 +7,9 @@ pub enum CustomError {
     #[error("error")]
     SerdeError(#[from] serde_json::Error),
     #[error("error")]
-    BsonDocError(#[from] mongodb::bson::extjson::de::Error)
+    BsonDocError(#[from] mongodb::bson::extjson::de::Error),
+    #[error("error")]
+    IOError(#[from] std::io::Error)    
 }
 
 impl serde::Serialize for CustomError {
