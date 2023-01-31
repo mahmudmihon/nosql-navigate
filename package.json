@@ -14,7 +14,6 @@
     "@types/uuid": "^9.0.0",
     "bson": "^4.7.2",
     "events": "^3.3.0",
-    "export-from-json": "^1.7.0",
     "mongodb": "^4.13.0",
     "pinia": "^2.0.28",
     "rollup-plugin-polyfill-node": "^0.11.0",

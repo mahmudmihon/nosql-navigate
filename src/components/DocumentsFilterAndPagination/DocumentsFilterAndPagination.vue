@@ -80,6 +80,11 @@
         </div>
 
         <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
+            <div v-if="collectionExporting" class="mr-4">
+                <n-tag size="small" round :bordered="false" type="success">
+                    Exporting
+                </n-tag>
+            </div>
             <div class="flex">
                 <span class="hover:cursor-pointer" title="Import Documents">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -116,7 +121,7 @@
     import { ref, VNode, h, reactive } from 'vue';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
-    import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination } from 'naive-ui';
+    import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, NIcon } from 'naive-ui';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
@@ -161,6 +166,7 @@
     let pageNumber = ref<number>(1);
     let totalPage = ref<number>(calculateTotalPageCount(countStore.countsList));
     let searchInitiated = ref<boolean>(false);
+    let collectionExporting = ref<boolean>(false);
     let documentFields: SelectMixedOption[] = [];
     let rawQuery = ref('{}');
     let multipleFilters: any[] = reactive([
@@ -259,7 +265,14 @@
             }]
         });
 
+        collectionExporting.value = true;
+
         invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
+            if(value != 'error') {
+                
+            }
+
+            collectionExporting.value = false;
         });
     }
 </script>

@@ -143,8 +143,8 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                 let mut cursor = db.collection::<Document>(collection_name).find(None, None).await?;
 
                 while let Some(doc) = cursor.next().await {
-                    let docToString = serde_json::to_string_pretty(&doc?)?;
-                    writeln!(file, "{}", docToString)?;
+                    let doc_to_string = serde_json::to_string_pretty(&doc?)?;
+                    writeln!(file, "{}", doc_to_string)?;
                 }
 
                 return Ok("ok".to_string());
