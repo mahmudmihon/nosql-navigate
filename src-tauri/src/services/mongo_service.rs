@@ -37,6 +37,21 @@ pub async fn validate_url(url: &str) -> bool {
     };
 }
 
+pub async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let db = client.database(db_name);
+
+                db.create_collection(collection_name, None).await?;
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound) }
+        }
+    }
+}
+
 pub async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {

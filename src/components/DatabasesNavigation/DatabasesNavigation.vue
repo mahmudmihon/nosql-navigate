@@ -2,90 +2,100 @@
   <div class="flex flex-col bg-base p-3 h-screen w-80">
     <GenericSkeletonVue v-if="dataLoading" />
 
-    <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
+    <div v-else>
+      <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
 
-    <div class="flex mt-2 align-middle justify-center gap-2">
-      <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Add Database" @click="showDbAddModal = true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-          <path fill-rule="evenodd" d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.379a.75.75 0 01-.53-.22L11.47 3.66A2.25 2.25 0 009.879 3H4.5a3 3 0 00-3 3v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V10.5z" clip-rule="evenodd" />
-        </svg>
-      </span>
-
-      <span class="bg-base p-2.5 rounded-full" title="Disconnect">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199m0-3.328a4.323 4.323 0 012.068-1.379l5.325-1.628a4.5 4.5 0 012.48-.044l.803.215-7.794 4.5m-2.882-1.664A4.331 4.331 0 0010.607 12m3.736 0l7.794 4.5-.802.215a4.5 4.5 0 01-2.48-.043l-5.326-1.629a4.324 4.324 0 01-2.068-1.379M14.343 12l-2.882 1.664" />
-        </svg>
-      </span>
-
-      <n-modal
-        v-model:show="showDbAddModal"
-        class="rounded-xl"
-        preset="card"
-        style="width: 50%; background-color: #313131; border: #313131;"
-        :bordered="true"
-        size="medium"
-      >
-        <div class="mb-6">
-          <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
-          <input type="text" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-        </div>
-
-        <div class="mb-6">
-          <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
-          <input type="text" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-        </div>
-
-        <div class="flex justify-end mt-3 gap-2">
-          <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6">
-            Create Database
-          </button>
-        </div>
-      </n-modal>
-    </div>
-
-    <div class="inline-flex flex-col justify-center relative text-white mt-5">
-        <div class="relative">
-            <input type="text" class="p-1 pl-8 rounded-lg border border-gray-200 bg-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:bg-base focus:border-transparent  w-full" placeholder="search..." />
-            <svg class="w-4 h-4 absolute left-2.5 top-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </div>
-    </div>
-
-    <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
-      <details v-for="db in dbsWithCollections" class="group [&_summary::-webkit-details-marker]:hidden" :key="db.db_name">
-        <summary class="flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
-          <span class="transition duration-300 shrink-0 group-open:rotate-90">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>           
-          </span>
-
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 ml-1.5">
-            <path d="M21 6.375c0 2.692-4.03 4.875-9 4.875S3 9.067 3 6.375 7.03 1.5 12 1.5s9 2.183 9 4.875z" />
-            <path d="M12 12.75c2.685 0 5.19-.586 7.078-1.609a8.283 8.283 0 001.897-1.384c.016.121.025.244.025.368C21 12.817 16.97 15 12 15s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.285 8.285 0 001.897 1.384C6.809 12.164 9.315 12.75 12 12.75z" />
-            <path d="M12 16.5c2.685 0 5.19-.586 7.078-1.609a8.282 8.282 0 001.897-1.384c.016.121.025.244.025.368 0 2.692-4.03 4.875-9 4.875s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.284 8.284 0 001.897 1.384C6.809 15.914 9.315 16.5 12 16.5z" />
-            <path d="M12 20.25c2.685 0 5.19-.586 7.078-1.609a8.282 8.282 0 001.897-1.384c.016.121.025.244.025.368 0 2.692-4.03 4.875-9 4.875s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.284 8.284 0 001.897 1.384C6.809 19.664 9.315 20.25 12 20.25z" />
+      <div class="flex mt-2 align-middle justify-center gap-2">
+        <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Add Database" @click="showCollectionAddModal = true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path fill-rule="evenodd" d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.379a.75.75 0 01-.53-.22L11.47 3.66A2.25 2.25 0 009.879 3H4.5a3 3 0 00-3 3v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V10.5z" clip-rule="evenodd" />
           </svg>
+        </span>
 
-          <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
-        </summary>
+        <span class="bg-base p-2.5 rounded-full" title="Disconnect">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199m0-3.328a4.323 4.323 0 012.068-1.379l5.325-1.628a4.5 4.5 0 012.48-.044l.803.215-7.794 4.5m-2.882-1.664A4.331 4.331 0 0010.607 12m3.736 0l7.794 4.5-.802.215a4.5 4.5 0 01-2.48-.043l-5.326-1.629a4.324 4.324 0 01-2.068-1.379M14.343 12l-2.882 1.664" />
+          </svg>
+        </span>
 
-        <nav v-for="collectionName in db.db_collections" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
-          <a href="#" class="flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white" @click="addCollectionTabInStore(db.db_name, collectionName)">
-            <span class="text-xs font-medium">{{collectionName}}</span>
-          </a>
-        </nav>
-      </details>
-    </nav>
+        <n-modal
+          v-model:show="showCollectionAddModal"
+          class="rounded-xl"
+          preset="card"
+          style="width: 50%; background-color: #313131; border: #313131;"
+          :bordered="true"
+          size="medium"
+        >
+          <div class="mb-6">
+            <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
+            <input type="text" v-model="collectionAddModel.dbName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+          </div>
+
+          <div class="mb-6">
+            <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
+            <input type="text" v-model="collectionAddModel.collectionName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+          </div>
+
+          <div class="flex justify-end mt-3 gap-2">
+            <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="addNewCollection">
+              <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Create Database
+            </button>
+          </div>
+        </n-modal>
+      </div>
+
+      <div class="inline-flex flex-col justify-center relative text-white mt-5">
+          <div class="relative">
+              <input type="text" class="p-1 pl-8 rounded-lg border border-gray-200 bg-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:bg-base focus:border-transparent  w-full" placeholder="search..." />
+              <svg class="w-4 h-4 absolute left-2.5 top-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+          </div>
+      </div>
+
+      <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
+        <details v-for="db in dbsWithCollections?.sort()" class="group [&_summary::-webkit-details-marker]:hidden" :key="db.db_name">
+          <summary class="flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
+            <span class="transition duration-300 shrink-0 group-open:rotate-90">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>           
+            </span>
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 ml-1.5">
+              <path d="M21 6.375c0 2.692-4.03 4.875-9 4.875S3 9.067 3 6.375 7.03 1.5 12 1.5s9 2.183 9 4.875z" />
+              <path d="M12 12.75c2.685 0 5.19-.586 7.078-1.609a8.283 8.283 0 001.897-1.384c.016.121.025.244.025.368C21 12.817 16.97 15 12 15s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.285 8.285 0 001.897 1.384C6.809 12.164 9.315 12.75 12 12.75z" />
+              <path d="M12 16.5c2.685 0 5.19-.586 7.078-1.609a8.282 8.282 0 001.897-1.384c.016.121.025.244.025.368 0 2.692-4.03 4.875-9 4.875s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.284 8.284 0 001.897 1.384C6.809 15.914 9.315 16.5 12 16.5z" />
+              <path d="M12 20.25c2.685 0 5.19-.586 7.078-1.609a8.282 8.282 0 001.897-1.384c.016.121.025.244.025.368 0 2.692-4.03 4.875-9 4.875s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.284 8.284 0 001.897 1.384C6.809 19.664 9.315 20.25 12 20.25z" />
+            </svg>
+
+            <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
+          </summary>
+
+          <nav v-for="collectionName in db.db_collections?.sort()" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
+            <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white" @click="addCollectionTabInStore(db.db_name, collectionName)">
+              <span class="text-xs font-medium">{{collectionName}}</span>
+
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </a>
+          </nav>
+        </details>
+      </nav>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { reactive, ref } from 'vue';
   import { invoke } from '@tauri-apps/api'; 
   import { DbsNavigationViewModel } from './Models/ViewModels';
-  import { NModal } from 'naive-ui';
+  import { NModal, useNotification } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
   import { v4 as uid } from 'uuid';
@@ -93,14 +103,16 @@
 
   const tabsStore = useCollectionTabsStore();
   const router = useRouter();
+  const notification = useNotification();
 
   let dataLoading = ref(true);
-  let showDbAddModal = ref(false);
-  let dbAddModel = ref({
+  let showCollectionAddModal = ref(false);
+  let creatingCollection = ref(false);
+  let collectionAddModel = reactive({
     dbName: '',
     collectionName: ''
   });
-  let dbsWithCollections: DbsNavigationViewModel[] = [];
+  let dbsWithCollections: DbsNavigationViewModel[] = reactive<DbsNavigationViewModel[]>([]);
 
   invoke('get_dbs_with_collections').then(value => {
     if(value !== 'error') {
@@ -109,8 +121,22 @@
     }    
   });
 
-  function saveDatabase() {
+  function addNewCollection() {
+    creatingCollection.value = true;
 
+    invoke('create_collection', { dbName: collectionAddModel.dbName, collectionName: collectionAddModel.collectionName }).then(value => {
+      if(value != 'error') {
+        notification.success({title: 'Database created.'});
+
+        dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
+        showCollectionAddModal.value = false;
+      }
+      else{
+        notification.error({title: "Something went wrong! Please try again later."});
+      }
+      
+      creatingCollection.value = false;
+    });
   }
 
   function addCollectionTabInStore(dbName: string, collectionName: string) {

@@ -69,9 +69,7 @@
         const documents = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;
 
         if(documents != null && documents.length > 0) {
-            documentList = documents.map(x => {
-                return EJSONService.BsonDocToObject(x);
-            });
+            documentList = documents.map(x => EJSONService.BsonDocToObject(x));
         }
     }
 

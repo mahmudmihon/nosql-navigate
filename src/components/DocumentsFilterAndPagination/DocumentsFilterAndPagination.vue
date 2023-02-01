@@ -130,7 +130,6 @@
     import { save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api/tauri';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    import exportFromJSON from 'export-from-json';
     
     const props = defineProps<{
         dbName: string
