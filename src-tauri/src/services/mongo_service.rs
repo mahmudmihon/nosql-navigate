@@ -52,6 +52,21 @@ pub async fn create_collection(db_name: &str, collection_name: &str) -> Result<S
     }
 }
 
+pub async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let db = client.database(db_name);
+
+                db.collection::<String>(collection_name).drop(None).await?;
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound) }
+        }
+    }
+}
+
 pub async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
@@ -157,10 +172,14 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let mut cursor = db.collection::<Document>(collection_name).find(None, None).await?;
 
+                writeln!(file, "[")?;
+
                 while let Some(doc) = cursor.next().await {
                     let doc_to_string = serde_json::to_string_pretty(&doc?)?;
-                    writeln!(file, "{}", doc_to_string)?;
+                    writeln!(file, "{},", doc_to_string)?;
                 }
+
+                writeln!(file, "]")?;
 
                 return Ok("ok".to_string());
             },

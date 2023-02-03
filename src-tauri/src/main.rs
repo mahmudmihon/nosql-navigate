@@ -28,6 +28,11 @@ async fn create_collection(db_name: &str, collection_name: &str) -> Result<Strin
 }
 
 #[tauri::command(async)]
+async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+  return mongo_service::drop_collection(db_name, collection_name).await;
+}
+
+#[tauri::command(async)]
 async fn get_collection_documents_count(db_name: &str, collection_name: &str, filters: &str) -> Result<u64, CustomError> {
   return mongo_service::get_collection_documents_count(db_name, collection_name, filters).await;
 }
@@ -49,7 +54,7 @@ async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> 
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, create_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count, export_collection])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, create_collection, drop_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count, export_collection])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

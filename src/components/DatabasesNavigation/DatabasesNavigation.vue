@@ -6,7 +6,7 @@
       <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
 
       <div class="flex mt-2 align-middle justify-center gap-2">
-        <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Add Database" @click="showCollectionAddModal = true">
+        <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Add Database" @click="addNewDatabase">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
             <path fill-rule="evenodd" d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.379a.75.75 0 01-.53-.22L11.47 3.66A2.25 2.25 0 009.879 3H4.5a3 3 0 00-3 3v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V10.5z" clip-rule="evenodd" />
           </svg>
@@ -26,7 +26,7 @@
           :bordered="true"
           size="medium"
         >
-          <div class="mb-6">
+          <div class="mb-6" v-if="addNewDb">
             <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
             <input type="text" v-model="collectionAddModel.dbName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
           </div>
@@ -37,12 +37,13 @@
           </div>
 
           <div class="flex justify-end mt-3 gap-2">
-            <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="addNewCollection">
+            <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="createCollection">
               <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Create Database
+              <span v-if="addNewDb">Create Database</span>
+              <span v-else>Create Collection</span> 
             </button>
           </div>
         </n-modal>
@@ -74,13 +75,23 @@
             </svg>
 
             <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
+
+            <div class="ml-auto hidden group-hover:flex">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-400" @click="addNewCollection(db.db_name)">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
           </summary>
 
           <nav v-for="collectionName in db.db_collections?.sort()" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
-            <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white" @click="addCollectionTabInStore(db.db_name, collectionName)">
-              <span class="text-xs font-medium">{{collectionName}}</span>
+            <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white">
+              <span @click="addCollectionTabInStore(db.db_name, collectionName)" class="text-xs font-medium">{{collectionName}}</span>
 
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex" @click="dropCollection(db.db_name, collectionName)">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </a>
@@ -106,9 +117,10 @@
   const notification = useNotification();
 
   let dataLoading = ref(true);
-  let showCollectionAddModal = ref(false);
-  let creatingCollection = ref(false);
-  let collectionAddModel = reactive({
+  let showCollectionAddModal = ref<boolean>(false);
+  let creatingCollection = ref<boolean>(false);
+  let addNewDb = ref<boolean>(true);
+  let collectionAddModel = reactive<any>({
     dbName: '',
     collectionName: ''
   });
@@ -121,14 +133,36 @@
     }    
   });
 
-  function addNewCollection() {
+  const addNewDatabase = (): void => {  
+    addNewDb.value = true;
+    collectionAddModel.dbName = '';
+    showCollectionAddModal.value = true;
+  }
+
+  const addNewCollection = (dbName: string): void => {
+    addNewDb.value = false;
+    collectionAddModel.dbName = dbName;
+    showCollectionAddModal.value = true;
+  }
+
+  const createCollection = () => {
     creatingCollection.value = true;
 
     invoke('create_collection', { dbName: collectionAddModel.dbName, collectionName: collectionAddModel.collectionName }).then(value => {
       if(value != 'error') {
-        notification.success({title: 'Database created.'});
+        if(addNewDb.value) {
+          dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
+        }
+        else {
+          let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
 
-        dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
+          if(updatedDb != null) {
+            updatedDb.db_collections.push(collectionAddModel.collectionName);
+            updatedDb.db_collections.sort();
+            dbsWithCollections = [...dbsWithCollections, updatedDb];
+          }
+        }
+
         showCollectionAddModal.value = false;
       }
       else{
@@ -139,7 +173,18 @@
     });
   }
 
-  function addCollectionTabInStore(dbName: string, collectionName: string) {
+  const dropCollection = (dbName: string, collectionName: string) => {
+    invoke('drop_collection', { dbName: dbName, collectionName: collectionName }).then(value => {
+      if(value != 'error') {
+        notification.success({title: "Collection deleted."});
+      }
+      else{
+        notification.error({title: "Something went wrong! Please try again later."});
+      }
+    });
+  }
+
+  const addCollectionTabInStore = (dbName: string, collectionName: string) => {
     tabsStore.addNewTab({id: uid(), dbName: dbName, collectionName: collectionName, isActive: true});
 
     router.push({path: '/collection-tabs'});
