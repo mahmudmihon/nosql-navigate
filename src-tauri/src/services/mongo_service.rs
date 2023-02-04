@@ -188,6 +188,12 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
+pub fn drop_client() {
+    unsafe {
+        CONNECTED_CLIENT = None;
+    }
+}
+
 fn create_options(limit: i64, skip: u64) -> FindOptions {
     FindOptions::builder()
         .limit(limit)

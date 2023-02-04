@@ -12,42 +12,48 @@
           </svg>
         </span>
 
-        <span class="bg-base p-2.5 rounded-full" title="Disconnect">
+        <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Disconnect" @click="disconnectDb">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199m0-3.328a4.323 4.323 0 012.068-1.379l5.325-1.628a4.5 4.5 0 012.48-.044l.803.215-7.794 4.5m-2.882-1.664A4.331 4.331 0 0010.607 12m3.736 0l7.794 4.5-.802.215a4.5 4.5 0 01-2.48-.043l-5.326-1.629a4.324 4.324 0 01-2.068-1.379M14.343 12l-2.882 1.664" />
           </svg>
         </span>
 
-        <n-modal
-          v-model:show="showCollectionAddModal"
-          class="rounded-xl"
-          preset="card"
-          style="width: 50%; background-color: #313131; border: #313131;"
-          :bordered="true"
-          size="medium"
-        >
-          <div class="mb-6" v-if="addNewDb">
-            <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
-            <input type="text" v-model="collectionAddModel.dbName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-          </div>
-
-          <div class="mb-6">
-            <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
-            <input type="text" v-model="collectionAddModel.collectionName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-          </div>
-
-          <div class="flex justify-end mt-3 gap-2">
-            <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="createCollection">
-              <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span v-if="addNewDb">Create Database</span>
-              <span v-else>Create Collection</span> 
-            </button>
-          </div>
-        </n-modal>
+        <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Refresh" @click="refreshDb">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+        </span>       
       </div>
+
+      <n-modal
+        v-model:show="showCollectionAddModal"
+        class="rounded-xl"
+        preset="card"
+        style="width: 50%; background-color: #313131; border: #313131;"
+        :bordered="true"
+        size="medium"
+      >
+        <div class="mb-6" v-if="addNewDb">
+          <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
+          <input type="text" v-model="collectionAddModel.dbName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
+          <input type="text" v-model="collectionAddModel.collectionName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+        </div>
+
+        <div class="flex justify-end mt-3 gap-2">
+          <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="createCollection">
+            <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span v-if="addNewDb">Create Database</span>
+            <span v-else>Create Collection</span> 
+          </button>
+        </div>
+      </n-modal>
 
       <div class="inline-flex flex-col justify-center relative text-white mt-5">
           <div class="relative">
@@ -109,10 +115,18 @@
   import { NModal, useNotification } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
-  import { v4 as uid } from 'uuid';
+  import { v4 as uid } from 'uuid'; 
+  import { useCollectionDocumentsStore } from '../../stores/collection-documents';
+  import { useDocumentFieldsStore } from '../../stores/document-fields';
+  import { useDocumentsCountStore } from '../../stores/documents-count';
+  import { useRefreshEventsStore } from '../../stores/refresh-events';
   import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
 
   const tabsStore = useCollectionTabsStore();
+  const documentsStore = useCollectionDocumentsStore();
+  const fieldsStore = useDocumentFieldsStore();
+  const countsStore = useDocumentsCountStore();
+  const refreshEventsStore = useRefreshEventsStore();
   const router = useRouter();
   const notification = useNotification();
 
@@ -126,12 +140,16 @@
   });
   let dbsWithCollections: DbsNavigationViewModel[] = reactive<DbsNavigationViewModel[]>([]);
 
-  invoke('get_dbs_with_collections').then(value => {
-    if(value !== 'error') {
-      dbsWithCollections = value as DbsNavigationViewModel[];
-      dataLoading.value = false;
-    }    
-  });
+  const getDbsWithCollections = () => {
+    invoke('get_dbs_with_collections').then(value => {
+      if(value !== 'error') {
+        dbsWithCollections = value as DbsNavigationViewModel[];
+        dataLoading.value = false;
+      }    
+    });
+  }
+
+  getDbsWithCollections();
 
   const addNewDatabase = (): void => {  
     addNewDb.value = true;
@@ -188,5 +206,22 @@
     tabsStore.addNewTab({id: uid(), dbName: dbName, collectionName: collectionName, isActive: true});
 
     router.push({path: '/collection-tabs'});
+  }
+
+  const refreshDb = () => {
+    getDbsWithCollections();
+
+    refreshEventsStore.updateRefreshDbSummary(true);
+  }
+
+  const disconnectDb = () => {
+    invoke('drop_client');
+
+    documentsStore.$reset();
+    fieldsStore.$reset();
+    countsStore.$reset();
+    tabsStore.$reset();
+
+    router.push({path: '/'});
   }
 </script>

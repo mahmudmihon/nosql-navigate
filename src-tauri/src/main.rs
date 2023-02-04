@@ -11,10 +11,14 @@ use services::mongo_service;
 use models::dtos::DbWithCollections;
 use models::errors::CustomError;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn check_mongo_url(url: &str) -> Result<bool, ()> {
   return Ok(mongo_service::validate_url(url).await);
+}
+
+#[tauri::command]
+async fn drop_client() {
+  mongo_service::drop_client();
 }
 
 #[tauri::command(async)]
@@ -54,7 +58,7 @@ async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> 
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, create_collection, drop_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count, export_collection])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, drop_client, create_collection, drop_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, get_collection_documents_count, export_collection])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
