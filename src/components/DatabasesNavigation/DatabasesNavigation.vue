@@ -175,9 +175,10 @@
           let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
 
           if(updatedDb != null) {
-            updatedDb.db_collections.push(collectionAddModel.collectionName);
-            updatedDb.db_collections.sort();
-            dbsWithCollections = [...dbsWithCollections, updatedDb];
+            const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
+
+            dbsWithCollections[updatedDbIndex].db_collections.push(collectionAddModel.collectionName);
+            dbsWithCollections[updatedDbIndex].db_collections.sort();
           }
         }
 
@@ -194,7 +195,19 @@
   const dropCollection = (dbName: string, collectionName: string) => {
     invoke('drop_collection', { dbName: dbName, collectionName: collectionName }).then(value => {
       if(value != 'error') {
-        notification.success({title: "Collection deleted."});
+        let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
+
+        if(updatedDb != null) {
+          const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
+
+          const deletedCollectionIndex = updatedDb.db_collections.indexOf(collectionName);
+
+          updatedDb.db_collections.splice(deletedCollectionIndex, 1);
+
+          dbsWithCollections.splice(updatedDbIndex, 1, updatedDb);
+
+          notification.success({title: "Collection deleted."});
+        }
       }
       else{
         notification.error({title: "Something went wrong! Please try again later."});
