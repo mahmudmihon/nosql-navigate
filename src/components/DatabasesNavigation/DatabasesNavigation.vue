@@ -65,8 +65,8 @@
       </div>
 
       <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
-        <details v-for="db in dbsWithCollections?.sort()" class="group [&_summary::-webkit-details-marker]:hidden" :key="db.db_name">
-          <summary class="flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
+        <details v-for="db in dbsWithCollections?.sort()" class="group" :key="db.db_name">
+          <summary class="group/db flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
             <span class="transition duration-300 shrink-0 group-open:rotate-90">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -82,7 +82,7 @@
 
             <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
 
-            <div class="ml-auto hidden group-hover:flex">
+            <div class="ml-auto hidden group-hover/db:flex">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-400" @click="addNewCollection(db.db_name)">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>

@@ -2,11 +2,11 @@ use mongodb::{options::FindOptions, Client};
 use mongodb::bson::{doc, Document};
 use serde_json::{Map, Value};
 use std::convert::TryFrom;
+use futures::stream::{StreamExt};
+use std::fs::{File, OpenOptions};
+use std::io::{Write};
 use crate::models::dtos::DbWithCollections;
 use crate::models::errors::CustomError;
-use futures::stream::{StreamExt};
-use std::fs::OpenOptions;
-use std::io::{Write};
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -180,6 +180,26 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                 }
 
                 writeln!(file, "]")?;
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let file_to_import = File::open(&path)?;
+
+                println!("{:?}", file_to_import);
+
+                let documents:Vec<Document> = serde_json::from_reader(file_to_import).expect("Something went wrong!");
+
+                println!("{:?}", documents);
 
                 return Ok("ok".to_string());
             },
