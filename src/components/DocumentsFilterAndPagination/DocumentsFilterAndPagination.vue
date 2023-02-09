@@ -80,9 +80,9 @@
         </div>
 
         <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
-            <div v-if="collectionExporting" class="mr-4">
+            <div v-if="runningOperation" class="mr-4">
                 <n-tag size="small" round :bordered="false" type="success">
-                    Exporting
+                    {{runningOperationText}}
                 </n-tag>
             </div>
             <div class="flex">
@@ -120,7 +120,7 @@
     import { ref, VNode, h, reactive } from 'vue';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
-    import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, NIcon } from 'naive-ui';
+    import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
@@ -149,6 +149,7 @@
 
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();
+    const notification = useNotification();
 
     const calculateTotalPageCount = (counsData: DocumentsCount[]) => {
         const countData = counsData.filter(x => x.documentsOf == `${props.dbName}.${props.collectionName}`)[0];
@@ -164,7 +165,8 @@
     let pageNumber = ref<number>(1);
     let totalPage = ref<number>(calculateTotalPageCount(countStore.countsList));
     let searchInitiated = ref<boolean>(false);
-    let collectionExporting = ref<boolean>(false);
+    let runningOperation = ref<boolean>(false);
+    let runningOperationText = ref<string>("");
     let documentFields: SelectMixedOption[] = [];
     let rawQuery = ref('{}');
     let multipleFilters: any[] = reactive([
@@ -265,12 +267,16 @@
             }]
         });
 
-        console.log(filePath);
+        runningOperation.value = true;
+        runningOperationText.value = "Importing";
 
         invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
             if(value != 'error') {
-                
+                notification.success({title: "Collection imported."});
             }
+
+            runningOperation.value = false;
+            runningOperationText.value = "";
         });
     }
 
@@ -282,14 +288,16 @@
             }]
         });
 
-        collectionExporting.value = true;
+        runningOperation.value = true;
+        runningOperationText.value = "Exporting";
 
         invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
             if(value != 'error') {
-                
+                notification.success({title: "Collection exported."});
             }
 
-            collectionExporting.value = false;
+            runningOperation.value = false;
+            runningOperationText.value = "";
         });
     }
 </script>

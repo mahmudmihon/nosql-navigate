@@ -199,7 +199,11 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let documents:Vec<Document> = serde_json::from_reader(file_to_import).expect("Something went wrong!");
 
-                println!("{:?}", documents);
+                if !documents.is_empty() && documents.len() > 0 {
+                    let db = client.database(db_name);
+
+                    db.collection::<Document>(collection_name).insert_many(documents, None).await?;
+                }
 
                 return Ok("ok".to_string());
             },

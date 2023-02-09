@@ -12,8 +12,17 @@ export const useDocumentFieldsStore = defineStore('document-fields', {
     }
   },
   actions: {
-    addNewFields(newFields: DocumentFields) {
-      this.$state.fieldsList.push(newFields);
+    upsertDocumentFields(fields: DocumentFields) {
+      var existingFields = this.$state.fieldsList.filter(x => x.documentOf == fields.documentOf)[0];
+
+      if(existingFields != null) {
+        const existingFieldsIndex = this.$state.fieldsList.indexOf(existingFields);
+
+        this.$state.fieldsList[existingFieldsIndex].documentFields = fields.documentFields;
+      }
+      else {
+        this.$state.fieldsList.push(fields);
+      }     
     }
   }
 })

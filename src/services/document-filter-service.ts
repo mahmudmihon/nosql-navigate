@@ -113,7 +113,7 @@ export class DocumentFiltering {
     }
 
     static parseInputValueForStringOrNumber = (value: string): string | number => {
-        const numberValue = parseInt(value.trim());
+        const numberValue = Number(value.trim());
 
         if(Number.isNaN(numberValue)) {
             return value;

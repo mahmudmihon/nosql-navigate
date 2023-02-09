@@ -94,7 +94,7 @@
                             const parsedObject = EJSONService.BsonDocToObject(firstDocument);
                             const objectKeys = extractObjectKeys(parsedObject) as string[];
 
-                            fieldsStore.addNewFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
+                            fieldsStore.upsertDocumentFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
                             
                             documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
                         }                       
