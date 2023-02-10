@@ -45,6 +45,11 @@
   border: none;
 }
 
+.jv-container.boxed {
+  border-color: #ffffff0a;
+  border-radius: 10px;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;

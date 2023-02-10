@@ -195,15 +195,33 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let file_to_import = File::open(&path)?;
 
-                println!("{:?}", file_to_import);
-
-                let documents:Vec<Document> = serde_json::from_reader(file_to_import).expect("Something went wrong!");
+                let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
 
                 if !documents.is_empty() && documents.len() > 0 {
                     let db = client.database(db_name);
 
                     db.collection::<Document>(collection_name).insert_many(documents, None).await?;
                 }
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let db = client.database(db_name);
+
+                let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
+                
+                let document_delete_filter = Document::try_from(filter_mapping)?;
+
+                db.collection::<Document>(collection_name).find_one_and_delete(document_delete_filter, None).await?;
 
                 return Ok("ok".to_string());
             },

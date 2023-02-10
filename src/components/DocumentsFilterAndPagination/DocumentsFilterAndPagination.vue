@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col flex-nowrap mt-4">
+    <div class="flex flex-col flex-nowrap mt-3">
         <div class="flex flex-row">
             <div class="filter-switch w-32">
                 <n-switch v-model:value="simpleFiltering">
@@ -79,7 +79,18 @@
             </div>
         </div>
 
-        <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
+        <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">          
+            <div class="mr-auto">
+                <summary class="flex items-center">
+                    <span class="mr-1.5 text-xs font-medium">{{$props.dbName}}</span>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 11-1.06-1.06l2.47-2.47H3a.75.75 0 010-1.5h16.19l-2.47-2.47a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                    </svg>
+
+                    <span class="ml-1.5 text-xs font-medium text-ellipsis overflow-hidden w-96">{{$props.collectionName}}</span>
+                </summary>
+            </div>
             <div v-if="runningOperation" class="mr-4">
                 <n-tag size="small" round :bordered="false" type="success">
                     {{runningOperationText}}
@@ -117,17 +128,18 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, VNode, h, reactive } from 'vue';
-    import { useDocumentFieldsStore } from '../../stores/document-fields';
+    import { ref, VNode, h, reactive } from 'vue';   
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
     import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
-    import { DocumentFiltering } from '../../services/document-filter-service';
-    import { useDocumentsCountStore } from '../../stores/documents-count';
+    import { DocumentFiltering } from '../../services/document-filter-service';   
     import { DocumentsFilteringPagination } from '../../types/documents-filtering-pagination';    
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
     import { open, save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api/tauri';
+    import { useDocumentsCountStore } from '../../stores/documents-count';
+    import { useDocumentFieldsStore } from '../../stores/document-fields';
+    import { useImportExportEventsStore } from '../../stores/import-export-events';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     
     const props = defineProps<{
@@ -149,6 +161,7 @@
 
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();
+    const importExportStore = useImportExportEventsStore();
     const notification = useNotification();
 
     const calculateTotalPageCount = (counsData: DocumentsCount[]) => {
@@ -272,6 +285,8 @@
 
         invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
             if(value != 'error') {
+                importExportStore.updateDocumentsImported(true);
+
                 notification.success({title: "Collection imported."});
             }
 

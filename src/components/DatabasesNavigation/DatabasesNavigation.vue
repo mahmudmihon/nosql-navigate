@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col bg-base p-3 h-screen w-80">
+  <div class="flex flex-col bg-base p-3 h-screen w-80 overflow-x-auto">
     <GenericSkeletonVue v-if="dataLoading" />
 
     <div v-else>
@@ -95,7 +95,7 @@
 
           <nav v-for="collectionName in db.db_collections?.sort()" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
             <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white">
-              <span @click="addCollectionTabInStore(db.db_name, collectionName)" class="text-xs font-medium">{{collectionName}}</span>
+              <span @click="addCollectionTabInStore(db.db_name, collectionName)" class="text-xs font-medium text-ellipsis overflow-hidden w-48">{{collectionName}}</span>
 
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex" @click="dropCollection(db.db_name, collectionName)">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -120,13 +120,15 @@
   import { useDocumentFieldsStore } from '../../stores/document-fields';
   import { useDocumentsCountStore } from '../../stores/documents-count';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
+  import { useImportExportEventsStore } from '../../stores/import-export-events';
   import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
-
+  
   const tabsStore = useCollectionTabsStore();
   const documentsStore = useCollectionDocumentsStore();
   const fieldsStore = useDocumentFieldsStore();
   const countsStore = useDocumentsCountStore();
   const refreshEventsStore = useRefreshEventsStore();
+  const importExportStore = useImportExportEventsStore();
   const router = useRouter();
   const notification = useNotification();
 
@@ -234,6 +236,8 @@
     fieldsStore.$reset();
     countsStore.$reset();
     tabsStore.$reset();
+    refreshEventsStore.$reset();
+    importExportStore.$reset();
 
     router.push({path: '/'});
   }
