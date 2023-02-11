@@ -42,7 +42,7 @@
         </div>
 
         <div class="flex justify-end mt-3 gap-2">
-            <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6">
+            <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6" @click="updateDoc">
                 Update
             </button>
         </div>
@@ -57,6 +57,7 @@
     import { EJSONService } from '../../services/ejson-service';
     import JSONViewVue from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
+import { EJSON } from 'bson';
     
     const props = defineProps<{
         dbName: string
@@ -88,14 +89,30 @@
         showDocEditModal.value = true;
     }
 
-    const deleteDoc = (document: object) => {
-        let deleteFilter = `
+    const docFilterQuery = (documentId: string): string => {
+        return `
             {
                 "_id": {
-                    "$eq": "${document["_id"]}"
+                    "$eq": "${documentId}"
                 }
             }
         `;
+    }
+
+    const updateDoc = () => {
+        const parsedObject = JSON.parse(editableDoc.value);
+
+        const updateFilter = docFilterQuery(parsedObject["_id"]);
+
+        invoke('update_document', { dbName: props.dbName, collectionName: props.collectionName, filter: updateFilter, document: editableDoc.value }).then(value => {
+            if(value != 'error') {
+                console.log(value);
+            }
+        });
+    }
+
+    const deleteDoc = (document: object) => {
+        const deleteFilter = docFilterQuery(document["_id"]);
 
         invoke('delete_document', { dbName: props.dbName, collectionName: props.collectionName, filter: deleteFilter }).then(value => {
             if(value != 'error') {

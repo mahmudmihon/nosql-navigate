@@ -1,4 +1,4 @@
-use mongodb::{options::FindOptions, Client};
+use mongodb::{options::FindOptions, options::UpdateModifications, Client};
 use mongodb::bson::{doc, Document};
 use serde_json::{Map, Value};
 use std::convert::TryFrom;
@@ -202,6 +202,32 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                     db.collection::<Document>(collection_name).insert_many(documents, None).await?;
                 }
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let db = client.database(db_name);
+
+                let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
+                
+                let document_update_filter = Document::try_from(filter_mapping)?;
+
+                let document_mapping: Map<String, Value> = serde_json::from_str(document)?;
+                
+                let document_to_update = Document::try_from(document_mapping)?;
+
+                let updateModifications = UpdateModifications::Document(document_to_update);
+
+                db.collection::<Document>(collection_name).find_one_and_update(document_update_filter, updateModifications, None).await?;
 
                 return Ok("ok".to_string());
             },
