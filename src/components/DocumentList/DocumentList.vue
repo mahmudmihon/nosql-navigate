@@ -1,5 +1,5 @@
 <template>
-    <div v-if="documentList.length > 0" class="h-screen overflow-auto">
+    <div v-if="documentList.length > 0">
         <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
             <div class="mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
                 <svg @click="editDoc(document)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-emerald-500 hover:cursor-pointer">
@@ -104,9 +104,24 @@ import { EJSON } from 'bson';
 
         const updateFilter = docFilterQuery(parsedObject["_id"]);
 
-        invoke('update_document', { dbName: props.dbName, collectionName: props.collectionName, filter: updateFilter, document: editableDoc.value }).then(value => {
+        const updateDoc = {"$set": parsedObject};
+
+        invoke('update_document', { dbName: props.dbName, collectionName: props.collectionName, filter: updateFilter, document: JSON.stringify(updateDoc) }).then(value => {
             if(value != 'error') {
-                console.log(value);
+                const updatedDoc = documentList.filter(x => x._id == parsedObject._id)[0];
+
+                if(updatedDoc != null) {
+                    const updatedDocIndex = documentList.indexOf(updatedDoc);
+
+                    documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
+
+                    showDocEditModal.value = false;
+                }
+
+                documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+            }
+            else {
+                notification.error({title: "Document can not be updated."});
             }
         });
     }
@@ -119,8 +134,6 @@ import { EJSON } from 'bson';
                 const deleted_doc_index = documentList.indexOf(document);
 
                 documentList = documentList.slice(deleted_doc_index, 1);
-
-                console.log(documentList);
 
                 documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
 

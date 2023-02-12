@@ -54,7 +54,7 @@
             &.jv-number { color: #49b3ff}
             &.jv-number-float { color: #49b3ff }
             &.jv-number-integer { color: #49b3ff }
-            &.jv-object { color: #90ee90 }
+            &.jv-object { color: #067bca }
             &.jv-undefined { color: #e08331 }
             &.jv-string {
                 color: #90ee90;

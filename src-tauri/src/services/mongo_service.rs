@@ -225,9 +225,11 @@ pub async fn update_document(db_name: &str, collection_name: &str, filter: &str,
                 
                 let document_to_update = Document::try_from(document_mapping)?;
 
-                let updateModifications = UpdateModifications::Document(document_to_update);
+                let update_modifications = UpdateModifications::Document(document_to_update);
 
-                db.collection::<Document>(collection_name).find_one_and_update(document_update_filter, updateModifications, None).await?;
+                let result = db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await;
+
+                println!("{:?}", result);
 
                 return Ok("ok".to_string());
             },
