@@ -57,7 +57,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
 
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-1" @click="showConfirmationModal(db.db_name, '')">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -121,8 +121,22 @@
     :bordered="true"
     size="medium"
   >
-    <div  class="bg-base p-5 rounded-xl w-full">
-      Are you sure you want to delete <span class="font-bold text-lg text-red-500">{{ deleteEntityName }}</span>
+    <div  class="bg-base p-4 rounded-xl w-full text-lg">
+      Are you sure you want to delete <span class="text-red-500">{{ deleteEntityName }}</span>
+    </div>
+
+    <div class="flex justify-end mt-3 gap-2">
+      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="deletingEntity"
+        @click="dropEntity">
+        <svg v-if="deletingEntity" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
+          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        Confirm
+      </button>
     </div>
   </n-modal>
 </template>
@@ -156,6 +170,7 @@
   let showDeleteConfirmationModal = ref<boolean>(false);
   let deleteEntityName = ref<string>("");
   let creatingCollection = ref<boolean>(false);
+  let deletingEntity = ref<boolean>(false);
   let addNewDb = ref<boolean>(true);
   let collectionAddModel = reactive<any>({
     dbName: '',
@@ -215,27 +230,36 @@
     });
   }
 
-  const dropCollection = (dbName: string, collectionName: string) => {
-    invoke('drop_collection', { dbName: dbName, collectionName: collectionName }).then(value => {
-      if(value != 'error') {
-        let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
+  const dropEntity = () => {
+    const dbCollectionName = deleteEntityName.value.split('->');
 
-        if(updatedDb != null) {
-          const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
+    deletingEntity.value = true;
 
-          const deletedCollectionIndex = updatedDb.db_collections.indexOf(collectionName);
+    if(dbCollectionName.length > 1) {
+      invoke('drop_collection', { dbName: dbCollectionName[0].trim(), collectionName: dbCollectionName[1].trim() }).then(value => {
+        if(value != 'error') {
+          let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
 
-          updatedDb.db_collections.splice(deletedCollectionIndex, 1);
+          if(updatedDb != null) {
+            const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
 
-          dbsWithCollections.splice(updatedDbIndex, 1, updatedDb);
+            const deletedCollectionIndex = updatedDb.db_collections.indexOf(dbCollectionName[1].trim());
 
-          notification.success({title: "Collection deleted."});
+            updatedDb.db_collections.splice(deletedCollectionIndex, 1);
+
+            dbsWithCollections.splice(updatedDbIndex, 1, updatedDb);
+
+            notification.success({title: "Collection deleted."});
+          }
         }
-      }
-      else{
-        notification.error({title: "Something went wrong! Please try again later."});
-      }
-    });
+        else{
+          notification.error({title: "Something went wrong! Please try again later."});
+        }
+      });
+    }
+
+    deletingEntity.value = true;
+    showDeleteConfirmationModal.value = false;
   }
 
   const showConfirmationModal = (dbName: string, collectionName: string) => {

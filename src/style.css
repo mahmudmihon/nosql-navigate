@@ -50,6 +50,18 @@
   border-radius: 10px;
 }
 
+.ͼo {
+  color: #7FCFA0;
+}
+
+.ͼr {
+  color: #C789D6;
+}
+
+.ͼp {
+  color: #D19A66;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
