@@ -22,38 +22,8 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
-        </span>       
+        </span>
       </div>
-
-      <n-modal
-        v-model:show="showCollectionAddModal"
-        class="rounded-xl"
-        preset="card"
-        style="width: 50%; background-color: #313131; border: #313131;"
-        :bordered="true"
-        size="medium"
-      >
-        <div class="mb-6" v-if="addNewDb">
-          <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
-          <input type="text" v-model="collectionAddModel.dbName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-        </div>
-
-        <div class="mb-6">
-          <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
-          <input type="text" v-model="collectionAddModel.collectionName" class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
-        </div>
-
-        <div class="flex justify-end mt-3 gap-2">
-          <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection" @click="createCollection">
-            <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span v-if="addNewDb">Create Database</span>
-            <span v-else>Create Collection</span> 
-          </button>
-        </div>
-      </n-modal>
 
       <div class="inline-flex flex-col justify-center relative text-white mt-5">
           <div class="relative">
@@ -70,7 +40,7 @@
             <span class="transition duration-300 shrink-0 group-open:rotate-90">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>           
+              </svg>
             </span>
 
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 ml-1.5">
@@ -80,7 +50,7 @@
               <path d="M12 20.25c2.685 0 5.19-.586 7.078-1.609a8.282 8.282 0 001.897-1.384c.016.121.025.244.025.368 0 2.692-4.03 4.875-9 4.875s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.284 8.284 0 001.897 1.384C6.809 19.664 9.315 20.25 12 20.25z" />
             </svg>
 
-            <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>      
+            <span class="ml-1.5 text-sm font-medium">{{db.db_name}}</span>
 
             <div class="ml-auto hidden group-hover/db:flex">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-400" @click="addNewCollection(db.db_name)">
@@ -97,7 +67,7 @@
             <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white">
               <span @click="addCollectionTabInStore(db.db_name, collectionName)" class="text-xs font-medium text-ellipsis overflow-hidden w-48">{{collectionName}}</span>
 
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex" @click="dropCollection(db.db_name, collectionName)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 ml-auto hidden group-hover/collection:flex" @click="showConfirmationModal(db.db_name, collectionName)">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </a>
@@ -106,23 +76,72 @@
       </nav>
     </div>
   </div>
+
+  <n-modal
+    v-model:show="showCollectionAddModal"
+    class="rounded-xl"
+    preset="card"
+    style="width: 50%; background-color: #313131; border: #313131;"
+    :bordered="true"
+    size="medium"
+  >
+    <div class="mb-6" v-if="addNewDb">
+      <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
+      <input type="text" v-model="collectionAddModel.dbName"
+        class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+    </div>
+
+    <div class="mb-6">
+      <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
+      <input type="text" v-model="collectionAddModel.collectionName"
+        class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
+    </div>
+
+    <div class="flex justify-end mt-3 gap-2">
+      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection"
+        @click="createCollection">
+        <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
+          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span v-if="addNewDb">Create Database</span>
+        <span v-else>Create Collection</span>
+      </button>
+    </div>
+  </n-modal>
+
+  <n-modal
+    v-model:show="showDeleteConfirmationModal"
+    class="rounded-xl"
+    preset="card"
+    style="width: 50%; background-color: #313131; border: #313131;"
+    :bordered="true"
+    size="medium"
+  >
+    <div  class="bg-base p-5 rounded-xl w-full">
+      Are you sure you want to delete <span class="font-bold text-lg text-red-500">{{ deleteEntityName }}</span>
+    </div>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
   import { reactive, ref } from 'vue';
-  import { invoke } from '@tauri-apps/api'; 
+  import { invoke } from '@tauri-apps/api';
   import { DbsNavigationViewModel } from './Models/ViewModels';
   import { NModal, useNotification } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
-  import { v4 as uid } from 'uuid'; 
+  import { v4 as uid } from 'uuid';
   import { useCollectionDocumentsStore } from '../../stores/collection-documents';
   import { useDocumentFieldsStore } from '../../stores/document-fields';
   import { useDocumentsCountStore } from '../../stores/documents-count';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
   import { useImportExportEventsStore } from '../../stores/import-export-events';
   import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
-  
+
   const tabsStore = useCollectionTabsStore();
   const documentsStore = useCollectionDocumentsStore();
   const fieldsStore = useDocumentFieldsStore();
@@ -134,6 +153,8 @@
 
   let dataLoading = ref(true);
   let showCollectionAddModal = ref<boolean>(false);
+  let showDeleteConfirmationModal = ref<boolean>(false);
+  let deleteEntityName = ref<string>("");
   let creatingCollection = ref<boolean>(false);
   let addNewDb = ref<boolean>(true);
   let collectionAddModel = reactive<any>({
@@ -147,13 +168,13 @@
       if(value !== 'error') {
         dbsWithCollections = value as DbsNavigationViewModel[];
         dataLoading.value = false;
-      }    
+      }
     });
   }
 
   getDbsWithCollections();
 
-  const addNewDatabase = (): void => {  
+  const addNewDatabase = (): void => {
     addNewDb.value = true;
     collectionAddModel.dbName = '';
     showCollectionAddModal.value = true;
@@ -189,7 +210,7 @@
       else{
         notification.error({title: "Something went wrong! Please try again later."});
       }
-      
+
       creatingCollection.value = false;
     });
   }
@@ -215,6 +236,16 @@
         notification.error({title: "Something went wrong! Please try again later."});
       }
     });
+  }
+
+  const showConfirmationModal = (dbName: string, collectionName: string) => {
+    deleteEntityName.value = dbName;
+
+    if(collectionName != '') {
+      deleteEntityName.value += ` -> ${collectionName}`;
+    }
+
+    showDeleteConfirmationModal.value = true;
   }
 
   const addCollectionTabInStore = (dbName: string, collectionName: string) => {

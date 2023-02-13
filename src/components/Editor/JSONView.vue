@@ -46,18 +46,18 @@
             user-select: none;
         }
         .jv-button { color: #49b3ff }
-        .jv-key { color: #FFA500}
+        .jv-key { color: #7FCFA0}
         .jv-item {
-            &.jv-array { color: #067bca }
-            &.jv-boolean { color: #ff4500}
+            &.jv-array { color: #56B5C1 }
+            &.jv-boolean { color: #D19A66}
             &.jv-function { color: #49b3ff }
-            &.jv-number { color: #49b3ff}
-            &.jv-number-float { color: #49b3ff }
-            &.jv-number-integer { color: #49b3ff }
-            &.jv-object { color: #067bca }
-            &.jv-undefined { color: #e08331 }
+            &.jv-number { color: #D19A66}
+            &.jv-number-float { color: #D19A66 }
+            &.jv-number-integer { color: #D19A66 }
+            &.jv-object { color: #C678DD }
+            &.jv-undefined { color: gray }
             &.jv-string {
-                color: #90ee90;
+                color: #C789D6;
                 word-break: break-word;
                 white-space: normal;
             }

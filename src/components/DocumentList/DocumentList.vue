@@ -31,13 +31,13 @@
     <n-modal v-model:show="showDocEditModal" class="rounded-xl" preset="card"
         style="width: 50%; background-color: #313131; border: #313131;" :bordered="true" size="medium">
         <div class="mb-6 overflow-y-auto">
-            <vue-jsoneditor 
-                mode="text" 
-                v-model:text="editableDoc" 
-                :mainMenuBar="false" 
+            <vue-jsoneditor
+                mode="text"
+                v-model:text="editableDoc"
+                :mainMenuBar="false"
                 :navigationBar="false"
-                :statusBar="false" 
-                :darkTheme="true" 
+                :statusBar="false"
+                :darkTheme="true"
             />
         </div>
 
@@ -53,12 +53,11 @@
     import { reactive, ref } from 'vue';
     import { invoke } from '@tauri-apps/api/tauri';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
-    import { NModal, useNotification } from 'naive-ui';   
+    import { NModal, useNotification } from 'naive-ui';
     import { EJSONService } from '../../services/ejson-service';
     import JSONViewVue from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-import { EJSON } from 'bson';
-    
+
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -131,9 +130,8 @@ import { EJSON } from 'bson';
 
         invoke('delete_document', { dbName: props.dbName, collectionName: props.collectionName, filter: deleteFilter }).then(value => {
             if(value != 'error') {
-                const deleted_doc_index = documentList.indexOf(document);
 
-                documentList = documentList.slice(deleted_doc_index, 1);
+                documentList = documentList.filter(x => x._id != document["_id"]);
 
                 documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
 
