@@ -33,7 +33,7 @@
     import { v4 as uid } from 'uuid';
     import { EJSONService } from '../../services/ejson-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
-    import { DocumentsFilteringPagination } from '../../types/documents-filtering-pagination';
+    import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import DocumentsFilterAndPaginationVue from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';

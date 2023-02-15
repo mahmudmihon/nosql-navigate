@@ -51,7 +51,6 @@
                 <div v-if="!simpleFiltering" class="flex">
                     <div class="w-full h-24 overflow-y-auto">
                         <vue-jsoneditor                   
-                            height="50"
                             mode="text"
                             v-model:text="rawQuery"
                             :mainMenuBar="false"
@@ -138,13 +137,14 @@
     import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
     import { DocumentFiltering } from '../../services/document-filter-service';   
-    import { DocumentsFilteringPagination } from '../../types/documents-filtering-pagination';    
+    import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';    
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
     import { open, save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api/tauri';
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
+    import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     
     const props = defineProps<{
@@ -179,6 +179,7 @@
         return 0;
     }
 
+    let advanceFiltering: AdvanceFiltering = {filters: {}, sort: {}};
     let simpleFiltering = ref<boolean>(true);
     let pageNumber = ref<number>(1);
     let totalPage = ref<number>(calculateTotalPageCount(countStore.countsList));
@@ -186,7 +187,7 @@
     let runningOperation = ref<boolean>(false);
     let runningOperationText = ref<string>("");
     let documentFields: SelectMixedOption[] = [];
-    let rawQuery = ref('{}');
+    let rawQuery = ref<string>(JSON.stringify(advanceFiltering, null, 2));
     let multipleFilters: any[] = reactive([
         {
             shouldApply: false,
@@ -247,7 +248,10 @@
 
     const importFiltersFromSimpleBuilder = (): void => {
         const filters = DocumentFiltering.extractSimpleBuilderFilters(multipleFilters);
-        rawQuery.value = JSON.stringify(filters, null, 2);
+
+        advanceFiltering.filters = filters;
+
+        rawQuery.value = JSON.stringify(advanceFiltering, null, 2);
     }
 
     const updateDocumentListOnPageNumberChange = (page: number) => {
