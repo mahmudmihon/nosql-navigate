@@ -73,7 +73,7 @@
     let editableDoc = ref<string>('');
 
     if(props.showSearchedData) {
-        documentList = props.searchedData;
+        documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
     }
     else {
         const documents = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;

@@ -110,13 +110,19 @@ pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
     }
 }
 
-pub async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
+pub async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, sort: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
 
-                let options = create_options(limit, skip);
+                let sort_mapping: Map<String, Value> = serde_json::from_str(sort)?;
+                
+                let sort_doc = Document::try_from(sort_mapping)?;
+
+                let options = create_options(sort_doc, limit, skip);
+
+                println!("{:?}", options);
 
                 let filters_mapping: Map<String, Value> = serde_json::from_str(filters)?;
                 
@@ -264,8 +270,9 @@ pub fn drop_client() {
     }
 }
 
-fn create_options(limit: i64, skip: u64) -> FindOptions {
+fn create_options(sort: Document, limit: i64, skip: u64) -> FindOptions {
     FindOptions::builder()
+        .sort(sort)
         .limit(limit)
         .skip(skip)
         .build()

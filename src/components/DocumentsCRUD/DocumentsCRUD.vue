@@ -56,10 +56,10 @@
     let documentListKey = ref<string>(uid());
     let collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
 
-    const getStoreCollectionDocumentsAndCount = (filters: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
+    const getStoreCollectionDocumentsAndCount = (filters: string, sort: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
 
         const promises = [
-            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: filters, limit: limit, skip: skip }),
+            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: filters, sort: sort, limit: limit, skip: skip }),
             invoke('get_collection_documents_count', { dbName: props.dbName, collectionName: props.collectionName, filters: filters })
         ];
 
@@ -112,16 +112,16 @@
         fullPageLoading.value = false;
     }
     else { 
-        getStoreCollectionDocumentsAndCount('{}', 50, 0);
+        getStoreCollectionDocumentsAndCount('{}', '{}', 50, 0);
     }
 
     const triggerFilter = (data: DocumentsFilteringPagination) => {
-        getStoreCollectionDocumentsAndCount(data.filters, data.limit, data.skip, true);        
+        getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);        
     }
 
     importExportStore.$subscribe((mutation, state) => {
         if(state.documentsImported) {
-            getStoreCollectionDocumentsAndCount('{}', 50, 0);
+            getStoreCollectionDocumentsAndCount('{}', '{}', 50, 0);
 
             importExportStore.updateDocumentsImported(false);
         }

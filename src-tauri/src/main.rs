@@ -22,8 +22,8 @@ async fn drop_client() {
 }
 
 #[tauri::command(async)]
-async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
-  return mongo_service::get_collection_documents(db_name, collection_name, filters, limit, skip).await;
+async fn get_collection_documents(db_name: &str, collection_name: &str, filters: &str, sort: &str, limit: i64, skip: u64) -> Result<Vec<Document>, CustomError> {
+  return mongo_service::get_collection_documents(db_name, collection_name, filters, sort, limit, skip).await;
 }
 
 #[tauri::command(async)]
