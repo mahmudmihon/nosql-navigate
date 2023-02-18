@@ -216,6 +216,26 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
+pub async fn insert_document(db_name: &str, collection_name: &str, document: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let db = client.database(db_name);
+
+                let doc_mapping: Map<String, Value> = serde_json::from_str(document)?;
+                
+                let doc_to_insert = Document::try_from(doc_mapping)?;
+
+                db.collection::<Document>(collection_name).insert_one(doc_to_insert, None).await?;
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
 pub async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
