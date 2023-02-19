@@ -50,7 +50,7 @@
 
                 <div v-if="!simpleFiltering" class="flex">
                     <div class="w-full h-24 overflow-y-auto">
-                        <vue-jsoneditor                   
+                        <vue-jsoneditor
                             mode="text"
                             v-model:text="rawQuery"
                             :mainMenuBar="false"
@@ -60,7 +60,7 @@
                         />
                     </div>
 
-                    <div class="w-8" title="Import simple filters">                     
+                    <div class="w-8" title="Import simple filters">
                         <svg @click="importFiltersFromSimpleBuilder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-green-400 ml-1 hover:cursor-pointer">
                             <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-4.28 9.22a.75.75 0 000 1.06l3 3a.75.75 0 101.06-1.06l-1.72-1.72h5.69a.75.75 0 000-1.5h-5.69l1.72-1.72a.75.75 0 00-1.06-1.06l-3 3z" clip-rule="evenodd" />
                         </svg>
@@ -78,7 +78,7 @@
             </div>
         </div>
 
-        <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">          
+        <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
             <div class="mr-auto">
                 <summary class="flex items-center">
                     <span class="mr-1.5 text-xs font-medium">{{$props.dbName}}</span>
@@ -96,7 +96,7 @@
                 </n-tag>
             </div>
             <div class="flex">
-                <span class="hover:cursor-pointer hover:text-blue-400" title="Insert Document">
+                <span class="hover:cursor-pointer hover:text-blue-400" title="Insert Document" @click="insertDocument">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
@@ -115,12 +115,12 @@
                 </span>
             </div>
             <div class="max-w-[50%]">
-                <n-pagination 
-                v-model:page="pageNumber" 
-                :page-size="50" 
-                :page-count="totalPage" 
+                <n-pagination
+                v-model:page="pageNumber"
+                :page-size="50"
+                :page-count="totalPage"
                 size="small"
-                simple 
+                simple
                 :on-update:page="updateDocumentListOnPageNumberChange">
                     <template #goto>
                         Go
@@ -132,12 +132,12 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, VNode, h, reactive } from 'vue';   
+    import { ref, VNode, h, reactive } from 'vue';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
     import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
-    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';   
-    import { DocumentFiltering } from '../../services/document-filter-service';   
-    import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';    
+    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
+    import { DocumentFiltering } from '../../services/document-filter-service';
+    import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
     import { open, save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api/tauri';
@@ -146,7 +146,7 @@
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    
+
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -155,6 +155,7 @@
 
     const emit = defineEmits<{
         (e: 'triggerFilter', data: DocumentsFilteringPagination): void
+        (e: 'triggerDocInsertModal', value: boolean): void
     }>();
 
     const renderOption = ({ node, option }: { node: VNode; option: SelectOption }) => {
@@ -236,10 +237,10 @@
         const sort = getSort();
 
         if(filters != '{}') {
-            searchInitiated.value = true;        
+            searchInitiated.value = true;
         }
         else {
-            searchInitiated.value = false;         
+            searchInitiated.value = false;
         }
 
         pageNumber.value = 1;
@@ -267,9 +268,6 @@
         filters = getFilters();
         sort = getSort();
 
-        console.log(filters);
-        console.log(sort);
-
         emit('triggerFilter', {filters: filters, sort: sort, skip: ((page - 1) * 50), limit: 50});
 
         pageNumber.value = page;
@@ -284,7 +282,7 @@
         else {
             const advanceFiltering: AdvanceFiltering = JSON.parse(rawQuery.value);
 
-            const filtersObject = advanceFiltering.filters; 
+            const filtersObject = advanceFiltering.filters;
 
             if(filtersObject != null && Object.keys(filtersObject).length > 0) {
                 filters = JSON.stringify(filtersObject);
@@ -315,6 +313,10 @@
         }
     }
 
+    const insertDocument = () => {
+        emit('triggerDocInsertModal', true);
+    }
+
     const importDocuments = async () => {
         const filePath = await open({
             directory: false,
@@ -325,19 +327,21 @@
             }]
         });
 
-        runningOperation.value = true;
-        runningOperationText.value = "Importing";
+        if(filePath != null) {
+            runningOperation.value = true;
+            runningOperationText.value = "Importing";
 
-        invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
-            if(value != 'error') {
-                importExportStore.updateDocumentsImported(true);
+            invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
+                if (value != 'error') {
+                    importExportStore.updateDocumentsImported(true);
 
-                notification.success({title: "Collection imported."});
-            }
+                    notification.success({ title: "Collection imported." });
+                }
 
-            runningOperation.value = false;
-            runningOperationText.value = "";
-        });
+                runningOperation.value = false;
+                runningOperationText.value = "";
+            });
+        }
     }
 
     const exportDocuments = async () => {
@@ -348,16 +352,18 @@
             }]
         });
 
-        runningOperation.value = true;
-        runningOperationText.value = "Exporting";
+        if(filePath != null) {
+            runningOperation.value = true;
+            runningOperationText.value = "Exporting";
 
-        invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
-            if(value != 'error') {
-                notification.success({title: "Collection exported."});
-            }
+            invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
+                if (value != 'error') {
+                    notification.success({ title: "Collection exported." });
+                }
 
-            runningOperation.value = false;
-            runningOperationText.value = "";
-        });
+                runningOperation.value = false;
+                runningOperationText.value = "";
+            });
+        }
     }
 </script>

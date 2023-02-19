@@ -117,15 +117,13 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
                 let db = client.database(db_name);
 
                 let sort_mapping: Map<String, Value> = serde_json::from_str(sort)?;
-                
+
                 let sort_doc = Document::try_from(sort_mapping)?;
 
                 let options = create_options(sort_doc, limit, skip);
 
-                println!("{:?}", options);
-
                 let filters_mapping: Map<String, Value> = serde_json::from_str(filters)?;
-                
+
                 let filters_doc = Document::try_from(filters_mapping)?;
 
                 let mut cursor = db.collection(collection_name).find(filters_doc, options).await?;
@@ -151,7 +149,7 @@ pub async fn get_collection_documents_count(db_name: &str, collection_name: &str
                 let db = client.database(db_name);
 
                 let filters_mapping: Map<String, Value> = serde_json::from_str(filters)?;
-                
+
                 let filters_doc = Document::try_from(filters_mapping)?;
 
                 let documents_count = db.collection::<String>(collection_name).count_documents(filters_doc, None).await?;
@@ -224,7 +222,7 @@ pub async fn insert_document(db_name: &str, collection_name: &str, document: &st
                 let db = client.database(db_name);
 
                 let doc_mapping: Map<String, Value> = serde_json::from_str(document)?;
-                
+
                 let doc_to_insert = Document::try_from(doc_mapping)?;
 
                 db.collection::<Document>(collection_name).insert_one(doc_to_insert, None).await?;
@@ -244,18 +242,16 @@ pub async fn update_document(db_name: &str, collection_name: &str, filter: &str,
                 let db = client.database(db_name);
 
                 let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
-                
+
                 let document_update_filter = Document::try_from(filter_mapping)?;
 
                 let document_mapping: Map<String, Value> = serde_json::from_str(document)?;
-                
+
                 let document_to_update = Document::try_from(document_mapping)?;
 
                 let update_modifications = UpdateModifications::Document(document_to_update);
 
-                let result = db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await;
-
-                println!("{:?}", result);
+                db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await;
 
                 return Ok("ok".to_string());
             },
@@ -272,7 +268,7 @@ pub async fn delete_document(db_name: &str, collection_name: &str, filter: &str)
                 let db = client.database(db_name);
 
                 let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
-                
+
                 let document_delete_filter = Document::try_from(filter_mapping)?;
 
                 db.collection::<Document>(collection_name).find_one_and_delete(document_delete_filter, None).await?;

@@ -5,7 +5,13 @@
         </div>
 
         <div v-else>
-            <DocumentsFilterAndPaginationVue @trigger-filter="triggerFilter" :db-name="props.dbName" :collection-name="props.collectionName" :documents-count="0" />
+            <DocumentsFilterAndPaginationVue
+                @trigger-filter="triggerFilter"
+                @trigger-doc-insert-modal="triggerDocInsertModal"
+                :db-name="props.dbName"
+                :collection-name="props.collectionName"
+                :documents-count="0"
+            />
 
             <div v-if="searchedDataLoading" class="mt-1">
                 <GenericSkeletonVue />
@@ -21,11 +27,41 @@
             </div>
         </div>
     </div>
+
+    <n-modal
+        v-model:show="showDocInsertModal"
+        class="rounded-xl"
+        preset="card"
+        style="width: 50%;
+        background-color: #313131;
+        border: #313131;"
+        :bordered="true"
+        size="medium"
+    >
+        <div class="mb-6 overflow-y-auto">
+            <vue-jsoneditor
+                mode="text"
+                v-model:text="docToInsert"
+                :mainMenuBar="false"
+                :navigationBar="false"
+                :statusBar="false"
+                :darkTheme="true"
+                :height="350"
+            />
+        </div>
+
+        <div class="flex justify-end mt-3 gap-2">
+            <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6" @click="insertDoc">
+                Insert
+            </button>
+        </div>
+    </n-modal>
 </template>
 
 <script setup lang="ts">
     import { invoke } from '@tauri-apps/api/tauri';
     import { reactive, ref } from 'vue';
+    import { NModal, useNotification } from 'naive-ui';
     import { extractObjectKeys } from '../../helpers/object-keys';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
@@ -35,10 +71,12 @@
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
+    import { ObjectId } from 'bson';
     import DocumentsFilterAndPaginationVue from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
     import DocumentListVue from '../DocumentList/DocumentList.vue';
-           
+    import VueJsoneditor from 'vue3-ts-jsoneditor';
+
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -48,10 +86,13 @@
     const documentsStore = useCollectionDocumentsStore();
     const countStore = useDocumentsCountStore();
     const importExportStore = useImportExportEventsStore();
+    const notification = useNotification();
 
     let fullPageLoading = ref<boolean>(true);
     let searchedDataLoading = ref<boolean>(false);
     let showSearchedData = ref<boolean>(false);
+    let showDocInsertModal = ref<boolean>(false);
+    let docToInsert = ref<string>('');
     let searchedData = reactive<object[]>([]);
     let documentListKey = ref<string>(uid());
     let collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
@@ -66,8 +107,8 @@
         if(triggeredFromFilterAndPagination) {
             searchedDataLoading.value = true;
         }
-        
-        Promise.allSettled(promises).then(results => {            
+
+        Promise.allSettled(promises).then(results => {
             const listResult = results[0];
             const countResult = results[1];
 
@@ -77,7 +118,7 @@
 
                     if(triggeredFromFilterAndPagination) {
                         searchedData = documentList;
-                        showSearchedData.value = true;                       
+                        showSearchedData.value = true;
                     }
                     else {
                         if (documentList.length > 0) {
@@ -86,11 +127,11 @@
                             const objectKeys = extractObjectKeys(parsedObject) as string[];
 
                             fieldsStore.upsertDocumentFields({ documentOf: `${props.dbName}.${props.collectionName}`, documentFields: objectKeys });
-                            
+
                             documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
-                        }                       
-                    }    
-                    
+                        }
+                    }
+
                     documentListKey.value = uid();
                 }
             }
@@ -111,12 +152,12 @@
     if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
         fullPageLoading.value = false;
     }
-    else { 
+    else {
         getStoreCollectionDocumentsAndCount('{}', '{}', 50, 0);
     }
 
     const triggerFilter = (data: DocumentsFilteringPagination) => {
-        getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);        
+        getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);
     }
 
     importExportStore.$subscribe((mutation, state) => {
@@ -126,4 +167,27 @@
             importExportStore.updateDocumentsImported(false);
         }
     });
+
+    const triggerDocInsertModal = (value: boolean) => {
+        showDocInsertModal.value = value;
+    }
+
+    const insertDoc = () => {
+        let parsedObject = JSON.parse(docToInsert.value);
+
+        if(Object.keys(parsedObject).length > 0) {
+            if(!Object.keys(parsedObject).includes('_id')) {
+                parsedObject = { "_id": ObjectId.generate().toString('hex'), ...parsedObject }
+            }
+
+            invoke('insert_docuemnt', { dbName: props.dbName, collectionName: props.collectionName, document: JSON.stringify(parsedObject) }).then(value => {
+                if(value == 'ok') {
+                    notification.success({ title: "Document inserted." });
+
+                    showDocInsertModal.value = false;
+                    docToInsert.value = '';
+                }
+            });
+        }
+    }
 </script>

@@ -258,7 +258,7 @@
       });
     }
 
-    deletingEntity.value = true;
+    deletingEntity.value = false;
     showDeleteConfirmationModal.value = false;
   }
 
