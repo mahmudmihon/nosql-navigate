@@ -50,6 +50,10 @@
   border-radius: 10px;
 }
 
+.jv-container .jv-code {
+  padding: 10px 20px;
+}
+
 .jse-contents.svelte-o0o8bj {
   border: 0px;
 }

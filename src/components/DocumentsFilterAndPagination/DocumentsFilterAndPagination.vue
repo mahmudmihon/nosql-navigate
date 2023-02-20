@@ -20,11 +20,11 @@
                         </div>
 
                         <div>
-                            <n-select size="small" v-model:value="filterModel.field" filterable :options="documentFields" :render-option="renderOption" :placeholder="'Field'" />
+                            <n-select size="small" v-model:value="filterModel.field" filterable :options="documentFields" :render-option="NaiveUiService.renderOption" :placeholder="'Field'" />
                         </div>
 
                         <div class="w-48">
-                            <n-select size="small" v-model:value="filterModel.filterType" :options="DocumentFiltering.filterTypes" :render-option="renderOption" :placeholder="'Fiter type'" />
+                            <n-select size="small" v-model:value="filterModel.filterType" :options="DocumentFiltering.filterTypes" :render-option="NaiveUiService.renderOption" :placeholder="'Fiter type'" />
                         </div>
 
                         <div class="w-full flex pr-1">
@@ -145,6 +145,7 @@
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
+    import { NaiveUiService } from '../../services/naive-ui-service';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
@@ -157,13 +158,6 @@
         (e: 'triggerFilter', data: DocumentsFilteringPagination): void
         (e: 'triggerDocInsertModal', value: boolean): void
     }>();
-
-    const renderOption = ({ node, option }: { node: VNode; option: SelectOption }) => {
-        return h(NTooltip, null, {
-            trigger: () => node,
-            default: () => option.label
-        });
-    }
 
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();

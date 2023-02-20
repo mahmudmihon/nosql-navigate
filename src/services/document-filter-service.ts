@@ -5,8 +5,8 @@ export class DocumentFiltering {
     static filterTypes: SelectMixedOption[] =
     [
         {
-        label: "Equal",
-        value: "Equal"
+            label: "Equal",
+            value: "Equal"
         },
         {
             label: "Not equal",

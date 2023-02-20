@@ -8,12 +8,16 @@
         trigger="click"
     >
         <n-tab-pane
-        v-for="tab in tabList"
-        :key="tab.id"
-        :tab="tab.collectionName"
-        :name="tab.id"
+            v-for="tab in tabList"
+            :key="tab.id"
+            :tab="tab.collectionName"
+            :name="tab.id"
         >
-            <DocumentOperationsVue :key="tab.id" :db-name="tab.dbName" :collection-name="tab.collectionName" />
+            <DocumentOperationsVue
+                :key="tab.id"
+                :db-name="tab.dbName"
+                :collection-name="tab.collectionName"
+            />
         </n-tab-pane>
     </n-tabs>
 </template>

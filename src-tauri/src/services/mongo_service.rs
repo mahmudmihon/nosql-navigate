@@ -141,6 +141,37 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
     }
 }
 
+pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>) -> Result<Vec<Document>, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                let db = client.database(db_name);
+
+                let mut pipelines: Vec<Document> = Vec::new();
+
+                for pipeline in aggregations {
+                    let pipeline_mapping: Map<String, Value> = serde_json::from_str(pipeline)?;
+
+                    let pipeline_doc = Document::try_from(pipeline_mapping)?;
+
+                    pipelines.push(pipeline_doc);
+                }
+
+                let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
+
+                let mut collection_docs: Vec<Document> = Vec::new();
+
+                while let Some(doc) = cursor.next().await {
+                    collection_docs.push(doc?);
+                }
+
+                return Ok(collection_docs);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
 pub async fn get_collection_documents_count(db_name: &str, collection_name: &str, filters: &str) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
