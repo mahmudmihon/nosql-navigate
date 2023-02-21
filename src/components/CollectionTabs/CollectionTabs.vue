@@ -13,7 +13,7 @@
             :tab="tab.collectionName"
             :name="tab.id"
         >
-            <DocumentOperationsVue
+            <DocumentOperations
                 :key="tab.id"
                 :db-name="tab.dbName"
                 :collection-name="tab.collectionName"
@@ -28,7 +28,7 @@
     import { NTabs, NTabPane } from 'naive-ui';
     import { useRouter } from 'vue-router';
     import { ref } from 'vue';
-    import DocumentOperationsVue from '../DocumentOperations/DocumentOperations.vue';
+    import DocumentOperations from '../DocumentOperations/DocumentOperations.vue';
 
     const tabsStore = useCollectionTabsStore();
     const router = useRouter();

@@ -1,6 +1,7 @@
 const objectKeys: any[] = [];
 
 const extractObjectKeys = (obj: any, previousPath: string = '') => {
+
     Object.keys(obj).forEach((key) => {
         const currentPath = previousPath ? `${previousPath}.${key}` : key;
 

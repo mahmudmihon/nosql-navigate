@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-screen w-full" v-if="dataLoading">
-    <GenericSkeletonVue />
+    <GenericSkeleton />
   </div>
 
   <div v-else class="flex flex-wrap content-start gap-4">
@@ -19,7 +19,7 @@
   import { invoke } from '@tauri-apps/api';
   import { DbsSummaryViewModel } from './Models/ViewModels';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
-  import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
+  import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   let dataLoading = ref(true);
   let dbStatsData: DbsSummaryViewModel[] = [];

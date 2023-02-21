@@ -23,7 +23,7 @@
                     </n-checkbox>
 
                     <div class="w-full">
-                        <JSONViewVue :editor-value="JSON.parse(stage.query)" />
+                        <JSONView :editor-value="JSON.parse(stage.query)" />
                     </div>
                 </div>
             </div>
@@ -49,7 +49,48 @@
                     :options="AggregationBuilderService.pipelineStages"
                     :render-option="NaiveUiService.renderOption"
                     :placeholder="'Select Stage'"
+                    @update:value="handleStageSelect"
                 />
+            </div>
+
+            <div v-if="showLookupSection" class="mt-3">
+                <div class="flex gap-2">
+                    <n-select
+                        size="small"
+                        v-model:value="lookUpModel.from"
+                        filterable
+                        :options="AggregationBuilderService.getOtherCollectionNames(props.dbName, props.collectionName)"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'From'"
+                        @update:value="handleForeignCollectionSelect"
+                    />
+
+                    <n-select
+                        size="small"
+                        v-model:value="lookUpModel.foreignField"
+                        filterable
+                        :options="foreignFields"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'Foreign Field'"
+                    />
+                </div>
+
+                <div class="flex gap-2 mt-2">
+                    <n-select
+                        size="small"
+                        v-model:value="lookUpModel.localField"
+                        filterable
+                        :options="foreignFields"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'From'"
+                    />
+
+                    <n-input
+                        size="small"
+                        v-model:value="lookUpModel.as"
+                        :placeholder="'As'"
+                    />
+                </div>
             </div>
 
             <div class="mt-3">
@@ -75,13 +116,15 @@
 
 <script setup lang="ts">
     import { reactive, ref } from 'vue';
-    import { NModal, NSelect, NCheckbox } from 'naive-ui';
+    import { NModal, NSelect, NCheckbox, NInput } from 'naive-ui';
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
+    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';  
+    import { LookupModel } from './Models/ViewModels';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    import JSONViewVue from '../Editor/JSONView.vue';
-
+    import JSONView from '../Editor/JSONView.vue';
+    
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -94,11 +137,36 @@
 
     const pipelineStage = ref<string>();
     const stageQuery = ref<string>('');
-    let showEditorModal = ref<boolean>(false);
-    let stagesQuery: StageQuery[] = reactive([]);
+    const showEditorModal = ref<boolean>(false);
+    const stagesQuery = reactive<StageQuery[]>([]);
+    const showLookupSection = ref<boolean>(false);
+    let foreignFields = reactive<SelectMixedOption[]>([]);
+    const lookUpModel = reactive<LookupModel>({
+        from: '', 
+        foreignField: '', 
+        localField: '', 
+        as: ''
+    });
 
     const triggerPipelineEditorModal = () => {
         showEditorModal.value = true
+    }
+
+    const handleStageSelect = (value: string, option: SelectOption) => {
+        if(pipelineStage.value == '$lookup') {
+            showLookupSection.value = true;
+
+            return;
+        }
+
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "");
+        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+    }
+
+    const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
+        foreignFields = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
+
+        //console.log(foreignFields);
     }
 
     const addStageQuery = () => {

@@ -132,10 +132,10 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, VNode, h, reactive } from 'vue';
+    import { ref, reactive } from 'vue';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
-    import { NSwitch, NCheckbox, NSelect, NInput, NTooltip, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
-    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
+    import { NSwitch, NCheckbox, NSelect, NInput, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
+    import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
@@ -343,7 +343,8 @@
             filters: [{
                 name: 'json',
                 extensions: ['json']
-            }]
+            }],
+            defaultPath: props.collectionName
         });
 
         if(filePath != null) {

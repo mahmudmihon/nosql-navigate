@@ -157,6 +157,10 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
                     pipelines.push(pipeline_doc);
                 }
 
+                let stage_limit = doc! { "$limit": 50 };
+
+                pipelines.push(stage_limit);
+
                 let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
 
                 let mut collection_docs: Vec<Document> = Vec::new();

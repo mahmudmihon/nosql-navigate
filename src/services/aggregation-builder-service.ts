@@ -1,4 +1,7 @@
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
+import { extractObjectKeys } from "../helpers/object-keys";
+import { CollectionsAndDocumentsService } from "./collections-documents-service";
+import { EJSONService } from "./ejson-service";
 
 export class AggregationBuilderService {
   static pipelineStages: SelectMixedOption[] = [
@@ -151,4 +154,60 @@ export class AggregationBuilderService {
       value: "$unwind",
     }
   ];
+
+  static getOtherCollectionNames = (dbName: string, collectionName: string): SelectMixedOption[] => {
+    const collectionNames = CollectionsAndDocumentsService.getDbCollectionNames(dbName);
+
+    return collectionNames.filter(x => x != collectionName).map(x => {
+      return {label: x, value: x}
+    });
+  }
+
+  static getForeignFields = async (dbName: string, collectionName: string): Promise<SelectMixedOption[]> => {
+
+    if(collectionName != '') {
+      const collectionDocuments = await CollectionsAndDocumentsService.getCollectionDocuments(dbName, collectionName, '{}', '{}', 1, 0);
+
+      if(collectionDocuments.length > 0) {
+        const parsedObject = EJSONService.BsonDocToObject(collectionDocuments[0]);
+
+        const objectFields = extractObjectKeys(parsedObject);
+
+        return objectFields.map(x => {
+          return {label: x, value: x}
+        });
+      }
+    }
+
+    return [];
+  }
+
+  static populateSelectedStageOutput = (stage: string): object => {
+    switch(stage) {
+      case "$count": {
+        return this.prepareCountStageOutput();
+      }
+      case "$group": {
+        return this.prepareGroupStageOutput();
+      }
+      case "$limit": {
+        return this.prepareLimitStageOutput();
+      }
+      default: {
+        return {};
+      }
+    }
+  }
+
+  static prepareCountStageOutput = (): object => {
+    return {"$count": "output_field"};
+  }
+
+  static prepareGroupStageOutput = (): object => {
+    return {"$group": {"_id": "expression", "field": {"accumulator": "expression"}}};
+  }
+
+  static prepareLimitStageOutput = (): object => {
+    return {"$limit": 0};
+  }
 }

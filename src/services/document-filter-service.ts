@@ -1,5 +1,5 @@
 import { CustomLinq } from "./custom-linq-service";
-import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
+import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
 
 export class DocumentFiltering {
     static filterTypes: SelectMixedOption[] =

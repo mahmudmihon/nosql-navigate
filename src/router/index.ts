@@ -1,22 +1,22 @@
-import DashboardInterfaceVue from '../components/DashboardInterface/DashboardInterface.vue';
-import ConnectionInterfaceVue from '../components/ConnectionInterface/ConnectionInterface.vue';
-import DatabasesSummaryVue from '../components/DatabasesSummary/DatabasesSummary.vue';
-import CollectionTabsVue from '../components/CollectionTabs/CollectionTabs.vue';
+import DashboardInterface from '../components/DashboardInterface/DashboardInterface.vue';
+import ConnectionInterface from '../components/ConnectionInterface/ConnectionInterface.vue';
+import DatabasesSummary from '../components/DatabasesSummary/DatabasesSummary.vue';
+import CollectionTabs from '../components/CollectionTabs/CollectionTabs.vue';
 import { createRouter, createMemoryHistory  } from 'vue-router';
 
 const routes = [
-    { name: '', path: '/', component: ConnectionInterfaceVue },
+    { name: '', path: '/', component: ConnectionInterface },
     { 
         path: '/dashboard', 
-        component: DashboardInterfaceVue,
+        component: DashboardInterface,
         children: [
             {
                 path: '',
-                component: DatabasesSummaryVue
+                component: DatabasesSummary
             },
             {
                 path: '/collection-tabs',
-                component: CollectionTabsVue
+                component: CollectionTabs
             }
         ]
     }  

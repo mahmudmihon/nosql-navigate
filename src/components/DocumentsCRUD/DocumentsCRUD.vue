@@ -1,11 +1,11 @@
 <template>
     <div class="flex flex-col">
         <div v-if="fullPageLoading" class="mt-2">
-            <GenericSkeletonVue />
+            <GenericSkeleton />
         </div>
 
         <div v-else>
-            <DocumentsFilterAndPaginationVue
+            <DocumentsFilterAndPagination
                 @trigger-filter="triggerFilter"
                 @trigger-doc-insert-modal="triggerDocInsertModal"
                 :db-name="props.dbName"
@@ -14,10 +14,10 @@
             />
 
             <div v-if="searchedDataLoading" class="mt-1">
-                <GenericSkeletonVue />
+                <GenericSkeleton />
             </div>
             <div v-else class="h-screen overflow-y-auto mb-1">
-                <DocumentListVue
+                <DocumentList
                     :key="documentListKey"
                     :db-name="props.dbName"
                     :collection-name="props.collectionName"
@@ -72,9 +72,9 @@
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import { ObjectId } from 'bson';
-    import DocumentsFilterAndPaginationVue from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
-    import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
-    import DocumentListVue from '../DocumentList/DocumentList.vue';
+    import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
+    import GenericSkeleton from '../Common/GenericSkeleton.vue';
+    import DocumentList from '../DocumentList/DocumentList.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{

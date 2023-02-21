@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col bg-base p-3 h-screen w-80 overflow-x-auto">
-    <GenericSkeletonVue v-if="dataLoading" />
+    <GenericSkeleton v-if="dataLoading" />
 
     <div v-else>
       <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
@@ -154,10 +154,12 @@
   import { useDocumentsCountStore } from '../../stores/documents-count';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
   import { useImportExportEventsStore } from '../../stores/import-export-events';
-  import GenericSkeletonVue from '../Common/GenericSkeleton.vue';
+  import { useDatabaseCollectionsStore } from '../../stores/db-collections';
+  import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   const tabsStore = useCollectionTabsStore();
   const documentsStore = useCollectionDocumentsStore();
+  const collectionsStore = useDatabaseCollectionsStore();
   const fieldsStore = useDocumentFieldsStore();
   const countsStore = useDocumentsCountStore();
   const refreshEventsStore = useRefreshEventsStore();
@@ -183,6 +185,8 @@
       if(value !== 'error') {
         dbsWithCollections = value as DbsNavigationViewModel[];
         dataLoading.value = false;
+
+        collectionsStore.addDbsWithCollections(dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
       }
     });
   }
@@ -287,6 +291,7 @@
   const disconnectDb = () => {
     invoke('drop_client');
 
+    collectionsStore.$reset();
     documentsStore.$reset();
     fieldsStore.$reset();
     countsStore.$reset();

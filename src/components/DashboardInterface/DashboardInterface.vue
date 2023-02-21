@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-1_1_100% flex-nowrap">
-    <DatabasesNavigationVue />
+    <DatabasesNavigation />
     <div class="p-3 w-full overflow-auto">
       <router-view />
     </div>
@@ -8,5 +8,5 @@
 </template>
 
 <script setup lang="ts">
-  import DatabasesNavigationVue from '../DatabasesNavigation/DatabasesNavigation.vue';
+  import DatabasesNavigation from '../DatabasesNavigation/DatabasesNavigation.vue';
 </script>

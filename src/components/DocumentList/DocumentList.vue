@@ -16,7 +16,7 @@
                 </svg>
             </div>
 
-            <JSONViewVue :editor-value="document" />
+            <JSONView :editor-value="document" />
         </div>
     </div>
 
@@ -55,7 +55,7 @@
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal, useNotification } from 'naive-ui';
     import { EJSONService } from '../../services/ejson-service';
-    import JSONViewVue from '../Editor/JSONView.vue';
+    import JSONView from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
