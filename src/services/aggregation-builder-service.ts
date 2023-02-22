@@ -1,5 +1,5 @@
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
-import { extractObjectKeys } from "../helpers/object-keys";
+import { clearObjectKeys, extractObjectKeys } from "../helpers/object-keys";
 import { CollectionsAndDocumentsService } from "./collections-documents-service";
 import { EJSONService } from "./ejson-service";
 
@@ -172,6 +172,8 @@ export class AggregationBuilderService {
         const parsedObject = EJSONService.BsonDocToObject(collectionDocuments[0]);
 
         const objectFields = extractObjectKeys(parsedObject);
+        
+        clearObjectKeys();
 
         return objectFields.map(x => {
           return {label: x, value: x}

@@ -120,11 +120,11 @@
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
-    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';  
+    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
     import { LookupModel } from './Models/ViewModels';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../Editor/JSONView.vue';
-    
+
     const props = defineProps<{
         dbName: string
         collectionName: string
@@ -140,11 +140,11 @@
     const showEditorModal = ref<boolean>(false);
     const stagesQuery = reactive<StageQuery[]>([]);
     const showLookupSection = ref<boolean>(false);
-    let foreignFields = reactive<SelectMixedOption[]>([]);
+    let foreignFields = ref<SelectMixedOption[]>([]);
     const lookUpModel = reactive<LookupModel>({
-        from: '', 
-        foreignField: '', 
-        localField: '', 
+        from: '',
+        foreignField: '',
+        localField: '',
         as: ''
     });
 
@@ -164,9 +164,9 @@
     }
 
     const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
-        foreignFields = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
+        foreignFields.value = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
 
-        //console.log(foreignFields);
+        console.log(foreignFields.value);
     }
 
     const addStageQuery = () => {

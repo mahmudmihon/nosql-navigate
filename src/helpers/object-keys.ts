@@ -1,4 +1,4 @@
-const objectKeys: any[] = [];
+let objectKeys: any[] = [];
 
 const extractObjectKeys = (obj: any, previousPath: string = '') => {
 
@@ -17,4 +17,8 @@ const extractObjectKeys = (obj: any, previousPath: string = '') => {
     return objectKeys;
 }
 
-export { extractObjectKeys }
+const clearObjectKeys = () => {
+    objectKeys = [];
+}
+
+export { extractObjectKeys, clearObjectKeys };
