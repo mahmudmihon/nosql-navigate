@@ -163,6 +163,12 @@ export class AggregationBuilderService {
     });
   }
 
+  static convertObjectKeysToSelectOptions = (keys: string[]): SelectMixedOption[] => {
+    return keys.map(x => {
+      return {label: x, value: x}
+    });
+  }
+
   static getForeignFields = async (dbName: string, collectionName: string): Promise<SelectMixedOption[]> => {
 
     if(collectionName != '') {
@@ -175,9 +181,7 @@ export class AggregationBuilderService {
         
         clearObjectKeys();
 
-        return objectFields.map(x => {
-          return {label: x, value: x}
-        });
+        return this.convertObjectKeysToSelectOptions(objectFields);
       }
     }
 

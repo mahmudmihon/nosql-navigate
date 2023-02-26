@@ -24,7 +24,11 @@
 <script setup lang="ts">
     import { invoke } from '@tauri-apps/api';
     import { reactive, ref } from 'vue';
-    import { v4 as uid } from 'uuid';
+    import { v4 as uid } from 'uuid';    
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-piprlines';   
+    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
+    import { EJSONService } from '../../services/ejson-service';
+    import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -34,17 +38,29 @@
         collectionName: string
     }>();
 
+    const fieldsStore = useAggregationResultFieldsStore();
+
     let aggregationDataLoading = ref<boolean>(false);
     let documentListKey = ref<string>(uid());
     let aggregationData = reactive<object[]>([]);
 
-    const triggerAggregation = (pipelines: string[]) => {
-        if(pipelines.length > 0) {
+    const triggerAggregation = (data: AggregationPipelines) => {
+        if(data.pipelines.length > 0) {
             aggregationDataLoading.value = true;
 
-            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: pipelines }).then(value => {
+            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines }).then(value => {
                 if(value != 'error') {
-                    aggregationData = value as object[];                    
+                    aggregationData = value as object[];
+                    
+                    if(aggregationData.length > 0) {
+                        const firstData = aggregationData[0];
+                        const parsedObject = EJSONService.BsonDocToObject(firstData);
+                        const fields = extractObjectKeys(parsedObject);
+
+                        clearObjectKeys();
+                        
+                        fieldsStore.upsertFields({storeId: data.idToStoreData, fields});
+                    }
                 }
 
                 aggregationDataLoading.value = false;

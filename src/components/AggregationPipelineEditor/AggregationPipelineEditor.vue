@@ -80,7 +80,7 @@
                         size="small"
                         v-model:value="lookUpModel.localField"
                         filterable
-                        :options="foreignFields"
+                        :options="localFields"
                         :render-option="NaiveUiService.renderOption"
                         :placeholder="'From'"
                     />
@@ -122,6 +122,9 @@
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
     import { LookupModel } from './Models/ViewModels';
+    import { v4 as uid } from 'uuid';  
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-piprlines';   
+    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../Editor/JSONView.vue';
 
@@ -131,22 +134,27 @@
         documentsCount: number
     }>();
 
+    const fieldsStore = useAggregationResultFieldsStore();
+
     const emit = defineEmits<{
-        (e: 'triggerAggregation', pipelines: string[]): void
+        (e: 'triggerAggregation', data: AggregationPipelines): void
     }>();
 
+    const idToStoreFieldsData = uid();
     const pipelineStage = ref<string>();
     const stageQuery = ref<string>('');
     const showEditorModal = ref<boolean>(false);
     const stagesQuery = reactive<StageQuery[]>([]);
-    const showLookupSection = ref<boolean>(false);
-    let foreignFields = ref<SelectMixedOption[]>([]);
+    const showLookupSection = ref<boolean>(false);   
     const lookUpModel = reactive<LookupModel>({
         from: '',
         foreignField: '',
         localField: '',
         as: ''
     });
+
+    let foreignFields = ref<SelectMixedOption[]>([]);
+    let localFields = ref<SelectMixedOption[]>([]);
 
     const triggerPipelineEditorModal = () => {
         showEditorModal.value = true
@@ -165,8 +173,6 @@
 
     const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
         foreignFields.value = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
-
-        console.log(foreignFields.value);
     }
 
     const addStageQuery = () => {
@@ -185,6 +191,14 @@
 
         const pipelines = shouldApplyStages.map(x => {return x.query});
 
-        emit('triggerAggregation', pipelines);
+        emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
     }
+
+    fieldsStore.$subscribe((mutation, state) => {
+        const data = state.fieldsData.filter(x => x.storeId == idToStoreFieldsData)[0];
+
+        if(data != null) {
+            localFields.value = AggregationBuilderService.convertObjectKeysToSelectOptions(data.fields);
+        }
+    });
 </script>
