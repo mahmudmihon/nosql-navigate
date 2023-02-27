@@ -25,7 +25,7 @@
     import { invoke } from '@tauri-apps/api';
     import { reactive, ref } from 'vue';
     import { v4 as uid } from 'uuid';    
-    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-piprlines';   
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
     import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
@@ -38,7 +38,7 @@
         collectionName: string
     }>();
 
-    const fieldsStore = useAggregationResultFieldsStore();
+    const localFieldsStore = useAggregationResultFieldsStore();
 
     let aggregationDataLoading = ref<boolean>(false);
     let documentListKey = ref<string>(uid());
@@ -59,7 +59,7 @@
 
                         clearObjectKeys();
                         
-                        fieldsStore.upsertFields({storeId: data.idToStoreData, fields});
+                        localFieldsStore.upsertFields({storeId: data.idToStoreData, fields});
                     }
                 }
 

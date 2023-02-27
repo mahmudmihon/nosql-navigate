@@ -91,6 +91,32 @@
                         :placeholder="'As'"
                     />
                 </div>
+
+                <div class="flex justify-end mt-2 gap-2">
+                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateLookupQuery">
+                        Done
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="showProjectSection" class="mt-3">
+                <div class="flex">
+                    <n-select
+                        size="small"
+                        v-model:value="projectedFields"
+                        filterable
+                        multiple
+                        :options="localFields"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'Select Fields'"
+                    />
+                </div>
+
+                <div class="flex justify-end mt-2 gap-2">
+                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateProjectQuery">
+                        Done
+                    </button>
+                </div>
             </div>
 
             <div class="mt-3">
@@ -123,10 +149,14 @@
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
     import { LookupModel } from './Models/ViewModels';
     import { v4 as uid } from 'uuid';  
-    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-piprlines';   
-    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
+    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';   
+    import { useDocumentFieldsStore } from '../../stores/document-fields';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../Editor/JSONView.vue';
+
+    let foreignFields = ref<SelectMixedOption[]>([]);
+    let localFields = ref<SelectMixedOption[]>([]);
 
     const props = defineProps<{
         dbName: string
@@ -134,18 +164,20 @@
         documentsCount: number
     }>();
 
-    const fieldsStore = useAggregationResultFieldsStore();
-
     const emit = defineEmits<{
         (e: 'triggerAggregation', data: AggregationPipelines): void
     }>();
 
+    const globalFieldsStore = useDocumentFieldsStore();
+    const localFieldsStore = useAggregationResultFieldsStore();
     const idToStoreFieldsData = uid();
     const pipelineStage = ref<string>();
     const stageQuery = ref<string>('');
     const showEditorModal = ref<boolean>(false);
     const stagesQuery = reactive<StageQuery[]>([]);
-    const showLookupSection = ref<boolean>(false);   
+    const showLookupSection = ref<boolean>(false);
+    const showProjectSection = ref<boolean>(false);
+    const projectedFields = ref<string[]>([]);   
     const lookUpModel = reactive<LookupModel>({
         from: '',
         foreignField: '',
@@ -153,26 +185,65 @@
         as: ''
     });
 
-    let foreignFields = ref<SelectMixedOption[]>([]);
-    let localFields = ref<SelectMixedOption[]>([]);
+    const updateLocalFieldsSelectOption = (fromLocalStore: boolean): void => {
+        let fields: string[] = [];
 
-    const triggerPipelineEditorModal = () => {
+        if(fromLocalStore) {
+            fields = localFieldsStore.fieldsData.filter(x => x.storeId == idToStoreFieldsData)[0]?.fields;            
+        }
+        else {
+            fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
+        }
+
+        if(fields.length > 0) {
+            localFields.value = AggregationBuilderService.convertObjectKeysToSelectOptions(fields);
+        }
+    }
+
+    updateLocalFieldsSelectOption(false);
+
+    const triggerPipelineEditorModal = (): void => {
         showEditorModal.value = true
     }
 
     const handleStageSelect = (value: string, option: SelectOption) => {
         if(pipelineStage.value == '$lookup') {
+            showProjectSection.value = false;
             showLookupSection.value = true;
 
             return;
         }
+        else if(pipelineStage.value == '$project') {
+            showProjectSection.value = true;
+            showLookupSection.value = false;
 
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "");
+            return;
+        }
+
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", {});
         stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
         foreignFields.value = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
+    }
+
+    const populateLookupQuery = (): void => {
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", lookUpModel);
+
+        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+    }
+
+    const populateProjectQuery = (): void => {
+        let fieldsToProject = {};
+
+        if(projectedFields.value.length > 0) {
+            projectedFields.value.forEach(x => {fieldsToProject[x]=1});
+        }
+
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", fieldsToProject);
+
+        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const addStageQuery = () => {
@@ -194,11 +265,7 @@
         emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
     }
 
-    fieldsStore.$subscribe((mutation, state) => {
-        const data = state.fieldsData.filter(x => x.storeId == idToStoreFieldsData)[0];
-
-        if(data != null) {
-            localFields.value = AggregationBuilderService.convertObjectKeysToSelectOptions(data.fields);
-        }
+    localFieldsStore.$subscribe((mutation, state) => {
+        updateLocalFieldsSelectOption(true);
     });
 </script>

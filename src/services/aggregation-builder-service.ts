@@ -188,7 +188,7 @@ export class AggregationBuilderService {
     return [];
   }
 
-  static populateSelectedStageOutput = (stage: string): object => {
+  static populateSelectedStageOutput = (stage: string, stageData: { [key: string]: string }): object => {
     switch(stage) {
       case "$count": {
         return this.prepareCountStageOutput();
@@ -198,6 +198,12 @@ export class AggregationBuilderService {
       }
       case "$limit": {
         return this.prepareLimitStageOutput();
+      }
+      case "$lookup": {
+        return this.prepareLookupStageOutput(stageData);
+      }
+      case "$project": {
+        return this.prepareProjectStageOutput(stageData);
       }
       default: {
         return {};
@@ -215,5 +221,18 @@ export class AggregationBuilderService {
 
   static prepareLimitStageOutput = (): object => {
     return {"$limit": 0};
+  }
+
+  static prepareLookupStageOutput = (stageData: { [key: string]: string }): object => {
+    return {"$lookup": {"from": stageData.from, "localField": stageData.localField, "foreignField": stageData.foreignField, "as": stageData.as != '' ? stageData.as : stageData.from}};
+  }
+
+  static prepareProjectStageOutput = (stageData: { [key: string]: string }): object => {
+    if(Object.keys(stageData).length > 0) {
+      return {"$project": stageData};
+    }
+    else {
+      return {"$project": {"field1": 1, "field2": 1}};
+    }
   }
 }

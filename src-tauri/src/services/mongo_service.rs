@@ -157,7 +157,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
                     pipelines.push(pipeline_doc);
                 }
 
-                let stage_limit = doc! { "$limit": 50 };
+                let stage_limit = doc! { "$limit": 10 };
 
                 pipelines.push(stage_limit);
 
