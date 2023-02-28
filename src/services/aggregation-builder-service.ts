@@ -205,6 +205,9 @@ export class AggregationBuilderService {
       case "$project": {
         return this.prepareProjectStageOutput(stageData);
       }
+      case "$match": {
+        return this.prepareMatchStageOutput();
+      }
       default: {
         return {};
       }
@@ -234,5 +237,9 @@ export class AggregationBuilderService {
     else {
       return {"$project": {"field1": 1, "field2": 1}};
     }
+  }
+
+  static prepareMatchStageOutput = (): object => {
+    return {"$match": {"field": "value"}};
   }
 }
