@@ -119,6 +119,33 @@
                 </div>
             </div>
 
+            <div v-if="showUnwindSection" class="mt-3">
+                <div class="flex flex-col gap-2">
+                    <n-select
+                        size="small"
+                        v-model:value="unwindModel.field"
+                        filterable
+                        :options="localFields"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'Select Field'"
+                    />
+
+                    <n-checkbox v-model:checked="unwindModel.preserveNullAndEmptyArrays">
+                        Preserve Null & Empty Arrays
+                    </n-checkbox>
+
+                    <n-checkbox v-model:checked="unwindModel.includeArrayIndex">
+                        Include Array Index
+                    </n-checkbox>
+                </div>
+
+                <div class="flex justify-end mt-2 gap-2">
+                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateunwindQuery">
+                        Done
+                    </button>
+                </div>
+            </div>
+
             <div class="mt-3">
                 <vue-jsoneditor
                     mode="text"
@@ -147,7 +174,7 @@
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
-    import { LookupModel } from './Models/ViewModels';
+    import { LookupModel, UnwindModel } from './Models/ViewModels';
     import { v4 as uid } from 'uuid';  
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
     import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';   
@@ -177,12 +204,18 @@
     const stagesQuery = reactive<StageQuery[]>([]);
     const showLookupSection = ref<boolean>(false);
     const showProjectSection = ref<boolean>(false);
+    const showUnwindSection = ref<boolean>(false);
     const projectedFields = ref<string[]>([]);   
     const lookUpModel = reactive<LookupModel>({
         from: '',
         foreignField: '',
         localField: '',
         as: ''
+    });
+    const unwindModel = reactive<UnwindModel>({
+        field: '',
+        includeArrayIndex: false,
+        preserveNullAndEmptyArrays: false
     });
 
     const updateLocalFieldsSelectOption = (fromLocalStore: boolean): void => {
@@ -208,15 +241,24 @@
 
     const handleStageSelect = (value: string, option: SelectOption) => {
         if(pipelineStage.value == '$lookup') {
-            showProjectSection.value = false;
             showLookupSection.value = true;
-
+            showProjectSection.value = false;
+            showUnwindSection.value = false;
+            
             return;
         }
         else if(pipelineStage.value == '$project') {
             showProjectSection.value = true;
             showLookupSection.value = false;
+            showUnwindSection.value = false;
 
+            return;
+        }
+        else if(pipelineStage.value == '$unwind') {
+            showUnwindSection.value = true;
+            showProjectSection.value = false;
+            showLookupSection.value = false;
+            
             return;
         }
 
@@ -230,6 +272,12 @@
 
     const populateLookupQuery = (): void => {
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", lookUpModel);
+
+        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+    }
+
+    const populateunwindQuery = (): void => {
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", unwindModel);
 
         stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
     }

@@ -29,6 +29,7 @@
     import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
+    import { useNotification } from 'naive-ui';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -39,6 +40,7 @@
     }>();
 
     const localFieldsStore = useAggregationResultFieldsStore();
+    const notification = useNotification();
 
     let aggregationDataLoading = ref<boolean>(false);
     let documentListKey = ref<string>(uid());
@@ -49,6 +51,7 @@
             aggregationDataLoading.value = true;
 
             invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines }).then(value => {
+                console.log(value);
                 if(value != 'error') {
                     aggregationData = value as object[];
                     
@@ -62,6 +65,10 @@
                         localFieldsStore.upsertFields({storeId: data.idToStoreData, fields});
                     }
                 }
+
+                aggregationDataLoading.value = false;
+            }).catch(e => {
+                notification.error({ title: "Error occured while running the pipeline." });
 
                 aggregationDataLoading.value = false;
             });

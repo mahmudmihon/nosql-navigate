@@ -4,3 +4,9 @@ export interface LookupModel {
     localField: string;
     as: string;
 }
+
+export interface UnwindModel {
+    field: string;
+    preserveNullAndEmptyArrays: boolean;
+    includeArrayIndex;
+}

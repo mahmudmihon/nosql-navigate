@@ -188,10 +188,31 @@ export class AggregationBuilderService {
     return [];
   }
 
-  static populateSelectedStageOutput = (stage: string, stageData: { [key: string]: string }): object => {
+  static populateSelectedStageOutput = (stage: string, stageData: { [key: string]: any }): object => {
     switch(stage) {
+      case "$addFields": {
+        return this.prepareaddFieldsStageOutput();
+      }
+      case "$bucket": {
+        return this.prepareBucketStageOutput();
+      }
+      case "$bucketAuto": {
+        return this.prepareBucketAutoStageOutput();
+      }
+      case "$collStats": {
+        return this.prepareCollStatsStageOutput();
+      }
       case "$count": {
         return this.prepareCountStageOutput();
+      }
+      case "$densify": {
+        return this.prepareDensifyStageOutput();
+      }
+      case "$documents": {
+        return this.prepareDocumentsStageOutput();
+      }
+      case "$facet": {
+        return this.prepareFacetStageOutput();
       }
       case "$group": {
         return this.prepareGroupStageOutput();
@@ -205,8 +226,14 @@ export class AggregationBuilderService {
       case "$project": {
         return this.prepareProjectStageOutput(stageData);
       }
+      case "$unwind": {
+        return this.prepareUnwindStageOutput(stageData);
+      }
       case "$match": {
         return this.prepareMatchStageOutput();
+      }
+      case "$sort": {
+        return this.prepareSortStageOutput();
       }
       default: {
         return {};
@@ -214,8 +241,36 @@ export class AggregationBuilderService {
     }
   }
 
+  static prepareaddFieldsStageOutput = (): object => {
+    return {"$addFields": {"new_field": "expression"}};
+  }
+
+  static prepareBucketStageOutput = (): object => {
+    return {"$bucket": {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}}};
+  }
+
+  static prepareBucketAutoStageOutput = (): object => {
+    return {"$bucketAuto": {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}, "granularity": ""}};
+  }
+
+  static prepareCollStatsStageOutput = (): object => {
+    return {"$collStats": {"latencyStats": {"histograms": false}, "storageStats": {"scale": 1}, "count": {}, "queryExecStats": {}}};
+  }
+
   static prepareCountStageOutput = (): object => {
     return {"$count": "output_field"};
+  }
+
+  static prepareDensifyStageOutput = (): object => {
+    return {"$densify": {}};
+  }
+
+  static prepareDocumentsStageOutput = (): object => {
+    return {"$documents": "expression"};
+  }
+
+  static prepareFacetStageOutput = (): object => {
+    return {"$facet": {"outputField1": ["stage1, stage2"], "outputField2": ["stage1, stage2"]}};
   }
 
   static prepareGroupStageOutput = (): object => {
@@ -226,11 +281,11 @@ export class AggregationBuilderService {
     return {"$limit": 0};
   }
 
-  static prepareLookupStageOutput = (stageData: { [key: string]: string }): object => {
+  static prepareLookupStageOutput = (stageData: { [key: string]: any }): object => {
     return {"$lookup": {"from": stageData.from, "localField": stageData.localField, "foreignField": stageData.foreignField, "as": stageData.as != '' ? stageData.as : stageData.from}};
   }
 
-  static prepareProjectStageOutput = (stageData: { [key: string]: string }): object => {
+  static prepareProjectStageOutput = (stageData: { [key: string]: any }): object => {
     if(Object.keys(stageData).length > 0) {
       return {"$project": stageData};
     }
@@ -239,7 +294,27 @@ export class AggregationBuilderService {
     }
   }
 
+  static prepareUnwindStageOutput = (stageData: { [key: string]: any }): object => {
+    let unwindObject: { [key: string]: any } = {};
+
+    unwindObject.path = stageData.field;
+
+    if(stageData.preserveNullAndEmptyArrays) {
+      unwindObject.preserveNullAndEmptyArrays = true;
+    }
+
+    if(stageData.includeArrayIndex) {
+      unwindObject.includeArrayIndex = true;
+    }
+
+    return {"$unwind": unwindObject};
+  }
+
   static prepareMatchStageOutput = (): object => {
     return {"$match": {"field": "value"}};
+  }
+
+  static prepareSortStageOutput = (): object => {
+    return {"$sort": {"field1": 1, "field2": 1}};
   }
 }
