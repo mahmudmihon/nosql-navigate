@@ -214,8 +214,20 @@ export class AggregationBuilderService {
       case "$facet": {
         return this.prepareFacetStageOutput();
       }
+      case "$fill": {
+        return this.prepareFacetStageOutput();
+      }
+      case "$geoNear": {
+        return this.prepareGeoNearStageOutput();
+      }
+      case "$graphLookup": {
+        return this.prepareGraphLookupStageOutput();
+      }
       case "$group": {
-        return this.prepareGroupStageOutput();
+        return this.prepareFillStageOutput();
+      }
+      case "$indexStats": {
+        return this.prepareIndexStatsStageOutput();
       }
       case "$limit": {
         return this.prepareLimitStageOutput();
@@ -273,8 +285,24 @@ export class AggregationBuilderService {
     return {"$facet": {"outputField1": ["stage1, stage2"], "outputField2": ["stage1, stage2"]}};
   }
 
+  static prepareFillStageOutput = (): object => {
+    return {"$fill": {}};
+  }
+
+  static prepareGeoNearStageOutput = (): object => {
+    return {"$geoNear": {"near": {}, "distanceField": "", "maxDistance": 0, "query": {}, "includeLocs": "", spherical: false}};
+  }
+
+  static prepareGraphLookupStageOutput = (): object => {
+    return {"$graphLookup": {"from": "", "startWith": "", "connectFromField": "", "connectToField": "", "as": ""}};
+  }
+
   static prepareGroupStageOutput = (): object => {
     return {"$group": {"_id": "expression", "field": {"accumulator": "expression"}}};
+  }
+
+  static prepareIndexStatsStageOutput = (): object => {
+    return {"$indexStats": {}};
   }
 
   static prepareLimitStageOutput = (): object => {
