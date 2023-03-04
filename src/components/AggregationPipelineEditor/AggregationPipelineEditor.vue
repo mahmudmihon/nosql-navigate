@@ -26,7 +26,15 @@
                         <JSONView :editor-value="JSON.parse(stage.query)" />
                     </div>
                 </div>
-            </div>
+            </div>         
+        </div>
+
+        <div v-if="showSummarySection" class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
+            <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                </svg>
+            </span>
         </div>
     </div>
 
@@ -119,6 +127,26 @@
                 </div>
             </div>
 
+            <div v-if="showUnsetSection" class="mt-3">
+                <div class="flex">
+                    <n-select
+                        size="small"
+                        v-model:value="unsetFields"
+                        filterable
+                        multiple
+                        :options="localFields"
+                        :render-option="NaiveUiService.renderOption"
+                        :placeholder="'Select Fields'"
+                    />
+                </div>
+
+                <div class="flex justify-end mt-2 gap-2">
+                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateUnsetQuery">
+                        Done
+                    </button>
+                </div>
+            </div>
+
             <div v-if="showUnwindSection" class="mt-3">
                 <div class="flex flex-col gap-2">
                     <n-select
@@ -177,7 +205,7 @@
     import { LookupModel, UnwindModel } from './Models/ViewModels';
     import { v4 as uid } from 'uuid';  
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
-    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';   
+    import { useAggregationResultStore } from '../../stores/aggregation-result';   
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../Editor/JSONView.vue';
@@ -196,16 +224,19 @@
     }>();
 
     const globalFieldsStore = useDocumentFieldsStore();
-    const localFieldsStore = useAggregationResultFieldsStore();
+    const aggregationResultStore = useAggregationResultStore();
     const idToStoreFieldsData = uid();
     const pipelineStage = ref<string>();
     const stageQuery = ref<string>('');
+    const showSummarySection = ref<boolean>(false);
     const showEditorModal = ref<boolean>(false);
     const stagesQuery = reactive<StageQuery[]>([]);
     const showLookupSection = ref<boolean>(false);
     const showProjectSection = ref<boolean>(false);
+    const showUnsetSection = ref<boolean>(false);
     const showUnwindSection = ref<boolean>(false);
-    const projectedFields = ref<string[]>([]);   
+    const projectedFields = ref<string[]>([]);
+    const unsetFields = ref<string[]>([]);   
     const lookUpModel = reactive<LookupModel>({
         from: '',
         foreignField: '',
@@ -218,11 +249,19 @@
         preserveNullAndEmptyArrays: false
     });
 
-    const updateLocalFieldsSelectOption = (fromLocalStore: boolean): void => {
+    const updateLocalFieldsAndSummary = (fromLocalStore: boolean): void => {
         let fields: string[] = [];
 
         if(fromLocalStore) {
-            fields = localFieldsStore.fieldsData.filter(x => x.storeId == idToStoreFieldsData)[0]?.fields;            
+            const resultData = aggregationResultStore.aggregationResult.filter(x => x.storeId == idToStoreFieldsData)[0];
+
+            if(resultData != null) {
+                fields = resultData.fields;
+
+                if(resultData.numberOfDocuments > 0) {
+                    showSummarySection.value = true;
+                }
+            }           
         }
         else {
             fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
@@ -233,7 +272,7 @@
         }
     }
 
-    updateLocalFieldsSelectOption(false);
+    updateLocalFieldsAndSummary(false);
 
     const triggerPipelineEditorModal = (): void => {
         showEditorModal.value = true
@@ -244,6 +283,7 @@
             showLookupSection.value = true;
             showProjectSection.value = false;
             showUnwindSection.value = false;
+            showUnsetSection.value = false;
             
             return;
         }
@@ -251,13 +291,23 @@
             showProjectSection.value = true;
             showLookupSection.value = false;
             showUnwindSection.value = false;
+            showUnsetSection.value = false;
 
+            return;
+        }
+        else if(pipelineStage.value == '$unset') {
+            showUnsetSection.value = true;
+            showProjectSection.value = false;
+            showLookupSection.value = false;
+            showUnwindSection.value = false;
+            
             return;
         }
         else if(pipelineStage.value == '$unwind') {
             showUnwindSection.value = true;
             showProjectSection.value = false;
             showLookupSection.value = false;
+            showUnsetSection.value = false;
             
             return;
         }
@@ -294,6 +344,16 @@
         stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
     }
 
+    const populateUnsetQuery = (): void => {
+        let fieldsToUnset = {};
+
+        fieldsToUnset["fields"] = unsetFields.value;
+
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", fieldsToUnset);
+
+        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+    }
+
     const addStageQuery = () => {
         const parsedQuery = JSON.parse(stageQuery.value);
 
@@ -310,10 +370,12 @@
 
         const pipelines = shouldApplyStages.map(x => {return x.query});
 
+        showSummarySection.value = false;
+
         emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
     }
 
-    localFieldsStore.$subscribe((mutation, state) => {
-        updateLocalFieldsSelectOption(true);
+    aggregationResultStore.$subscribe((mutation, state) => {
+        updateLocalFieldsAndSummary(true);
     });
 </script>

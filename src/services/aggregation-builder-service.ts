@@ -235,18 +235,60 @@ export class AggregationBuilderService {
       case "$lookup": {
         return this.prepareLookupStageOutput(stageData);
       }
+      case "$match": {
+        return this.prepareMatchStageOutput();
+      }
+      case "$merge": {
+        return this.prepareMergeStageOutput();
+      }
+      case "$out": {
+        return this.prepareOutStageOutput();
+      }
+      case "$planCacheStats": {
+        return this.preparePlanCacheStatsStageOutput();
+      }
       case "$project": {
         return this.prepareProjectStageOutput(stageData);
       }
-      case "$unwind": {
-        return this.prepareUnwindStageOutput(stageData);
+      case "$redact": {
+        return this.prepareRedactStageOutput();
       }
-      case "$match": {
-        return this.prepareMatchStageOutput();
+      case "$replaceRoot": {
+        return this.prepareReplaceRootStageOutput();
+      }
+      case "$replaceWith": {
+        return this.prepareReplaceWithStageOutput();
+      }
+      case "$sample": {
+        return this.prepareSampleStageOutput();
+      }
+      case "$set": {
+        return this.prepareSetStageOutput();
+      }
+      case "$setWindowFields": {
+        return this.prepareSetWindowFieldsStageOutput();
+      }
+      case "$shardedDataDistribution": {
+        return this.prepareShardedDataDistributionStageOutput();
+      }
+      case "$skip": {
+        return this.prepareSkipStageOutput();
       }
       case "$sort": {
         return this.prepareSortStageOutput();
       }
+      case "$sortByCount": {
+        return this.prepareSortByCountStageOutput();
+      }
+      case "$unionWith": {
+        return this.prepareUnionWithStageOutput();
+      }
+      case "$unset": {
+        return this.prepareUnsetStageOutput(stageData);
+      }  
+      case "$unwind": {
+        return this.prepareUnwindStageOutput(stageData);
+      }     
       default: {
         return {};
       }
@@ -254,7 +296,7 @@ export class AggregationBuilderService {
   }
 
   static prepareaddFieldsStageOutput = (): object => {
-    return {"$addFields": {"new_field": "expression"}};
+    return {"$addFields": {"newField": "expression"}};
   }
 
   static prepareBucketStageOutput = (): object => {
@@ -270,7 +312,7 @@ export class AggregationBuilderService {
   }
 
   static prepareCountStageOutput = (): object => {
-    return {"$count": "output_field"};
+    return {"$count": "outputField"};
   }
 
   static prepareDensifyStageOutput = (): object => {
@@ -322,6 +364,75 @@ export class AggregationBuilderService {
     }
   }
 
+  static prepareMatchStageOutput = (): object => {
+    return {"$match": {"field": "value"}};
+  }
+
+  static prepareMergeStageOutput = (): object => {
+    return {"$merge": {"into": "", "on": "", "whenMatched": "", "whenNotMatched": ""}};
+  }
+
+  static prepareOutStageOutput = (): object => {
+    return {"$out": {"db": "output-db", "coll": "output-collection"}};
+  }
+
+  static preparePlanCacheStatsStageOutput = (): object => {
+    return {"$planCacheStats": {}};
+  }
+
+  static prepareRedactStageOutput = (): object => {
+    return {"$redact": {}};
+  }
+
+  static prepareReplaceRootStageOutput = (): object => {
+    return {"$replaceRoot": {"newRoot": {}}};
+  }
+
+  static prepareReplaceWithStageOutput = (): object => {
+    return {"$replaceWith": ""};
+  }
+
+  static prepareSampleStageOutput = (): object => {
+    return {"$sample": { "size": 0 }};
+  }
+
+  static prepareSetStageOutput = (): object => {
+    return {"$set": { "newField": "expression" }};
+  }
+
+  static prepareSetWindowFieldsStageOutput = (): object => {
+    return {"$setWindowFields": {}};
+  }
+
+  static prepareShardedDataDistributionStageOutput = (): object => {
+    return {"$shardedDataDistribution": {}};
+  }
+
+  static prepareSkipStageOutput = (): object => {
+    return {"$skip": 0};
+  }
+
+  static prepareSortStageOutput = (): object => {
+    return {"$sort": {"field1": 1, "field2": 1}};
+  }
+
+  static prepareSortByCountStageOutput = (): object => {
+    return {"$sortByCount": "expression"};
+  }
+
+  static prepareUnionWithStageOutput = (): object => {
+    return {"$unionWith": {"coll": "collectionName", "pipeline": []}};
+  }
+
+  static prepareUnsetStageOutput = (stageData: { [key: string]: any }): object => {
+    if(stageData.fields.length > 0) {
+      return {"$unset": stageData.fields}
+    }
+    else {
+      return {"$unset": "fieldName"}
+    }
+  }
+
   static prepareUnwindStageOutput = (stageData: { [key: string]: any }): object => {
     let unwindObject: { [key: string]: any } = {};
 
@@ -336,13 +447,5 @@ export class AggregationBuilderService {
     }
 
     return {"$unwind": unwindObject};
-  }
-
-  static prepareMatchStageOutput = (): object => {
-    return {"$match": {"field": "value"}};
-  }
-
-  static prepareSortStageOutput = (): object => {
-    return {"$sort": {"field1": 1, "field2": 1}};
   }
 }

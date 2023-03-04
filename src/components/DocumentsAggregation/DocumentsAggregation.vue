@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col">
-        <div class="h-64">
+        <div class="h-80">
             <AggregationPipelineEditor
                 @trigger-aggregation="triggerAggregation"
                 :db-name="props.dbName"
@@ -26,7 +26,7 @@
     import { reactive, ref } from 'vue';
     import { v4 as uid } from 'uuid';    
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
-    import { useAggregationResultFieldsStore } from '../../stores/aggregation-result-fields';
+    import { useAggregationResultStore } from '../../stores/aggregation-result';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
     import { useNotification } from 'naive-ui';
@@ -39,7 +39,7 @@
         collectionName: string
     }>();
 
-    const localFieldsStore = useAggregationResultFieldsStore();
+    const aggregationResultStore = useAggregationResultStore();
     const notification = useNotification();
 
     let aggregationDataLoading = ref<boolean>(false);
@@ -50,19 +50,19 @@
         if(data.pipelines.length > 0) {
             aggregationDataLoading.value = true;
 
-            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines }).then(value => {
-                console.log(value);
+            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines }).then((value: any) => {
+
                 if(value != 'error') {
-                    aggregationData = value as object[];
+                    aggregationData = value.map(x => EJSONService.BsonDocToObject(x));
                     
                     if(aggregationData.length > 0) {
                         const firstData = aggregationData[0];
-                        const parsedObject = EJSONService.BsonDocToObject(firstData);
-                        const fields = extractObjectKeys(parsedObject);
+
+                        const fields = extractObjectKeys(firstData);
 
                         clearObjectKeys();
                         
-                        localFieldsStore.upsertFields({storeId: data.idToStoreData, fields});
+                        aggregationResultStore.upsertResult({storeId: data.idToStoreData, fields, numberOfDocuments: aggregationData.length, isExporting: false});
                     }
                 }
 
