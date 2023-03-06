@@ -32,6 +32,11 @@ async fn documents_aggregation(db_name: &str, collection_name: &str, aggregation
 }
 
 #[tauri::command(async)]
+async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<String, CustomError> {
+  return mongo_service::export_aggregation_result(db_name, collection_name, aggregations, path).await;
+}
+
+#[tauri::command(async)]
 async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
   return mongo_service::create_collection(db_name, collection_name).await;
 }
@@ -83,7 +88,7 @@ async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> 
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![check_mongo_url, drop_client, create_collection, drop_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, documents_aggregation, get_collection_documents_count, import_collection, export_collection, insert_docuemnt, update_document, delete_document])
+        .invoke_handler(tauri::generate_handler![check_mongo_url, drop_client, create_collection, drop_collection, get_dbs_with_collections, dbs_with_stats, get_collection_documents, documents_aggregation, export_aggregation_result, get_collection_documents_count, import_collection, export_collection, insert_docuemnt, update_document, delete_document])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

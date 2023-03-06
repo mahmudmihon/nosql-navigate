@@ -147,15 +147,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
             Some(client) => {
                 let db = client.database(db_name);
 
-                let mut pipelines: Vec<Document> = Vec::new();
-
-                for pipeline in aggregations {
-                    let pipeline_mapping: Map<String, Value> = serde_json::from_str(pipeline)?;
-
-                    let pipeline_doc = Document::try_from(pipeline_mapping)?;
-
-                    pipelines.push(pipeline_doc);
-                }
+                let mut pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
 
                 let stage_limit = doc! { "$limit": 10 };
 
@@ -170,6 +162,39 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
                 }
 
                 return Ok(collection_docs);
+            },
+            None => { return Err(CustomError::ClientNotFound); }
+        }
+    }
+}
+
+pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let mut file = OpenOptions::new()
+                                                .write(true)
+                                                .create(true)
+                                                .append(true)
+                                                .open(path)?;
+
+                let db = client.database(db_name);
+
+                let pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
+
+                let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
+
+                writeln!(file, "[")?;
+
+                while let Some(doc) = cursor.next().await {
+                    let doc_to_string = serde_json::to_string_pretty(&doc?)?;
+                    writeln!(file, "{},", doc_to_string)?;
+                }
+
+                writeln!(file, "]")?;
+
+                return Ok("ok".to_string());
             },
             None => { return Err(CustomError::ClientNotFound); }
         }
@@ -319,6 +344,20 @@ pub fn drop_client() {
     unsafe {
         CONNECTED_CLIENT = None;
     }
+}
+
+fn prepare_aggregation_stages(aggregations: Vec<&str>) -> Vec<Document> {
+    let mut pipelines: Vec<Document> = Vec::new();
+
+    for pipeline in aggregations {
+        let pipeline_mapping: Map<String, Value> = serde_json::from_str(pipeline).unwrap();
+
+        let pipeline_doc = Document::try_from(pipeline_mapping).unwrap();
+
+        pipelines.push(pipeline_doc);
+    }
+
+    return pipelines;
 }
 
 fn create_options(sort: Document, limit: i64, skip: u64) -> FindOptions {
