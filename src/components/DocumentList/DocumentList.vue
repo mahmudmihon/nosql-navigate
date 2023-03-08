@@ -83,6 +83,8 @@
         }
     }
 
+    console.log(documentList);
+
     const editDoc = (document: object) => {
         editableDoc.value = JSON.stringify(document, null, 2);
         showDocEditModal.value = true;
