@@ -203,7 +203,7 @@
 
 <script setup lang="ts">
     import { reactive, ref } from 'vue';
-    import { NModal, NSelect, NCheckbox, NInput, useNotification } from 'naive-ui';
+    import { NModal, NSelect, NCheckbox, NInput, NTag, useNotification } from 'naive-ui';
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
