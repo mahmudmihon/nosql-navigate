@@ -26,7 +26,7 @@
                         <JSONView :editor-value="JSON.parse(stage.query)" />
                     </div>
                 </div>
-            </div>         
+            </div>
         </div>
 
         <div v-if="showSummarySection" class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
@@ -36,7 +36,7 @@
                 </n-tag>
             </div>
 
-            <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="">
+            <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="exportAggregationResult">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                 </svg>
@@ -203,16 +203,18 @@
 
 <script setup lang="ts">
     import { reactive, ref } from 'vue';
-    import { NModal, NSelect, NCheckbox, NInput, NTag } from 'naive-ui';
+    import { NModal, NSelect, NCheckbox, NInput, useNotification } from 'naive-ui';
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
     import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
     import { LookupModel, UnwindModel } from './Models/ViewModels';
-    import { v4 as uid } from 'uuid';  
-    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
-    import { useAggregationResultStore } from '../../stores/aggregation-result';   
+    import { v4 as uid } from 'uuid';
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
+    import { useAggregationResultStore } from '../../stores/aggregation-result';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
+    import { save } from '@tauri-apps/api/dialog';
+    import { invoke } from '@tauri-apps/api';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../Editor/JSONView.vue';
 
@@ -229,6 +231,7 @@
         (e: 'triggerAggregation', data: AggregationPipelines): void
     }>();
 
+    const notification = useNotification();
     const globalFieldsStore = useDocumentFieldsStore();
     const aggregationResultStore = useAggregationResultStore();
     const idToStoreFieldsData = uid();
@@ -243,7 +246,7 @@
     const showUnsetSection = ref<boolean>(false);
     const showUnwindSection = ref<boolean>(false);
     const projectedFields = ref<string[]>([]);
-    const unsetFields = ref<string[]>([]);   
+    const unsetFields = ref<string[]>([]);
     const lookUpModel = reactive<LookupModel>({
         from: '',
         foreignField: '',
@@ -268,7 +271,7 @@
                 if(resultData.numberOfDocuments > 0) {
                     showSummarySection.value = true;
                 }
-            }           
+            }
         }
         else {
             fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
@@ -291,7 +294,7 @@
             showProjectSection.value = false;
             showUnwindSection.value = false;
             showUnsetSection.value = false;
-            
+
             return;
         }
         else if(pipelineStage.value == '$project') {
@@ -307,7 +310,7 @@
             showProjectSection.value = false;
             showLookupSection.value = false;
             showUnwindSection.value = false;
-            
+
             return;
         }
         else if(pipelineStage.value == '$unwind') {
@@ -315,7 +318,7 @@
             showProjectSection.value = false;
             showLookupSection.value = false;
             showUnsetSection.value = false;
-            
+
             return;
         }
 
@@ -380,6 +383,30 @@
         showSummarySection.value = false;
 
         emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
+    }
+
+    const exportAggregationResult = async () => {
+        const filePath = await save({
+            filters: [{
+                name: 'json',
+                extensions: ['json']
+            }],
+            defaultPath: `${props.collectionName}-aggregation`
+        });
+
+        if (filePath != null) {
+            const shouldApplyStages = stagesQuery.filter(x => x.shouldApply);
+
+            const pipelines = shouldApplyStages.map(x => { return x.query });
+
+            invoke('export_aggregation_result', { dbName: props.dbName, collectionName: props.collectionName, aggregations: pipelines, path: filePath }).then(value => {
+                if (value != 'error') {
+                    notification.success({ title: "Result exported." });
+                }
+
+                dataExporting.value = false;
+            });
+        }
     }
 
     aggregationResultStore.$subscribe((mutation, state) => {
