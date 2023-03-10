@@ -35,7 +35,7 @@
       </div>
 
       <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
-        <details v-for="db in dbsWithCollections?.sort()" class="group" :key="db.db_name">
+        <details v-for="db in dbsWithCollections?.sort()" :key="db.db_collections.length" class="group">
           <summary class="group/db flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
             <span class="transition duration-300 shrink-0 group-open:rotate-90">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -63,7 +63,7 @@
             </div>
           </summary>
 
-          <nav v-for="collectionName in db.db_collections?.sort()" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
+          <nav v-for="(collectionName, index) in db.db_collections?.sort()" :key="index" aria-label="Teams Nav" class="mt-1 ml-7 flex flex-col">
             <a href="#" class="group/collection flex items-center p-1.5 text-white rounded-lg hover:bg-base hover:text-white">
               <span @click="addCollectionTabInStore(db.db_name, collectionName)" class="text-xs font-medium text-ellipsis overflow-hidden w-48">{{collectionName}}</span>
 
@@ -231,6 +231,10 @@
       }
 
       creatingCollection.value = false;
+    }).catch(e => {
+        notification.error({ title: "Something went wrong!" });
+
+        creatingCollection.value = false;
     });
   }
 
@@ -247,11 +251,13 @@
           if(updatedDb != null) {
             const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
 
+            let newDb = {...updatedDb};
+
             const deletedCollectionIndex = updatedDb.db_collections.indexOf(dbCollectionName[1].trim());
 
-            updatedDb.db_collections.splice(deletedCollectionIndex, 1);
+            newDb.db_collections.splice(deletedCollectionIndex, 1);
 
-            dbsWithCollections.splice(updatedDbIndex, 1, updatedDb);
+            dbsWithCollections.splice(updatedDbIndex, 1, newDb);
 
             notification.success({title: "Collection deleted."});
           }

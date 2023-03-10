@@ -203,7 +203,7 @@
 
 <script setup lang="ts">
     import { reactive, ref } from 'vue';
-    import { NModal, NSelect, NCheckbox, NInput } from 'naive-ui';
+    import { NModal, NSelect, NCheckbox, NInput, NTag } from 'naive-ui';
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
     import { StageQuery } from '../../types/AggregationBuilder/stage-query';
@@ -274,7 +274,7 @@
             fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
         }
 
-        if(fields.length > 0) {
+        if(fields?.length > 0) {
             localFields.value = AggregationBuilderService.convertObjectKeysToSelectOptions(fields);
         }
     }
