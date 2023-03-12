@@ -68,7 +68,7 @@
     const documentsStore = useCollectionDocumentsStore();
     const notification = useNotification();
 
-    let documentList = reactive<any[]>([]);
+    let documentList = reactive<any[]>([{}]);
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
 
@@ -83,9 +83,7 @@
         }
     }
 
-    console.log(documentList);
-
-    const editDoc = (document: object) => {
+    const editDoc = (document: object): void => {
         editableDoc.value = JSON.stringify(document, null, 2);
         showDocEditModal.value = true;
     }
@@ -116,10 +114,14 @@
 
                     documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
 
+                    console.log(EJSONService.BsonDocToObject(parsedObject));
+
                     showDocEditModal.value = false;
                 }
 
                 documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+
+                notification.success({title: value as string});
             }
             else {
                 notification.error({title: "Document can not be updated."});
@@ -133,11 +135,17 @@
         invoke('delete_document', { dbName: props.dbName, collectionName: props.collectionName, filter: deleteFilter }).then(value => {
             if(value != 'error') {
 
-                documentList = documentList.filter(x => x._id != document["_id"]);
+                const deletedDocument = documentList.filter(x => x._id == document["_id"])[0];
 
-                documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+                if(deletedDocument != null) {
+                    const deletedDocumentIndex = documentList.indexOf(deletedDocument);
 
-                notification.success({title: "Document deleted."});
+                    documentList.splice(deletedDocumentIndex, 1);
+
+                    documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+
+                    notification.success({title: "Document deleted."});
+                }               
             }
         });
     }

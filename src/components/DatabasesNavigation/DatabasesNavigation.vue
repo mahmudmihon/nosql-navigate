@@ -38,7 +38,7 @@
         <n-input
           placeholder="Search"
           clearable
-          @change="triggerSearch"
+          v-model:value="searchQuery"
         >
           <template #prefix>
             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +48,7 @@
         </n-input>
       </div>
 
-      <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto" :key="listKey">
+      <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
         <details v-for="db, index in dbSearchableData" :key="index" class="group">
           <summary class="group/db flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
             <span class="transition duration-300 shrink-0 group-open:rotate-90">
@@ -156,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, ref } from 'vue';
+  import { computed, reactive, ref } from 'vue';
   import { invoke } from '@tauri-apps/api';
   import { DbsNavigationViewModel } from './Models/ViewModels';
   import { NModal, useNotification, NInput } from 'naive-ui';
@@ -181,7 +181,7 @@
   const router = useRouter();
   const notification = useNotification();
 
-  let listKey = ref<string>(uid());
+  let searchQuery = ref<string>("");
   let dataLoading = ref(true);
   let showCollectionAddModal = ref<boolean>(false);
   let showDeleteConfirmationModal = ref<boolean>(false);
@@ -193,14 +193,13 @@
     dbName: '',
     collectionName: ''
   });
-  let dbsWithCollections: DbsNavigationViewModel[] = [];
-  let dbSearchableData: DbsNavigationViewModel[] = reactive<DbsNavigationViewModel[]>([{db_name: "", db_collections: []}]);
+  let dbsWithCollections: DbsNavigationViewModel[] = reactive<DbsNavigationViewModel[]>([{db_name: "", db_collections: []}]);
 
   const getDbsWithCollections = (): void => {
     invoke('get_dbs_with_collections').then(value => {
       if(value !== 'error') {
         dbsWithCollections = value as DbsNavigationViewModel[];
-        dbSearchableData = dbsWithCollections;
+
         dataLoading.value = false;
 
         collectionsStore.addDbsWithCollections(dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
@@ -238,8 +237,6 @@
 
             dbsWithCollections[updatedDbIndex].db_collections.push(collectionAddModel.collectionName);
             dbsWithCollections[updatedDbIndex].db_collections.sort();
-
-            dbSearchableData = dbsWithCollections;
           }
         }
 
@@ -278,8 +275,6 @@
 
             dbsWithCollections.splice(updatedDbIndex, 1, newDb);
 
-            dbSearchableData = dbsWithCollections;
-
             notification.success({title: "Collection deleted."});
           }
         }
@@ -315,13 +310,15 @@
     refreshEventsStore.updateRefreshDbSummary(true);
   }
 
-  const triggerSearch = (term: string): void => {
+  const dbSearchableData = computed(() => {
+    let searchedData: DbsNavigationViewModel[] = [];
+
+    const term = searchQuery.value;
+
     if(term == null || term == '') {
-      dbSearchableData = dbsWithCollections;
+      searchedData = dbsWithCollections;
     }
     else {
-      let searchedData: DbsNavigationViewModel[] = [];
-
       for(let i = 0; i < dbsWithCollections.length; i++) {
         const dbData = dbsWithCollections[i];
 
@@ -344,12 +341,10 @@
           }
         }
       }
-
-      dbSearchableData = searchedData;
     }
 
-    listKey.value = uid();
-  }
+    return searchedData;
+  });
 
   const disconnectDb = () => {
     invoke('drop_client');

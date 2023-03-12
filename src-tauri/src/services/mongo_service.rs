@@ -311,9 +311,14 @@ pub async fn update_document(db_name: &str, collection_name: &str, filter: &str,
 
                 let update_modifications = UpdateModifications::Document(document_to_update);
 
-                db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await;
+                let update_result = db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await?;
 
-                return Ok("ok".to_string());
+                if update_result.modified_count > 0 {
+                    return Ok("Document updated.".to_string());
+                }
+                else {
+                    return Ok("No document found to update!".to_string());
+                }               
             },
             None => { return Err(CustomError::ClientNotFound); }
         }
