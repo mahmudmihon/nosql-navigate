@@ -57,7 +57,6 @@
     import { EJSONService } from '../../services/ejson-service';
     import JSONView from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    import HadronDocument from 'hadron-document';
 
     const props = defineProps<{
         dbName: string
@@ -69,7 +68,7 @@
     const documentsStore = useCollectionDocumentsStore();
     const notification = useNotification();
 
-    let documentList = reactive<any[]>([{}]);
+    let documentList = reactive<{[key: string]: any}[]>([]);
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
 

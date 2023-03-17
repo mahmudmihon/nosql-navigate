@@ -58,7 +58,7 @@
                     if(aggregationData.length > 0) {
                         const firstData = aggregationData[0];
 
-                        const fields = extractObjectKeys(firstData);
+                        const fields = extractObjectKeys(firstData).sort();
 
                         clearObjectKeys();
                         

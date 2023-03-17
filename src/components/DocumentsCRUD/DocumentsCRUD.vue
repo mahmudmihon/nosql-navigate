@@ -10,7 +10,7 @@
                 @trigger-doc-insert-modal="triggerDocInsertModal"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
-                :documents-count="0"
+                :documents-count="documentsCount"
             />
 
             <div v-if="searchedDataLoading" class="mt-1">
@@ -92,6 +92,7 @@
     let searchedDataLoading = ref<boolean>(false);
     let showSearchedData = ref<boolean>(false);
     let showDocInsertModal = ref<boolean>(false);
+    let documentsCount = ref<number>(0);
     let docToInsert = ref<string>('');
     let searchedData = reactive<object[]>([]);
     let documentListKey = ref<string>(uid());
@@ -116,6 +117,8 @@
                 if(listResult.value != 'error') {
                     const documentList = listResult.value as object[];
 
+                    documentsCount.value = documentList.length;
+
                     if(triggeredFromFilterAndPagination) {
                         searchedData = documentList;
                         showSearchedData.value = true;
@@ -124,7 +127,7 @@
                         if (documentList.length > 0) {
                             const firstDocument = documentList[0];
                             const parsedObject = EJSONService.BsonDocToObject(firstDocument);
-                            const objectKeys = extractObjectKeys(parsedObject) as string[];
+                            const objectKeys = extractObjectKeys(parsedObject).sort() as string[];
 
                             clearObjectKeys();
 

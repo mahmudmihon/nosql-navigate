@@ -177,7 +177,7 @@ export class AggregationBuilderService {
       if(collectionDocuments.length > 0) {
         const parsedObject = EJSONService.BsonDocToObject(collectionDocuments[0]);
 
-        const objectFields = extractObjectKeys(parsedObject);
+        const objectFields = extractObjectKeys(parsedObject).sort();
         
         clearObjectKeys();
 
