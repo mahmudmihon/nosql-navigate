@@ -343,10 +343,6 @@
         stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
     }
 
-    const removeAggregationStage = (index: number): void => {
-        stagesQuery.splice(index, 1);
-    }
-
     const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
         foreignFields.value = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
     }
@@ -396,7 +392,7 @@
         }
     }
 
-    const parseAndTriggerAggregation = () => {
+    const parseAndTriggerAggregation = (): void => {
         const shouldApplyStages = stagesQuery.filter(x => x.shouldApply);
 
         const pipelines = shouldApplyStages.map(x => {return x.query});
@@ -404,6 +400,12 @@
         showSummarySection.value = false;
 
         emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
+    }
+
+    const removeAggregationStage = (index: number): void => {
+        stagesQuery.splice(index, 1);
+
+        parseAndTriggerAggregation();
     }
 
     const exportAggregationResult = async () => {

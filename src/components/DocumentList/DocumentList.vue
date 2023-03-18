@@ -1,5 +1,5 @@
 <template>
-    <div v-if="documentList.length > 0">
+    <div v-if="documentList.length > 0" :key="documentListKey">
         <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
             <div class="mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
                 <svg @click="editDoc(document)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-emerald-500 hover:cursor-pointer">
@@ -55,6 +55,7 @@
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal, useNotification } from 'naive-ui';
     import { EJSONService } from '../../services/ejson-service';
+    import { v4 as uid } from 'uuid';
     import JSONView from '../Editor/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
@@ -71,6 +72,7 @@
     let documentList = reactive<{[key: string]: any}[]>([]);
     let showDocEditModal = ref<boolean>(false);
     let editableDoc = ref<string>('');
+    let documentListKey = ref<string>(uid());
 
     if(props.showSearchedData) {
         documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
@@ -143,6 +145,8 @@
                     documentList.splice(deletedDocumentIndex, 1);
 
                     documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+
+                    documentListKey.value = uid();
 
                     notification.success({title: "Document deleted."});
                 }               

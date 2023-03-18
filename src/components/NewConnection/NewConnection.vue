@@ -43,6 +43,7 @@
   import { ButtonActionType } from "./Models/ViewModels";
   import { useRouter } from 'vue-router';
   import { useNotification } from 'naive-ui';
+  import SQLite from 'tauri-plugin-sqlite-api';
 
   const connectionUrl = ref('mongodb://localhost:27017');
   const router = useRouter();
@@ -101,4 +102,16 @@
       }      
     });
   }
+
+  (async () => {
+    const db = await SQLite.open('./db/navigateDb.db');
+
+    await db.execute(`
+        CREATE TABLE users (name TEXT, age INTEGER);
+        INSERT INTO users VALUES ('Alice', 42);
+        INSERT INTO users VALUES ('Bob', 69);
+    `);
+
+    await db.close();
+  })();
 </script>

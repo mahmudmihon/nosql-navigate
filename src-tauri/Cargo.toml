@@ -21,6 +21,10 @@ thiserror = "1.0"
 futures = "0.3.25"
 tauri = { version = "1.2.4", features = ["dialog-open", "dialog-save", "shell-open"] }
 
+[dependencies.tauri-plugin-sqlite]
+git = "https://github.com/lzdyes/tauri-plugin-sqlite"
+tag = "v0.1.1"
+
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
