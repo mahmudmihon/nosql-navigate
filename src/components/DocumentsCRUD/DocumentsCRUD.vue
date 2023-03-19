@@ -62,7 +62,7 @@
     import { invoke } from '@tauri-apps/api/tauri';
     import { reactive, ref } from 'vue';
     import { NModal, useNotification } from 'naive-ui';
-    import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
+    import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { CollectionDocuments } from '../../types/CollectionDocuments/collection-documents';

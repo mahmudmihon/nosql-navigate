@@ -24,11 +24,11 @@
 <script setup lang="ts">
     import { invoke } from '@tauri-apps/api';
     import { reactive, ref } from 'vue';
-    import { v4 as uid } from 'uuid';    
-    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';   
+    import { v4 as uid } from 'uuid';
+    import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
     import { useAggregationResultStore } from '../../stores/aggregation-result';
     import { EJSONService } from '../../services/ejson-service';
-    import { clearObjectKeys, extractObjectKeys } from '../../helpers/object-keys';
+    import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
     import { useNotification } from 'naive-ui';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
@@ -54,14 +54,14 @@
 
                 if(value != 'error') {
                     aggregationData = value.map(x => EJSONService.BsonDocToObject(x));
-                    
+
                     if(aggregationData.length > 0) {
                         const firstData = aggregationData[0];
 
                         const fields = extractObjectKeys(firstData).sort();
 
                         clearObjectKeys();
-                        
+
                         aggregationResultStore.upsertResult({storeId: data.idToStoreData, fields, numberOfDocuments: aggregationData.length, isExporting: false});
                     }
                 }
@@ -76,7 +76,7 @@
         else {
             aggregationData = [];
         }
-               
+
         documentListKey.value = uid();
     }
 </script>

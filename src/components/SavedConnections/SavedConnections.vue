@@ -15,3 +15,11 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+  import { SqlLiteService } from '../../services/data/sqlLite-service';
+
+  (async () => {
+    await SqlLiteService.checkAndCreateInitialTable();
+  })();
+</script>

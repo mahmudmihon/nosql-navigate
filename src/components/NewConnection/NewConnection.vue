@@ -28,11 +28,11 @@
 
     <label class="block mb-2 text-sm font-medium text-white">Save Connection</label>
     <div class="mt-2">
-        <input type="text" class="border-gray-300 text-[#ffffffde] text-sm rounded-lg w-full p-1 dark:bg-base dark:placeholder-gray-400" placeholder="Connection Name" required>
+        <input type="text" v-model.trim="connectionName" class="border-gray-300 text-[#ffffffde] text-sm rounded-lg w-full p-1 dark:bg-base dark:placeholder-gray-400" placeholder="Connection Name">
     </div>
 
     <div class="flex justify-end mt-3">
-      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click.prevent="">Save</button>
+      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click.prevent="saveConnection">Save</button>
     </div>
   </div>
 </template>
@@ -43,9 +43,11 @@
   import { ButtonActionType } from "./Models/ViewModels";
   import { useRouter } from 'vue-router';
   import { useNotification } from 'naive-ui';
-  import SQLite from 'tauri-plugin-sqlite-api';
+  import { CommonConsts } from '../../utilities/common-consts';
+  import { SqlLiteService } from '../../services/data/sqlLite-service';
 
-  const connectionUrl = ref('mongodb://localhost:27017');
+  const connectionName = ref<string>('');
+  const connectionUrl = ref<string>(CommonConsts.defaultConnectionURl);
   const router = useRouter();
   const notification = useNotification();
 
@@ -93,25 +95,24 @@
           default: {
             return;
           }
-        }        
+        }
       }
       else {
         notification.error({title: "Couldn't connect to the URL."});
+        
         testButtonLoading.value = false;
         connectButtonLoading.value = false;
-      }      
+      }
     });
   }
 
-  (async () => {
-    const db = await SQLite.open('./db/navigateDb.db');
+  const saveConnection = async () => {
+    if(connectionName.value != '' && connectionUrl.value != '') {
+      await SqlLiteService.saveDbConnection({name: connectionName.value, url: connectionUrl.value });
 
-    await db.execute(`
-        CREATE TABLE users (name TEXT, age INTEGER);
-        INSERT INTO users VALUES ('Alice', 42);
-        INSERT INTO users VALUES ('Bob', 69);
-    `);
+      return;
+    }
 
-    await db.close();
-  })();
+    notification.error({ title: 'Connection name or URL is empty.' });
+  }
 </script>
