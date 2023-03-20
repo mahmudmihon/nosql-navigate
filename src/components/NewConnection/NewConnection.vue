@@ -45,11 +45,13 @@
   import { useNotification } from 'naive-ui';
   import { CommonConsts } from '../../utilities/common-consts';
   import { SqlLiteService } from '../../services/data/sqlLite-service';
+  import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
 
   const connectionName = ref<string>('');
   const connectionUrl = ref<string>(CommonConsts.defaultConnectionURl);
   const router = useRouter();
   const notification = useNotification();
+  const crudEventsStore = useConnectionCRUDEventsStore(); 
 
   let testButtonLoading = ref(false);
   let connectButtonLoading = ref(false);
@@ -110,6 +112,8 @@
     if(connectionName.value != '' && connectionUrl.value != '') {
       await SqlLiteService.saveDbConnection({name: connectionName.value, url: connectionUrl.value });
 
+      crudEventsStore.updateConnectionSavedEvent(true);
+      
       return;
     }
 

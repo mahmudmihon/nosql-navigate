@@ -21,4 +21,14 @@ export class SqlLiteService {
 
     await db.close();
   }
+
+  static getSavedConnections = async (): Promise<DbConnection[]> => {
+    const db = await this.dbConnection();
+
+    const savedConnections = await db.select<Array<DbConnection>>('SELECT * FROM saved_connections');
+
+    //await db.close();
+
+    return savedConnections;
+  }
 }
