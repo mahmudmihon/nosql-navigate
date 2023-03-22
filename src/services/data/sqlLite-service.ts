@@ -9,7 +9,7 @@ export class SqlLiteService {
   static checkAndCreateInitialTable = async () => {
     const db = await this.dbConnection();
 
-    await db.execute(`CREATE TABLE IF NOT EXISTS saved_connections (name TEXT, url TEXT);`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS saved_connections (id TEXT, name TEXT, url TEXT);`);
 
     await db.close();
   };
@@ -17,7 +17,7 @@ export class SqlLiteService {
   static saveDbConnection = async (model: DbConnection) => {
     const db = await this.dbConnection();
 
-    await db.execute("INSERT INTO saved_connections VALUES (?1, ?2)", [model.name, model.url]);
+    await db.execute("INSERT INTO saved_connections VALUES (?1, ?2, ?3)", [model.id, model.name, model.url]);
 
     await db.close();
   }
@@ -27,8 +27,14 @@ export class SqlLiteService {
 
     const savedConnections = await db.select<Array<DbConnection>>('SELECT * FROM saved_connections');
 
-    //await db.close();
-
     return savedConnections;
+  }
+
+  static deleteSavedConnection = async (id: string) => {
+    const db = await this.dbConnection();
+
+    await db.execute("DELETE FROM saved_connections WHERE id=?", [id]);
+
+    await db.close();
   }
 }

@@ -46,12 +46,13 @@
   import { CommonConsts } from '../../utilities/common-consts';
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
+  import { v4 as uid } from 'uuid';
 
   const connectionName = ref<string>('');
   const connectionUrl = ref<string>(CommonConsts.defaultConnectionURl);
   const router = useRouter();
   const notification = useNotification();
-  const crudEventsStore = useConnectionCRUDEventsStore(); 
+  const crudEventsStore = useConnectionCRUDEventsStore();
 
   let testButtonLoading = ref(false);
   let connectButtonLoading = ref(false);
@@ -101,7 +102,7 @@
       }
       else {
         notification.error({title: "Couldn't connect to the URL."});
-        
+
         testButtonLoading.value = false;
         connectButtonLoading.value = false;
       }
@@ -110,13 +111,19 @@
 
   const saveConnection = async () => {
     if(connectionName.value != '' && connectionUrl.value != '') {
-      await SqlLiteService.saveDbConnection({name: connectionName.value, url: connectionUrl.value });
+      await SqlLiteService.saveDbConnection({id: uid(), name: connectionName.value, url: connectionUrl.value });
 
       crudEventsStore.updateConnectionSavedEvent(true);
-      
+
       return;
     }
 
     notification.error({ title: 'Connection name or URL is empty.' });
   }
+
+  crudEventsStore.$subscribe((mutation, state) => {
+    if(state.selectedConnection?.url != '') {
+      connectionUrl.value = state.selectedConnection?.url;
+    }
+  });
 </script>
