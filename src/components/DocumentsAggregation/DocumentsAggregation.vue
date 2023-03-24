@@ -29,7 +29,8 @@
     import { useAggregationResultStore } from '../../stores/aggregation-result';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
-    import { useNotification } from 'naive-ui';
+    import { useNotification } from 'naive-ui';   
+    import { CommonConsts } from '../../utilities/common-consts';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -50,7 +51,7 @@
         if(data.pipelines.length > 0) {
             aggregationDataLoading.value = true;
 
-            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines }).then((value: any) => {
+            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines, limit: CommonConsts.defaultAggregationPageSize }).then((value: any) => {
 
                 if(value != 'error') {
                     aggregationData = value.map(x => EJSONService.BsonDocToObject(x));

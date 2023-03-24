@@ -141,7 +141,7 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
     }
 }
 
-pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>) -> Result<Vec<Document>, CustomError> {
+pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>, limit: i64) -> Result<Vec<Document>, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -149,7 +149,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
 
                 let mut pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
 
-                let stage_limit = doc! { "$limit": 10 };
+                let stage_limit = doc! { "$limit": limit };
 
                 pipelines.push(stage_limit);
 

@@ -1,10 +1,10 @@
 <template>
   <div class="bg-base p-3 h-screen">
     <div class="mt-1 mb-4 pr-[220px]">
-      SAVED <span class="bg-green-100 text-green-800 text-xs font-semibold ml-2 px-2.5 py-0.5 rounded-full dark:bg-green-200 dark:text-green-900">{{connections.savedConnections.length}}</span>
+      SAVED <span class="bg-green-100 text-green-800 text-xs font-semibold ml-2 px-2.5 py-0.5 rounded-full dark:bg-green-200 dark:text-green-900">{{componentState.savedConnections.length}}</span>
     </div>
 
-    <div v-for="(cData, index) in connections.savedConnections" :key="index" @click="updateSelectedDb(index)" class="bg-base rounded-lg pl-3 pr-[70px] py-[7px] mb-2 relative group hover:cursor-pointer">
+    <div v-for="(cData, index) in componentState.savedConnections" :key="index" @click="updateSelectedDb(index)" class="bg-base rounded-lg pl-3 pr-[70px] py-[7px] mb-2 relative group hover:cursor-pointer">
       <div class="z-40 absolute top-2 right-1 hidden group-hover:flex">
         <svg @click="DeleteConnection(cData.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ml-2 text-red-500 hover:cursor-pointer">
             <path fill-rule="evenodd"
@@ -25,18 +25,18 @@
   import { reactive } from 'vue';
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
-  import { DbConnection } from '../../types/DbConnections/db-connection';
-
-  let connections = reactive<{savedConnections: DbConnection[]}>({savedConnections: []});
+  import { ComponentStateModel } from './Models/ViewModels';
 
   const crudEventsStore = useConnectionCRUDEventsStore();
+
+  const componentState: ComponentStateModel = reactive({savedConnections: []});
 
   (async () => {
     await SqlLiteService.checkAndCreateInitialTable();
   })();
 
   async function getSavedConnections() {
-    connections.savedConnections = await SqlLiteService.getSavedConnections();
+    componentState.savedConnections = await SqlLiteService.getSavedConnections();
   };
 
   getSavedConnections();
@@ -48,7 +48,7 @@
   }
 
   function updateSelectedDb(index: number) {
-    crudEventsStore.updateSelectedConnection(connections.savedConnections[index]);
+    crudEventsStore.updateSelectedConnection(componentState.savedConnections[index]);
   }
 
   crudEventsStore.$subscribe((mutation, state) => {

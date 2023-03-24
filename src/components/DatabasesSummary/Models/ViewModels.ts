@@ -14,3 +14,7 @@ export interface DbsSummaryViewModel {
     totalSize: number,
     views: number
 }
+
+export interface ComponentDataModel {
+    dbStatsData: DbsSummaryViewModel[];
+}

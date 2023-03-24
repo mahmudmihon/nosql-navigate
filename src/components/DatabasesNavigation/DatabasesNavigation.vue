@@ -25,15 +25,6 @@
         </span>
       </div>
 
-      <!-- <div class="inline-flex flex-col justify-center relative text-white mt-5">
-          <div class="relative">
-              <input type="text" class="p-1 pl-8 rounded-lg border border-gray-200 bg-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:bg-base focus:border-transparent  w-full" placeholder="search..." />
-              <svg class="w-4 h-4 absolute left-2.5 top-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-          </div>
-      </div> -->
-
       <div class="flex mt-5">
         <n-input
           placeholder="Search"
@@ -158,7 +149,7 @@
 <script setup lang="ts">
   import { computed, reactive, ref } from 'vue';
   import { invoke } from '@tauri-apps/api';
-  import { DbsNavigationViewModel } from './Models/ViewModels';
+  import { ComponentDataModel, DbsNavigationViewModel } from './Models/ViewModels';
   import { NModal, useNotification, NInput } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
@@ -193,16 +184,16 @@
     dbName: '',
     collectionName: ''
   });
-  let dbsWithCollections: DbsNavigationViewModel[] = reactive<DbsNavigationViewModel[]>([{db_name: "", db_collections: []}]);
+  let componentData: ComponentDataModel = reactive<ComponentDataModel>({dbsWithCollections: []});
 
   const getDbsWithCollections = (): void => {
     invoke('get_dbs_with_collections').then(value => {
       if(value !== 'error') {
-        dbsWithCollections = value as DbsNavigationViewModel[];
+        componentData.dbsWithCollections = value as DbsNavigationViewModel[];
 
         dataLoading.value = false;
 
-        collectionsStore.addDbsWithCollections(dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
+        collectionsStore.addDbsWithCollections(componentData.dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
       }
     });
   }
@@ -227,16 +218,16 @@
     invoke('create_collection', { dbName: collectionAddModel.dbName, collectionName: collectionAddModel.collectionName }).then(value => {
       if(value != 'error') {
         if(addNewDb.value) {
-          dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
+          componentData.dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
         }
         else {
-          let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
+          let updatedDb = componentData.dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
 
           if(updatedDb != null) {
-            const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
+            const updatedDbIndex = componentData.dbsWithCollections.indexOf(updatedDb);
 
-            dbsWithCollections[updatedDbIndex].db_collections.push(collectionAddModel.collectionName);
-            dbsWithCollections[updatedDbIndex].db_collections.sort();
+            componentData.dbsWithCollections[updatedDbIndex].db_collections.push(collectionAddModel.collectionName);
+            componentData.dbsWithCollections[updatedDbIndex].db_collections.sort();
           }
         }
 
@@ -262,10 +253,10 @@
     if(dbCollectionName.length > 1) {
       invoke('drop_collection', { dbName: dbCollectionName[0].trim(), collectionName: dbCollectionName[1].trim() }).then(value => {
         if(value != 'error') {
-          let updatedDb = dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
+          let updatedDb = componentData.dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
 
           if(updatedDb != null) {
-            const updatedDbIndex = dbsWithCollections.indexOf(updatedDb);
+            const updatedDbIndex = componentData.dbsWithCollections.indexOf(updatedDb);
 
             let newDb = {...updatedDb};
 
@@ -273,7 +264,7 @@
 
             newDb.db_collections.splice(deletedCollectionIndex, 1);
 
-            dbsWithCollections.splice(updatedDbIndex, 1, newDb);
+            componentData.dbsWithCollections.splice(updatedDbIndex, 1, newDb);
 
             notification.success({title: "Collection deleted."});
           }
@@ -316,11 +307,11 @@
     const term = searchQuery.value;
 
     if(term == null || term == '') {
-      searchedData = dbsWithCollections;
+      searchedData = componentData.dbsWithCollections;
     }
     else {
-      for(let i = 0; i < dbsWithCollections.length; i++) {
-        const dbData = dbsWithCollections[i];
+      for(let i = 0; i < componentData.dbsWithCollections.length; i++) {
+        const dbData = componentData.dbsWithCollections[i];
 
         if(dbData != null) {
           let data: DbsNavigationViewModel = {db_name: "", db_collections: []};

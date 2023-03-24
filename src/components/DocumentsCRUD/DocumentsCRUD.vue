@@ -71,7 +71,8 @@
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
-    import { ObjectId } from 'bson';
+    import { ObjectId } from 'bson';    
+    import { CommonConsts } from '../../utilities/common-consts';
     import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
     import DocumentList from '../DocumentList/DocumentList.vue';
@@ -158,7 +159,7 @@
         fullPageLoading.value = false;
     }
     else {
-        getStoreCollectionDocumentsAndCount('{}', '{}', 50, 0);
+        getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
     }
 
     const triggerFilter = (data: DocumentsFilteringPagination) => {
@@ -167,7 +168,7 @@
 
     importExportStore.$subscribe((mutation, state) => {
         if(state.documentsImported) {
-            getStoreCollectionDocumentsAndCount('{}', '{}', 50, 0);
+            getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
 
             importExportStore.updateDocumentsImported(false);
         }
