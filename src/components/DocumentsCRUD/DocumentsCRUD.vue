@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col">
-        <div v-if="fullPageLoading" class="mt-2">
+        <div v-if="componentState.fullPageLoading" class="mt-2">
             <GenericSkeleton />
         </div>
 
@@ -10,26 +10,24 @@
                 @trigger-doc-insert-modal="triggerDocInsertModal"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
-                :documents-count="documentsCount"
             />
 
-            <div v-if="searchedDataLoading" class="mt-1">
+            <div v-if="componentState.searchedDataLoading" class="mt-1">
                 <GenericSkeleton />
             </div>
             <div v-else class="h-screen overflow-y-auto mb-1">
                 <DocumentList
-                    :key="documentListKey"
                     :db-name="props.dbName"
                     :collection-name="props.collectionName"
-                    :show-searched-data="showSearchedData"
-                    :searched-data="searchedData"
+                    :show-searched-data="componentState.showSearchedData"
+                    :searched-data="componentState.searchedData"
                 />
             </div>
         </div>
     </div>
 
     <n-modal
-        v-model:show="showDocInsertModal"
+        v-model:show="componentState.showDocInsertModal"
         class="rounded-xl"
         preset="card"
         style="width: 50%;
@@ -41,7 +39,7 @@
         <div class="mb-6 overflow-y-auto">
             <vue-jsoneditor
                 mode="text"
-                v-model:text="docToInsert"
+                v-model:text="componentState.docToInsert"
                 :mainMenuBar="false"
                 :navigationBar="false"
                 :statusBar="false"
@@ -59,20 +57,19 @@
 </template>
 
 <script setup lang="ts">
-    import { invoke } from '@tauri-apps/api/tauri';
-    import { reactive, ref } from 'vue';
+    import { reactive } from 'vue';
     import { NModal, useNotification } from 'naive-ui';
     import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
-    import { CollectionDocuments } from '../../types/CollectionDocuments/collection-documents';
-    import { v4 as uid } from 'uuid';
     import { EJSONService } from '../../services/ejson-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import { ObjectId } from 'bson';    
-    import { CommonConsts } from '../../utilities/common-consts';
+    import { CommonConsts } from '../../utilities/common-consts';    
+    import { MongoDbService } from '../../services/data/mongo-service';
+    import { ComponentStateModel } from './Models/ViewModels';
     import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
     import DocumentList from '../DocumentList/DocumentList.vue';
@@ -89,25 +86,25 @@
     const importExportStore = useImportExportEventsStore();
     const notification = useNotification();
 
-    let fullPageLoading = ref<boolean>(true);
-    let searchedDataLoading = ref<boolean>(false);
-    let showSearchedData = ref<boolean>(false);
-    let showDocInsertModal = ref<boolean>(false);
-    let documentsCount = ref<number>(0);
-    let docToInsert = ref<string>('');
-    let searchedData = reactive<object[]>([]);
-    let documentListKey = ref<string>(uid());
-    let collectionDocuments: CollectionDocuments[] = documentsStore.collectionDocuments;
+    const componentState: ComponentStateModel = reactive({
+        fullPageLoading: true,
+        searchedDataLoading: false,
+        showSearchedData: false,
+        showDocInsertModal: false,
+        docToInsert: '',
+        searchedData: [],
+        collectionDocuments: []
+    });
 
-    const getStoreCollectionDocumentsAndCount = (filters: string, sort: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
+    const getStoreCollectionDocumentsAndCount = async (filters: string, sort: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
 
         const promises = [
-            invoke('get_collection_documents', { dbName: props.dbName, collectionName: props.collectionName, filters: filters, sort: sort, limit: limit, skip: skip }),
-            invoke('get_collection_documents_count', { dbName: props.dbName, collectionName: props.collectionName, filters: filters })
+            await MongoDbService.getCollectionDocuments(props.dbName, props.collectionName, filters, sort, limit, skip),
+            await MongoDbService.getCollectionDocumentsCount(props.dbName, props.collectionName, filters)
         ];
 
         if(triggeredFromFilterAndPagination) {
-            searchedDataLoading.value = true;
+            componentState.searchedDataLoading = true;
         }
 
         Promise.allSettled(promises).then(results => {
@@ -118,11 +115,9 @@
                 if(listResult.value != 'error') {
                     const documentList = listResult.value as object[];
 
-                    documentsCount.value = documentList.length;
-
                     if(triggeredFromFilterAndPagination) {
-                        searchedData = documentList;
-                        showSearchedData.value = true;
+                        componentState.searchedData = documentList;
+                        componentState.showSearchedData = true;
                     }
                     else {
                         if (documentList.length > 0) {
@@ -137,8 +132,6 @@
                             documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
                         }
                     }
-
-                    documentListKey.value = uid();
                 }
             }
 
@@ -150,13 +143,13 @@
                 }
             }
 
-            fullPageLoading.value = false;
-            searchedDataLoading.value = false;
+            componentState.fullPageLoading = false;
+            componentState.searchedDataLoading = false;
         });
     }
 
-    if(collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
-        fullPageLoading.value = false;
+    if(componentState.collectionDocuments.some(x => x.collectionName == `${props.dbName}.${props.collectionName}`)) {
+        componentState.fullPageLoading = false;
     }
     else {
         getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
@@ -175,25 +168,25 @@
     });
 
     const triggerDocInsertModal = (value: boolean) => {
-        showDocInsertModal.value = value;
+        componentState.showDocInsertModal = value;
     }
 
-    const insertDoc = () => {
-        let parsedObject = JSON.parse(docToInsert.value);
+    const insertDoc = async () => {
+        let parsedObject = JSON.parse(componentState.docToInsert);
 
         if(Object.keys(parsedObject).length > 0) {
             if(!Object.keys(parsedObject).includes('_id')) {
                 parsedObject = { "_id": ObjectId.generate().toString('hex'), ...parsedObject }
             }
 
-            invoke('insert_docuemnt', { dbName: props.dbName, collectionName: props.collectionName, document: JSON.stringify(parsedObject) }).then(value => {
-                if(value == 'ok') {
-                    notification.success({ title: "Document inserted." });
+            const result = await MongoDbService.insertDocument(props.dbName, props.collectionName, JSON.stringify(parsedObject));
 
-                    showDocInsertModal.value = false;
-                    docToInsert.value = '';
-                }
-            });
+            if(result == 'ok') {
+                notification.success({ title: "Document inserted." });
+
+                componentState.showDocInsertModal = false;
+                componentState.docToInsert = '';
+            }
         }
     }
 </script>

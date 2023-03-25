@@ -15,6 +15,7 @@ export interface DbsSummaryViewModel {
     views: number
 }
 
-export interface ComponentDataModel {
+export interface ComponentStateModel {
     dbStatsData: DbsSummaryViewModel[];
+    dataLoading: boolean;
 }

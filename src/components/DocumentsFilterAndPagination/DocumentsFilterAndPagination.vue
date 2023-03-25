@@ -2,7 +2,7 @@
     <div class="flex flex-col flex-nowrap mt-3">
         <div class="flex flex-row">
             <div class="filter-switch w-32">
-                <n-switch v-model:value="simpleFiltering">
+                <n-switch v-model:value="componentState.simpleFiltering">
                     <template #checked>
                         Simple
                     </template>
@@ -13,14 +13,14 @@
             </div>
 
             <div class="document-filtering w-full">
-                <div v-if="simpleFiltering" class="flex flex-col gap-2 h-24 overflow-y-auto">
-                    <div v-for="(filterModel, index) in multipleFilters" :key="index" class="flex gap-2">
+                <div v-if="componentState.simpleFiltering" class="flex flex-col gap-2 h-24 overflow-y-auto">
+                    <div v-for="(filterModel, index) in componentState.multipleFilters" :key="index" class="flex gap-2">
                         <div>
                             <n-checkbox size="large" v-model:checked="filterModel.shouldApply"></n-checkbox>
                         </div>
 
                         <div>
-                            <n-select size="small" v-model:value="filterModel.field" filterable :options="documentFields" :render-option="NaiveUiService.renderOption" :placeholder="'Field'" />
+                            <n-select size="small" v-model:value="filterModel.field" filterable :options="componentState.documentFields" :render-option="NaiveUiService.renderOption" :placeholder="'Field'" />
                         </div>
 
                         <div class="w-48">
@@ -33,7 +33,7 @@
                                 <n-input size="small" v-model:value="filterModel.value" type="text" :placeholder="'Value'" />
                             </n-input-group>
 
-                            <svg v-if="simpleFiltering && index == 0" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-green-400 hover:cursor-pointer">
+                            <svg v-if="componentState.simpleFiltering && index == 0" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-green-400 hover:cursor-pointer">
                                 <path fill-rule="evenodd"
                                     d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
                                     clip-rule="evenodd" />
@@ -48,11 +48,11 @@
                     </div>
                 </div>
 
-                <div v-if="!simpleFiltering" class="flex">
+                <div v-if="!componentState.simpleFiltering" class="flex">
                     <div class="w-full h-24 overflow-y-auto">
                         <vue-jsoneditor
                             mode="text"
-                            v-model:text="rawQuery"
+                            v-model:text="componentState.rawQuery"
                             :mainMenuBar="false"
                             :navigationBar="false"
                             :statusBar="false"
@@ -90,9 +90,9 @@
                     <span class="ml-1.5 text-xs font-medium text-ellipsis overflow-hidden w-96">{{$props.collectionName}}</span>
                 </summary>
             </div>
-            <div v-if="runningOperation" class="mr-4">
+            <div v-if="componentState.runningOperation" class="mr-4">
                 <n-tag size="small" round :bordered="false" type="success">
-                    {{runningOperationText}}
+                    {{componentState.runningOperationText}}
                 </n-tag>
             </div>
             <div class="flex">
@@ -116,9 +116,9 @@
             </div>
             <div class="max-w-[50%]">
                 <n-pagination
-                v-model:page="pageNumber"
-                :page-size="50"
-                :page-count="totalPage"
+                v-model:page="componentState.pageNumber"
+                :page-size="CommonConsts.defaultDocumentPageSize"
+                :page-count="componentState.totalPage"
                 size="small"
                 simple
                 :on-update:page="updateDocumentListOnPageNumberChange">
@@ -132,10 +132,9 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, reactive } from 'vue';
+    import { reactive } from 'vue';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
     import { NSwitch, NCheckbox, NSelect, NInput, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
-    import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
@@ -145,13 +144,14 @@
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
     import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
-    import { NaiveUiService } from '../../services/naive-ui-service';
+    import { NaiveUiService } from '../../services/naive-ui-service';   
+    import { CommonConsts } from '../../utilities/common-consts';
+    import { ComponentStateModel } from './Models/ViewModels';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
         dbName: string
         collectionName: string
-        documentsCount: number
     }>();
 
     const emit = defineEmits<{
@@ -168,34 +168,33 @@
         const countData = counsData.filter(x => x.documentsOf == `${props.dbName}.${props.collectionName}`)[0];
 
         if(countData != null) {
-            return Math.ceil(countData.documentsCount / 50);
+            return Math.ceil(countData.documentsCount / CommonConsts.defaultDocumentPageSize);
         }
 
         return 0;
     }
 
-    let advanceFiltering: AdvanceFiltering = {filters: {}, sort: {}};
-    let simpleFiltering = ref<boolean>(true);
-    let pageNumber = ref<number>(1);
-    let totalPage = ref<number>(calculateTotalPageCount(countStore.countsList));
-    let searchInitiated = ref<boolean>(false);
-    let runningOperation = ref<boolean>(false);
-    let runningOperationText = ref<string>("");
-    let documentFields: SelectMixedOption[] = [];
-    let rawQuery = ref<string>(JSON.stringify(advanceFiltering, null, 2));
-    let multipleFilters: any[] = reactive([
-        {
+    const componentState: ComponentStateModel = reactive({
+        advanceFiltering: {filters: {}, sort: {}},
+        simpleFiltering: true,
+        pageNumber: 1,
+        totalPage: calculateTotalPageCount(countStore.countsList),
+        searchInitiated: false,
+        runningOperation: false,
+        runningOperationText: '',
+        documentFields: [],
+        rawQuery: JSON.stringify({filters: {}, sort: {}}, null, 2),
+        multipleFilters: [{
             shouldApply: false,
             field: null,
             filterType: "Equal",
-            dataType: null,
             value: null
-        }
-    ]);
+        }]
+    });
 
     const checkAndUpdateFields = (fieldsData: DocumentFields[]) => {
         if (fieldsData.some(x => x.documentOf == `${props.dbName}.${props.collectionName}`)) {
-            documentFields = fieldsData.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0].documentFields.map(x => {
+            componentState.documentFields = fieldsData.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0].documentFields.map(x => {
                 const selectOption = { label: x, value: x };
                 return selectOption;
             });
@@ -209,21 +208,20 @@
     });
 
     countStore.$subscribe((mutation, state) => {
-        totalPage.value = calculateTotalPageCount(state.countsList);
+        componentState.totalPage = calculateTotalPageCount(state.countsList);
     });
 
     const addNewFilter = (): void => {
-        multipleFilters.push({
+        componentState.multipleFilters.push({
             shouldApply: false,
             field: null,
             filterType: "Equal",
-            dataType: null,
             value: ''
         });
     }
 
     const removeFilter = (index: number): void => {
-        multipleFilters.splice(index, 1);
+        componentState.multipleFilters.splice(index, 1);
     }
 
     const searchDocuments = (): void => {
@@ -231,23 +229,23 @@
         const sort = getSort();
 
         if(filters != '{}') {
-            searchInitiated.value = true;
+            componentState.searchInitiated = true;
         }
         else {
-            searchInitiated.value = false;
+            componentState.searchInitiated = false;
         }
 
-        pageNumber.value = 1;
+        componentState.pageNumber = 1;
 
-        emit('triggerFilter', {filters: filters, sort: sort, skip: ((pageNumber.value - 1) * 50), limit: 50});
+        emit('triggerFilter', {filters: filters, sort: sort, skip: ((componentState.pageNumber - 1) * CommonConsts.defaultDocumentPageSize), limit: CommonConsts.defaultDocumentPageSize});
     }
 
     const importFiltersFromSimpleBuilder = (): void => {
-        const filters = DocumentFiltering.extractSimpleBuilderFilters(multipleFilters);
+        const filters = DocumentFiltering.extractSimpleBuilderFilters(componentState.multipleFilters);
 
-        advanceFiltering.filters = filters;
+        componentState.advanceFiltering.filters = filters;
 
-        rawQuery.value = JSON.stringify(advanceFiltering, null, 2);
+        componentState.rawQuery = JSON.stringify(componentState.advanceFiltering, null, 2);
     }
 
     const updateDocumentListOnPageNumberChange = (page: number): void => {
@@ -262,19 +260,19 @@
         filters = getFilters();
         sort = getSort();
 
-        emit('triggerFilter', {filters: filters, sort: sort, skip: ((page - 1) * 50), limit: 50});
+        emit('triggerFilter', {filters: filters, sort: sort, skip: ((page - 1) * CommonConsts.defaultDocumentPageSize), limit: CommonConsts.defaultDocumentPageSize});
 
-        pageNumber.value = page;
+        componentState.pageNumber = page;
     }
 
     const getFilters = (): string => {
         let filters = '';
 
-        if(simpleFiltering.value) {
-            filters = JSON.stringify(DocumentFiltering.extractSimpleBuilderFilters(multipleFilters));
+        if(componentState.simpleFiltering) {
+            filters = JSON.stringify(DocumentFiltering.extractSimpleBuilderFilters(componentState.multipleFilters));
         }
         else {
-            const advanceFiltering: AdvanceFiltering = JSON.parse(rawQuery.value);
+            const advanceFiltering: AdvanceFiltering = JSON.parse(componentState.rawQuery);
 
             const filtersObject = advanceFiltering.filters;
 
@@ -290,11 +288,11 @@
     }
 
     const getSort = (): string => {
-        if(simpleFiltering.value) {
+        if(componentState.simpleFiltering) {
             return '{}';
         }
         else {
-            const advanceFiltering: AdvanceFiltering = JSON.parse(rawQuery.value);
+            const advanceFiltering: AdvanceFiltering = JSON.parse(componentState.rawQuery);
 
             const sortObject = advanceFiltering.sort;
 
@@ -322,8 +320,8 @@
         });
 
         if(filePath != null) {
-            runningOperation.value = true;
-            runningOperationText.value = "Importing";
+            componentState.runningOperation = true;
+            componentState.runningOperationText = "Importing";
 
             invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
                 if (value != 'error') {
@@ -332,8 +330,8 @@
                     notification.success({ title: "Collection imported." });
                 }
 
-                runningOperation.value = false;
-                runningOperationText.value = "";
+                componentState.runningOperation = false;
+                componentState.runningOperationText = "";
             });
         }
     }
@@ -348,16 +346,16 @@
         });
 
         if(filePath != null) {
-            runningOperation.value = true;
-            runningOperationText.value = "Exporting";
+            componentState.runningOperation = true;
+            componentState.runningOperationText = "Exporting";
 
             invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
                 if (value != 'error') {
                     notification.success({ title: "Collection exported." });
                 }
 
-                runningOperation.value = false;
-                runningOperationText.value = "";
+                componentState.runningOperation = false;
+                componentState.runningOperationText = "";
             });
         }
     }
