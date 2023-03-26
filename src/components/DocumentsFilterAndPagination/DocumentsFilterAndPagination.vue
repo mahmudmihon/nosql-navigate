@@ -109,10 +109,16 @@
                 </span>
 
                 <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="exportDocuments">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                     </svg>
                 </span>
+
+                <div v-if="componentState.documentsCount > 0" class="mr-2">
+                    <n-tag size="small" round :bordered="false" type="success">
+                        {{componentState.documentsCount}}
+                    </n-tag>
+                </div>
             </div>
             <div class="max-w-[50%]">
                 <n-pagination
@@ -146,12 +152,14 @@
     import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
     import { NaiveUiService } from '../../services/naive-ui-service';   
     import { CommonConsts } from '../../utilities/common-consts';
-    import { ComponentStateModel } from './Models/ViewModels';
+    import { ComponentStateModel } from './Models/ViewModels';   
+    import { useTabDataStore } from '../../stores/tab-data';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
         dbName: string
         collectionName: string
+        tabStoreKey: string
     }>();
 
     const emit = defineEmits<{
@@ -161,6 +169,7 @@
 
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();
+    const tabsDataStore = useTabDataStore();
     const importExportStore = useImportExportEventsStore();
     const notification = useNotification();
 
@@ -175,6 +184,7 @@
     }
 
     const componentState: ComponentStateModel = reactive({
+        documentsCount: 0,
         advanceFiltering: {filters: {}, sort: {}},
         simpleFiltering: true,
         pageNumber: 1,
@@ -192,6 +202,16 @@
         }]
     });
 
+    const checkAndUpdateDocumentsCount = () => {
+        const tabData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+        if(tabData != null) {
+            componentState.documentsCount = tabData.documentsCount;
+        }
+    }
+
+    checkAndUpdateDocumentsCount();
+
     const checkAndUpdateFields = (fieldsData: DocumentFields[]) => {
         if (fieldsData.some(x => x.documentOf == `${props.dbName}.${props.collectionName}`)) {
             componentState.documentFields = fieldsData.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0].documentFields.map(x => {
@@ -202,14 +222,6 @@
     }
 
     checkAndUpdateFields(fieldsStore.fieldsList);
-
-    fieldsStore.$subscribe((mutation, state) => {
-        checkAndUpdateFields(state.fieldsList);
-    });
-
-    countStore.$subscribe((mutation, state) => {
-        componentState.totalPage = calculateTotalPageCount(state.countsList);
-    });
 
     const addNewFilter = (): void => {
         componentState.multipleFilters.push({
@@ -251,11 +263,6 @@
     const updateDocumentListOnPageNumberChange = (page: number): void => {
         let filters = '{}';
         let sort = '{}';
-
-        // if(searchInitiated.value) {
-        //     filters = getFilters();
-        //     sort = getSort();
-        // }
 
         filters = getFilters();
         sort = getSort();
@@ -359,4 +366,16 @@
             });
         }
     }
+
+    fieldsStore.$subscribe((mutation, state) => {
+        checkAndUpdateFields(state.fieldsList);
+    });
+
+    countStore.$subscribe((mutation, state) => {
+        componentState.totalPage = calculateTotalPageCount(state.countsList);
+    });
+
+    tabsDataStore.$subscribe((mutation, state) => {
+        checkAndUpdateDocumentsCount();       
+    });    
 </script>

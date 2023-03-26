@@ -228,7 +228,7 @@
     import { LookupModel, UnwindModel } from './Models/ViewModels';
     import { v4 as uid } from 'uuid';
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
-    import { useAggregationResultStore } from '../../stores/aggregation-result';
+    import { useTabDataStore } from '../../stores/tab-data';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api';
@@ -241,7 +241,7 @@
     const props = defineProps<{
         dbName: string
         collectionName: string
-        documentsCount: number
+        tabStoreKey: string
     }>();
 
     const emit = defineEmits<{
@@ -250,7 +250,8 @@
 
     const notification = useNotification();
     const globalFieldsStore = useDocumentFieldsStore();
-    const aggregationResultStore = useAggregationResultStore();
+    const tabsDataStore = useTabDataStore();
+
     const idToStoreFieldsData = uid();
     const pipelineStage = ref<string>();
     const stageQuery = ref<string>('');
@@ -280,12 +281,12 @@
         let fields: string[] = [];
 
         if(fromLocalStore) {
-            const resultData = aggregationResultStore.aggregationResult.filter(x => x.storeId == idToStoreFieldsData)[0];
+            const resultData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
 
             if(resultData != null) {
-                fields = resultData.fields;
+                fields = resultData.aggregationResultFields;
 
-                if(resultData.numberOfDocuments > 0) {
+                if(resultData.aggregationDocumentsCount > 0) {
                     showSummarySection.value = true;
                 }
             }
@@ -432,7 +433,7 @@
         }
     }
 
-    aggregationResultStore.$subscribe((mutation, state) => {
+    tabsDataStore.$subscribe((mutation, state) => {
         updateLocalFieldsAndSummary(true);
     });
 </script>

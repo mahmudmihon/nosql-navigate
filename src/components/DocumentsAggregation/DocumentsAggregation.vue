@@ -5,17 +5,16 @@
                 @trigger-aggregation="triggerAggregation"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
-                :documents-count="0"
+                :tab-store-key="props.tabStoreKey"
             />
         </div>
 
-        <div v-if="aggregationDataLoading" class="mt-1">
+        <div v-if="componentState.aggregationDataLoading" class="mt-1">
             <GenericSkeleton />
         </div>
         <div v-else class="h-screen overflow-y-auto mb-1">
             <AggregationResult
-                :key="documentListKey"
-                :document-list="aggregationData"
+                :document-list="componentState.aggregationData"
             />
         </div>
     </div>
@@ -23,14 +22,14 @@
 
 <script setup lang="ts">
     import { invoke } from '@tauri-apps/api';
-    import { reactive, ref } from 'vue';
-    import { v4 as uid } from 'uuid';
+    import { reactive } from 'vue';
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
-    import { useAggregationResultStore } from '../../stores/aggregation-result';
+    import { useTabDataStore } from '../../stores/tab-data';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
     import { useNotification } from 'naive-ui';   
-    import { CommonConsts } from '../../utilities/common-consts';
+    import { CommonConsts } from '../../utilities/common-consts';   
+    import { ComponentStateModel } from './Models/ViewModels';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -38,46 +37,66 @@
     const props = defineProps<{
         dbName: string
         collectionName: string
+        tabStoreKey: string
     }>();
 
-    const aggregationResultStore = useAggregationResultStore();
+    const tabsDataStore = useTabDataStore();
     const notification = useNotification();
 
-    let aggregationDataLoading = ref<boolean>(false);
-    let documentListKey = ref<string>(uid());
-    let aggregationData = reactive<object[]>([]);
+    const componentState: ComponentStateModel = reactive({
+        aggregationDataLoading: false,
+        aggregationData: []
+    });
 
     const triggerAggregation = (data: AggregationPipelines) => {
         if(data.pipelines.length > 0) {
-            aggregationDataLoading.value = true;
+            componentState.aggregationDataLoading = true;
 
             invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines, limit: CommonConsts.defaultAggregationPageSize }).then((value: any) => {
 
                 if(value != 'error') {
-                    aggregationData = value.map(x => EJSONService.BsonDocToObject(x));
+                    componentState.aggregationData = value.map(x => EJSONService.BsonDocToObject(x));
 
-                    if(aggregationData.length > 0) {
-                        const firstData = aggregationData[0];
+                    if(componentState.aggregationData.length > 0) {
+                        const firstData = componentState.aggregationData[0];
 
                         const fields = extractObjectKeys(firstData).sort();
 
                         clearObjectKeys();
 
-                        aggregationResultStore.upsertResult({storeId: data.idToStoreData, fields, numberOfDocuments: aggregationData.length, isExporting: false});
+                        let existingData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+                        if(existingData != null) {
+                            existingData = {
+                                ...existingData,
+                                aggregationResultFields: fields,
+                                aggregationDocumentsCount: componentState.aggregationData.length,
+                                isExporting: false                               
+                            }
+                        }
+                        else {
+                            existingData = {
+                                storeKey: props.tabStoreKey,
+                                documentsCount: 0,
+                                aggregationResultFields: fields,
+                                aggregationDocumentsCount: componentState.aggregationData.length,
+                                isExporting: false  
+                            }
+                        }
+
+                        tabsDataStore.upsertData(existingData);
                     }
                 }
 
-                aggregationDataLoading.value = false;
+                componentState.aggregationDataLoading = false;
             }).catch(e => {
                 notification.error({ title: "Error occured while running the pipeline." });
 
-                aggregationDataLoading.value = false;
+                componentState.aggregationDataLoading = false;
             });
         }
         else {
-            aggregationData = [];
+            componentState.aggregationData = [];
         }
-
-        documentListKey.value = uid();
     }
 </script>

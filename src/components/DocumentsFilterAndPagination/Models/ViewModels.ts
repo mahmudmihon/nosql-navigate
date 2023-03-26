@@ -2,6 +2,7 @@ import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { AdvanceFiltering } from "../../../types/DocumentFilter&Pagination/advance-filtering";
 
 export interface ComponentStateModel {
+    documentsCount: number;
     advanceFiltering: AdvanceFiltering;
     simpleFiltering: boolean;
     pageNumber: number;

@@ -10,6 +10,7 @@
                 @trigger-doc-insert-modal="triggerDocInsertModal"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
+                :tab-store-key="props.tabStoreKey"
             />
 
             <div v-if="componentState.searchedDataLoading" class="mt-1">
@@ -69,7 +70,8 @@
     import { ObjectId } from 'bson';    
     import { CommonConsts } from '../../utilities/common-consts';    
     import { MongoDbService } from '../../services/data/mongo-service';
-    import { ComponentStateModel } from './Models/ViewModels';
+    import { ComponentStateModel } from './Models/ViewModels';   
+    import { useTabDataStore } from '../../stores/tab-data';
     import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
     import DocumentList from '../DocumentList/DocumentList.vue';
@@ -78,11 +80,13 @@
     const props = defineProps<{
         dbName: string
         collectionName: string
+        tabStoreKey: string
     }>();
 
     const fieldsStore = useDocumentFieldsStore();
     const documentsStore = useCollectionDocumentsStore();
     const countStore = useDocumentsCountStore();
+    const tabsDataStore = useTabDataStore();
     const importExportStore = useImportExportEventsStore();
     const notification = useNotification();
 
@@ -132,6 +136,26 @@
                             documentsStore.addNewDocuments({ collectionName: `${props.dbName}.${props.collectionName}`, CollectionDocuments: documentList });
                         }
                     }
+
+                    let existingTabData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+                    if(existingTabData != null) {
+                        existingTabData = {
+                            ...existingTabData,
+                            documentsCount: documentList.length
+                        }
+                    }
+                    else {
+                        existingTabData = {
+                            storeKey: props.tabStoreKey,
+                            documentsCount: documentList.length,
+                            aggregationResultFields: [],
+                            aggregationDocumentsCount: 0,
+                            isExporting: false  
+                        }
+                    }
+
+                    tabsDataStore.upsertData(existingTabData);
                 }
             }
 

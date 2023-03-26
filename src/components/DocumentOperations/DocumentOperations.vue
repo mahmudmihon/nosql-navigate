@@ -2,14 +2,18 @@
     <n-tabs type="segment" size="small" :bar-width="28">
         <n-tab-pane name="documents" tab="Documents">
             <DocumentsCRUD
+                :key="props.tabStoreKey"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
+                :tab-store-key="props.tabStoreKey"
             />
         </n-tab-pane>
         <n-tab-pane name="aggregation" tab="Aggregation">
             <DocumentsAggregation
+                :key="props.tabStoreKey"
                 :db-name="props.dbName"
                 :collection-name="props.collectionName"
+                :tab-store-key="props.tabStoreKey"
             />
         </n-tab-pane>
     </n-tabs>
@@ -23,5 +27,6 @@
     const props = defineProps<{
         dbName: string
         collectionName: string
+        tabStoreKey: string
     }>();
 </script>
