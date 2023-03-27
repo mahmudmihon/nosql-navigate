@@ -13,8 +13,8 @@
                 </div>
             </div>
 
-            <div v-if="stagesQuery.length > 0" class="w-full flex flex-col gap-3 h-60 overflow-y-auto">
-                <div v-for="(stage, index) in stagesQuery" :key="index" class="flex gap-2">
+            <div v-if="componentState.stagesQuery.length > 0" class="w-full flex flex-col gap-3 h-60 overflow-y-auto">
+                <div v-for="(stage, index) in componentState.stagesQuery" :key="index" class="flex gap-2">
                     <div class="flex flex-col items-center">
                         <n-checkbox
                             size="large"
@@ -37,8 +37,8 @@
             </div>
         </div>
 
-        <div v-if="showSummarySection" class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
-            <div v-if="dataExporting" class="mr-4">
+        <div v-if="componentState.showSummarySection" class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
+            <div v-if="componentState.dataExporting" class="mr-4">
                 <n-tag size="small" round :bordered="false" type="success">
                     Exporting
                 </n-tag>
@@ -53,7 +53,7 @@
     </div>
 
     <n-modal
-        v-model:show="showEditorModal"
+        v-model:show="componentState.showEditorModal"
         class="rounded-xl"
         preset="card"
         style="width: 50%;
@@ -66,7 +66,7 @@
             <div>
                 <n-select
                     size="small"
-                    v-model:value="pipelineStage"
+                    v-model:value="componentState.pipelineStage"
                     filterable
                     :options="AggregationBuilderService.pipelineStages"
                     :render-option="NaiveUiService.renderOption"
@@ -75,13 +75,13 @@
                 />
             </div>
 
-            <div v-if="showLookupSection" class="mt-3">
+            <div v-if="componentState.showLookupSection" class="mt-3">
                 <div class="flex gap-2">
                     <div class="grow flex-col">
                         <p class="text-xs mb-1">From</p>
                         <n-select
                             size="small"
-                            v-model:value="lookUpModel.from"
+                            v-model:value="componentState.lookUpModel.from"
                             filterable
                             :options="AggregationBuilderService.getOtherCollectionNames(props.dbName, props.collectionName)"
                             :render-option="NaiveUiService.renderOption"
@@ -93,12 +93,12 @@
                         <p class="text-xs mb-1">Foreign Field</p>
                         <n-select
                             size="small"
-                            v-model:value="lookUpModel.foreignField"
+                            v-model:value="componentState.lookUpModel.foreignField"
                             filterable
-                            :options="foreignFields"
+                            :options="componentState.foreignFields"
                             :render-option="NaiveUiService.renderOption"
                         />
-                    </div>                   
+                    </div>
                 </div>
 
                 <div class="flex basis-0 gap-2 mt-2">
@@ -106,9 +106,9 @@
                         <p class="text-xs mb-1">Local Field</p>
                         <n-select
                             size="small"
-                            v-model:value="lookUpModel.localField"
+                            v-model:value="componentState.lookUpModel.localField"
                             filterable
-                            :options="localFields"
+                            :options="componentState.localFields"
                             :render-option="NaiveUiService.renderOption"
                         />
                     </div>
@@ -117,9 +117,9 @@
                         <p class="text-xs mb-1">As</p>
                         <n-input
                             size="small"
-                            v-model:value="lookUpModel.as"
+                            v-model:value="componentState.lookUpModel.as"
                         />
-                    </div>                   
+                    </div>
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
@@ -129,17 +129,17 @@
                 </div>
             </div>
 
-            <div v-if="showProjectSection" class="mt-3">
+            <div v-if="componentState.showProjectSection" class="mt-3">
                 <div class="flex flex-col">
                     <p class="text-xs mb-1">Fields</p>
                     <n-select
                         size="small"
-                        v-model:value="projectedFields"
+                        v-model:value="componentState.projectedFields"
                         filterable
                         multiple
-                        :options="localFields"
+                        :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
-                    />                
+                    />
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
@@ -149,15 +149,15 @@
                 </div>
             </div>
 
-            <div v-if="showUnsetSection" class="mt-3">
+            <div v-if="componentState.showUnsetSection" class="mt-3">
                 <div class="flex flex-col">
                     <p class="text-xs mb-1">Fields</p>
                     <n-select
                         size="small"
-                        v-model:value="unsetFields"
+                        v-model:value="componentState.unsetFields"
                         filterable
                         multiple
-                        :options="localFields"
+                        :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
                     />
                 </div>
@@ -169,23 +169,23 @@
                 </div>
             </div>
 
-            <div v-if="showUnwindSection" class="mt-3">
+            <div v-if="componentState.showUnwindSection" class="mt-3">
                 <div class="flex flex-col gap-2">
                     <p class="text-xs mb-1">Field</p>
                     <n-select
                         size="small"
-                        v-model:value="unwindModel.field"
+                        v-model:value="componentState.unwindModel.field"
                         filterable
-                        :options="localFields"
+                        :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
                         :placeholder="'Select Field'"
                     />
 
-                    <n-checkbox v-model:checked="unwindModel.preserveNullAndEmptyArrays">
+                    <n-checkbox v-model:checked="componentState.unwindModel.preserveNullAndEmptyArrays">
                         Preserve Null & Empty Arrays
                     </n-checkbox>
 
-                    <n-checkbox v-model:checked="unwindModel.includeArrayIndex">
+                    <n-checkbox v-model:checked="componentState.unwindModel.includeArrayIndex">
                         Include Array Index
                     </n-checkbox>
                 </div>
@@ -200,7 +200,7 @@
             <div class="mt-3">
                 <vue-jsoneditor
                     mode="text"
-                    v-model:text="stageQuery"
+                    v-model:text="componentState.stageQuery"
                     :mainMenuBar="false"
                     :navigationBar="false"
                     :statusBar="false"
@@ -219,24 +219,19 @@
 </template>
 
 <script setup lang="ts">
-    import { reactive, ref } from 'vue';
+    import { reactive } from 'vue';
     import { NModal, NSelect, NCheckbox, NInput, NTag, useNotification } from 'naive-ui';
     import { AggregationBuilderService } from '../../services/aggregation-builder-service';
     import { NaiveUiService } from '../../services/naive-ui-service';
-    import { StageQuery } from '../../types/AggregationBuilder/stage-query';
-    import { SelectMixedOption, SelectOption } from 'naive-ui/es/select/src/interface';
-    import { LookupModel, UnwindModel } from './Models/ViewModels';
-    import { v4 as uid } from 'uuid';
+    import { SelectOption } from 'naive-ui/es/select/src/interface';
+    import { ComponentStateModel } from './Models/ViewModels';
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
     import { useTabDataStore } from '../../stores/tab-data';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { save } from '@tauri-apps/api/dialog';
     import { invoke } from '@tauri-apps/api';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    import JSONView from '../Editor/JSONView.vue';
-
-    let foreignFields = ref<SelectMixedOption[]>([]);
-    let localFields = ref<SelectMixedOption[]>([]);
+    import JSONView from '../JsonViewer/JSONView.vue';
 
     const props = defineProps<{
         dbName: string
@@ -252,29 +247,32 @@
     const globalFieldsStore = useDocumentFieldsStore();
     const tabsDataStore = useTabDataStore();
 
-    const idToStoreFieldsData = uid();
-    const pipelineStage = ref<string>();
-    const stageQuery = ref<string>('');
-    const dataExporting = ref<boolean>(false);
-    const showSummarySection = ref<boolean>(false);
-    const showEditorModal = ref<boolean>(false);
-    const stagesQuery = reactive<StageQuery[]>([]);
-    const showLookupSection = ref<boolean>(false);
-    const showProjectSection = ref<boolean>(false);
-    const showUnsetSection = ref<boolean>(false);
-    const showUnwindSection = ref<boolean>(false);
-    const projectedFields = ref<string[]>([]);
-    const unsetFields = ref<string[]>([]);
-    const lookUpModel = reactive<LookupModel>({
-        from: '',
-        foreignField: '',
-        localField: '',
-        as: ''
-    });
-    const unwindModel = reactive<UnwindModel>({
-        field: '',
-        includeArrayIndex: false,
-        preserveNullAndEmptyArrays: false
+    const componentState: ComponentStateModel = reactive({
+        pipelineStage: '',
+        stageQuery: '',
+        dataExporting: false,
+        showSummarySection: false,
+        showEditorModal: false,
+        showLookupSection: false,
+        showProjectSection: false,
+        showUnsetSection: false,
+        showUnwindSection: false,
+        projectedFields: [],
+        unsetFields: [],
+        stagesQuery: [],
+        foreignFields: [],
+        localFields: [],
+        lookUpModel: {
+            from: '',
+            foreignField: '',
+            localField: '',
+            as: ''
+        },
+        unwindModel: {
+            field: '',
+            includeArrayIndex: false,
+            preserveNullAndEmptyArrays: false
+        }
     });
 
     const updateLocalFieldsAndSummary = (fromLocalStore: boolean): void => {
@@ -287,7 +285,7 @@
                 fields = resultData.aggregationResultFields;
 
                 if(resultData.aggregationDocumentsCount > 0) {
-                    showSummarySection.value = true;
+                    componentState.showSummarySection = true;
                 }
             }
         }
@@ -296,115 +294,115 @@
         }
 
         if(fields?.length > 0) {
-            localFields.value = AggregationBuilderService.convertObjectKeysToSelectOptions(fields);
+            componentState.localFields = AggregationBuilderService.convertObjectKeysToSelectOptions(fields);
         }
     }
 
     updateLocalFieldsAndSummary(false);
 
     const triggerPipelineEditorModal = (): void => {
-        showEditorModal.value = true
+        componentState.showEditorModal = true
     }
 
     const handleStageSelect = (value: string, option: SelectOption) => {
-        if(pipelineStage.value == '$lookup') {
-            showLookupSection.value = true;
-            showProjectSection.value = false;
-            showUnwindSection.value = false;
-            showUnsetSection.value = false;
+        if(componentState.pipelineStage == '$lookup') {
+            componentState.showLookupSection = true;
+            componentState.showProjectSection = false;
+            componentState.showUnwindSection = false;
+            componentState.showUnsetSection = false;
 
             return;
         }
-        else if(pipelineStage.value == '$project') {
-            showProjectSection.value = true;
-            showLookupSection.value = false;
-            showUnwindSection.value = false;
-            showUnsetSection.value = false;
+        else if(componentState.pipelineStage == '$project') {
+            componentState.showProjectSection = true;
+            componentState.showLookupSection = false;
+            componentState.showUnwindSection = false;
+            componentState.showUnsetSection = false;
 
             return;
         }
-        else if(pipelineStage.value == '$unset') {
-            showUnsetSection.value = true;
-            showProjectSection.value = false;
-            showLookupSection.value = false;
-            showUnwindSection.value = false;
+        else if(componentState.pipelineStage == '$unset') {
+            componentState.showUnsetSection = true;
+            componentState.showProjectSection = false;
+            componentState.showLookupSection = false;
+            componentState.showUnwindSection = false;
 
             return;
         }
-        else if(pipelineStage.value == '$unwind') {
-            showUnwindSection.value = true;
-            showProjectSection.value = false;
-            showLookupSection.value = false;
-            showUnsetSection.value = false;
+        else if(componentState.pipelineStage == '$unwind') {
+            componentState.showUnwindSection = true;
+            componentState.showProjectSection = false;
+            componentState.showLookupSection = false;
+            componentState.showUnsetSection = false;
 
             return;
         }
 
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", {});
-        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", {});
+        componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const handleForeignCollectionSelect = async (value: string, option: SelectOption) => {
-        foreignFields.value = await AggregationBuilderService.getForeignFields(props.dbName, lookUpModel.from);
+        componentState.foreignFields = await AggregationBuilderService.getForeignFields(props.dbName, componentState.lookUpModel.from);
     }
 
     const populateLookupQuery = (): void => {
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", lookUpModel);
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", componentState.lookUpModel);
 
-        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+        componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const populateunwindQuery = (): void => {
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", unwindModel);
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", componentState.unwindModel);
 
-        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+        componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const populateProjectQuery = (): void => {
         let fieldsToProject = {};
 
-        if(projectedFields.value.length > 0) {
-            projectedFields.value.forEach(x => {fieldsToProject[x]=1});
+        if(componentState.projectedFields.length > 0) {
+            componentState.projectedFields.forEach(x => {fieldsToProject[x]=1});
         }
 
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", fieldsToProject);
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", fieldsToProject);
 
-        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+        componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const populateUnsetQuery = (): void => {
         let fieldsToUnset = {};
 
-        fieldsToUnset["fields"] = unsetFields.value;
+        fieldsToUnset["fields"] = componentState.unsetFields;
 
-        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(pipelineStage.value ?? "", fieldsToUnset);
+        const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", fieldsToUnset);
 
-        stageQuery.value = JSON.stringify(selectedStageOutput, null, 2);
+        componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
     const addStageQuery = () => {
-        const parsedQuery = JSON.parse(stageQuery.value);
+        const parsedQuery = JSON.parse(componentState.stageQuery);
 
         if(Object.keys(parsedQuery).length > 0) {
-            stagesQuery.push({ shouldApply: false, query: stageQuery.value });
+            componentState.stagesQuery.push({ shouldApply: false, query: componentState.stageQuery });
 
-            stageQuery.value = '';
-            showEditorModal.value = false;
+            componentState.stageQuery = '';
+            componentState.showEditorModal = false;
         }
     }
 
     const parseAndTriggerAggregation = (): void => {
-        const shouldApplyStages = stagesQuery.filter(x => x.shouldApply);
+        const shouldApplyStages = componentState.stagesQuery.filter(x => x.shouldApply);
 
         const pipelines = shouldApplyStages.map(x => {return x.query});
 
-        showSummarySection.value = false;
+        componentState.showSummarySection = false;
 
-        emit('triggerAggregation', { idToStoreData: idToStoreFieldsData, pipelines });
+        emit('triggerAggregation', { pipelines });
     }
 
     const removeAggregationStage = (index: number): void => {
-        stagesQuery.splice(index, 1);
+        componentState.stagesQuery.splice(index, 1);
 
         parseAndTriggerAggregation();
     }
@@ -419,7 +417,7 @@
         });
 
         if (filePath != null) {
-            const shouldApplyStages = stagesQuery.filter(x => x.shouldApply);
+            const shouldApplyStages = componentState.stagesQuery.filter(x => x.shouldApply);
 
             const pipelines = shouldApplyStages.map(x => { return x.query });
 
@@ -428,7 +426,7 @@
                     notification.success({ title: "Result exported." });
                 }
 
-                dataExporting.value = false;
+                componentState.dataExporting = false;
             });
         }
     }

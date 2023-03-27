@@ -16,7 +16,7 @@
             <div v-if="componentState.searchedDataLoading" class="mt-1">
                 <GenericSkeleton />
             </div>
-            <div v-else class="h-screen overflow-y-auto mb-1">
+            <div v-else class="mb-1">
                 <DocumentList
                     :db-name="props.dbName"
                     :collection-name="props.collectionName"
@@ -67,10 +67,10 @@
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
-    import { ObjectId } from 'bson';    
-    import { CommonConsts } from '../../utilities/common-consts';    
+    import { ObjectId } from 'bson';
+    import { CommonConsts } from '../../utilities/common-consts';
     import { MongoDbService } from '../../services/data/mongo-service';
-    import { ComponentStateModel } from './Models/ViewModels';   
+    import { ComponentStateModel } from './Models/ViewModels';
     import { useTabDataStore } from '../../stores/tab-data';
     import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -151,7 +151,7 @@
                             documentsCount: documentList.length,
                             aggregationResultFields: [],
                             aggregationDocumentsCount: 0,
-                            isExporting: false  
+                            isExporting: false
                         }
                     }
 

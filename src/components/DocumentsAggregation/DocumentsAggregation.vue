@@ -12,7 +12,7 @@
         <div v-if="componentState.aggregationDataLoading" class="mt-1">
             <GenericSkeleton />
         </div>
-        <div v-else class="h-screen overflow-y-auto mb-1">
+        <div v-else class="max-h-[calc(100vh-430px)] overflow-y-auto mb-1">
             <AggregationResult
                 :document-list="componentState.aggregationData"
             />
@@ -27,8 +27,8 @@
     import { useTabDataStore } from '../../stores/tab-data';
     import { EJSONService } from '../../services/ejson-service';
     import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
-    import { useNotification } from 'naive-ui';   
-    import { CommonConsts } from '../../utilities/common-consts';   
+    import { useNotification } from 'naive-ui';
+    import { CommonConsts } from '../../utilities/common-consts';
     import { ComponentStateModel } from './Models/ViewModels';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
@@ -71,7 +71,7 @@
                                 ...existingData,
                                 aggregationResultFields: fields,
                                 aggregationDocumentsCount: componentState.aggregationData.length,
-                                isExporting: false                               
+                                isExporting: false
                             }
                         }
                         else {
@@ -80,7 +80,7 @@
                                 documentsCount: 0,
                                 aggregationResultFields: fields,
                                 aggregationDocumentsCount: componentState.aggregationData.length,
-                                isExporting: false  
+                                isExporting: false
                             }
                         }
 

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-    import JSONView from '../Editor/JSONView.vue';
+    import JSONView from '../JsonViewer/JSONView.vue';
 
     const props = defineProps<{
         documentList: object[]
