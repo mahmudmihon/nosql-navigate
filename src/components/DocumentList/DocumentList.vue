@@ -1,6 +1,6 @@
 <template>
-    <div v-if="documentList.length > 0" :key="documentListKey" class="max-h-[calc(100vh-280px)] overflow-y-auto">
-        <div v-for="(document, index) in documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
+    <div v-if="componentState.documentList.length > 0" class="max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div v-for="(document, index) in componentState.documentList" :key="index" class="mb-3.5 relative group hover:cursor-pointer last:h-max">
             <div class="mr-2 z-40 absolute top-3 right-7 hidden group-hover:flex">
                 <svg @click="editDoc(document)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-emerald-500 hover:cursor-pointer">
                     <path
@@ -28,12 +28,12 @@
         No Documents Found.
     </div>
 
-    <n-modal v-model:show="showDocEditModal" class="rounded-xl" preset="card"
+    <n-modal v-model:show="componentState.showDocEditModal" class="rounded-xl" preset="card"
         style="width: 50%; background-color: #313131; border: #313131;" :bordered="true" size="medium">
         <div class="mb-6 overflow-y-auto">
             <vue-jsoneditor
                 mode="text"
-                v-model:text="editableDoc"
+                v-model:text="componentState.editableDoc"
                 :mainMenuBar="false"
                 :navigationBar="false"
                 :statusBar="false"
@@ -50,44 +50,48 @@
 </template>
 
 <script setup lang="ts">
-    import { reactive, ref } from 'vue';
+    import { reactive } from 'vue';
     import { invoke } from '@tauri-apps/api/tauri';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal, useNotification } from 'naive-ui';
-    import { EJSONService } from '../../services/ejson-service';
-    import { v4 as uid } from 'uuid';
+    import { EJSONService } from '../../services/ejson-service';   
+    import { ComponentStateModel } from './Models/ViewModels';
     import JSONView from '../JsonViewer/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
+    import { useTabDataStore } from '../../stores/tab-data';
 
     const props = defineProps<{
         dbName: string
         collectionName: string
+        tabStoreKey: string
         showSearchedData: boolean
         searchedData: object[]
     }>();
 
     const documentsStore = useCollectionDocumentsStore();
+    const tabsDataStore = useTabDataStore();
     const notification = useNotification();
 
-    let documentList = reactive<{[key: string]: any}[]>([]);
-    let showDocEditModal = ref<boolean>(false);
-    let editableDoc = ref<string>('');
-    let documentListKey = ref<string>(uid());
+    const componentState: ComponentStateModel = reactive({
+        documentList: [],
+        editableDoc: '',
+        showDocEditModal: false
+    });
 
     if(props.showSearchedData) {
-        documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
+        componentState.documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
     }
     else {
         const documents = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;
 
         if(documents != null && documents.length > 0) {
-            documentList = documents.map(x => EJSONService.BsonDocToObject(x));
+            componentState.documentList = documents.map(x => EJSONService.BsonDocToObject(x));
         }
     }
 
     const editDoc = (document: object): void => {
-        editableDoc.value = JSON.stringify(document, null, 2);
-        showDocEditModal.value = true;
+        componentState.editableDoc = JSON.stringify(document, null, 2);
+        componentState.showDocEditModal = true;
     }
 
     const docFilterQuery = (documentId: string): string => {
@@ -101,7 +105,7 @@
     }
 
     const updateDoc = () => {
-        const parsedObject = JSON.parse(editableDoc.value);
+        const parsedObject = JSON.parse(componentState.editableDoc);
 
         const updateFilter = docFilterQuery(parsedObject["_id"]);
 
@@ -109,16 +113,14 @@
 
         invoke('update_document', { dbName: props.dbName, collectionName: props.collectionName, filter: updateFilter, document: JSON.stringify(updateDoc) }).then(value => {
             if(value != 'error') {
-                const updatedDoc = documentList.filter(x => x._id == parsedObject._id)[0];
+                const updatedDoc = componentState.documentList.filter(x => x._id == parsedObject._id)[0];
 
                 if(updatedDoc != null) {
-                    const updatedDocIndex = documentList.indexOf(updatedDoc);
+                    const updatedDocIndex = componentState.documentList.indexOf(updatedDoc);
 
-                    documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
+                    componentState.documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
 
-                    console.log(EJSONService.BsonDocToObject(parsedObject));
-
-                    showDocEditModal.value = false;
+                    componentState.showDocEditModal = false;
                 }
 
                 documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
@@ -131,22 +133,35 @@
         });
     }
 
+    const updateDocumentsCount = () => {
+        let existingTabData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+        if(existingTabData != null) {
+            existingTabData = {
+                ...existingTabData,
+                documentsCount: componentState.documentList.length
+            }
+
+            tabsDataStore.upsertData(existingTabData);
+        }
+    }
+
     const deleteDoc = (document: object) => {
         const deleteFilter = docFilterQuery(document["_id"]);
 
         invoke('delete_document', { dbName: props.dbName, collectionName: props.collectionName, filter: deleteFilter }).then(value => {
             if(value != 'error') {
 
-                const deletedDocument = documentList.filter(x => x._id == document["_id"])[0];
+                const deletedDocument = componentState.documentList.filter(x => x._id == document["_id"])[0];
 
                 if(deletedDocument != null) {
-                    const deletedDocumentIndex = documentList.indexOf(deletedDocument);
+                    const deletedDocumentIndex = componentState.documentList.indexOf(deletedDocument);
 
-                    documentList.splice(deletedDocumentIndex, 1);
+                    componentState.documentList.splice(deletedDocumentIndex, 1);
 
                     documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
 
-                    documentListKey.value = uid();
+                    updateDocumentsCount();
 
                     notification.success({title: "Document deleted."});
                 }

@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme="darkTheme" :theme-overrides="{ common: { fontFamily: 'Poppins', fontWeight: '350' } }">
+  <n-config-provider :theme="darkTheme" :theme-overrides="themeOverrides">
     <n-global-style />
       <n-notification-provider placement="bottom-right">
         <router-view />
@@ -8,5 +8,15 @@
 </template>
 
 <script setup lang="ts">
-import { NNotificationProvider, NGlobalStyle, NConfigProvider, darkTheme } from 'naive-ui';
+  import { NNotificationProvider, NGlobalStyle, NConfigProvider, darkTheme, GlobalThemeOverrides } from 'naive-ui';
+
+  const themeOverrides: GlobalThemeOverrides = {
+    common: {
+      fontFamily: 'Poppins',
+      fontWeight: '350'
+    },
+    Input: {
+      borderRadius: '5px'
+    }
+  }
 </script>

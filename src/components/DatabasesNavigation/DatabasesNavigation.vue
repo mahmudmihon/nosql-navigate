@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col bg-base p-3 h-screen w-80 overflow-x-auto">
+  <div class="flex flex-col p-3 w-[350px] bg-base h-screen overflow-x-auto">
     <GenericSkeleton v-if="dataLoading" />
 
     <div v-else>
@@ -39,7 +39,7 @@
         </n-input>
       </div>
 
-      <nav aria-label="Dbs" class="flex flex-col mt-4 space-y-0 overflow-auto">
+      <nav aria-label="Dbs" class="flex flex-col mt-4 max-h-[calc(100vh-190px)] overflow-y-auto">
         <details v-for="db, index in dbSearchableData" :key="index" class="group">
           <summary class="group/db flex items-center px-3 py-2 text-white rounded-lg cursor-pointer hover:bg-base hover:text-white">
             <span class="transition duration-300 shrink-0 group-open:rotate-90">

@@ -44,6 +44,12 @@
                 </n-tag>
             </div>
 
+            <div v-if="componentState.resultDocumentsCount > 0" class="mr-2">
+                <n-tag size="small" round :bordered="false" type="success">
+                    {{componentState.resultDocumentsCount}}
+                </n-tag>
+            </div>
+
             <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="exportAggregationResult">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
@@ -68,6 +74,7 @@
                     size="small"
                     v-model:value="componentState.pipelineStage"
                     filterable
+                    clearable
                     :options="AggregationBuilderService.pipelineStages"
                     :render-option="NaiveUiService.renderOption"
                     :placeholder="'Select Stage'"
@@ -83,6 +90,7 @@
                             size="small"
                             v-model:value="componentState.lookUpModel.from"
                             filterable
+                            clearable
                             :options="AggregationBuilderService.getOtherCollectionNames(props.dbName, props.collectionName)"
                             :render-option="NaiveUiService.renderOption"
                             @update:value="handleForeignCollectionSelect"
@@ -95,6 +103,7 @@
                             size="small"
                             v-model:value="componentState.lookUpModel.foreignField"
                             filterable
+                            clearable
                             :options="componentState.foreignFields"
                             :render-option="NaiveUiService.renderOption"
                         />
@@ -108,6 +117,7 @@
                             size="small"
                             v-model:value="componentState.lookUpModel.localField"
                             filterable
+                            clearable
                             :options="componentState.localFields"
                             :render-option="NaiveUiService.renderOption"
                         />
@@ -136,6 +146,7 @@
                         size="small"
                         v-model:value="componentState.projectedFields"
                         filterable
+                        clearable
                         multiple
                         :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
@@ -156,6 +167,7 @@
                         size="small"
                         v-model:value="componentState.unsetFields"
                         filterable
+                        clearable
                         multiple
                         :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
@@ -176,6 +188,7 @@
                         size="small"
                         v-model:value="componentState.unwindModel.field"
                         filterable
+                        clearable
                         :options="componentState.localFields"
                         :render-option="NaiveUiService.renderOption"
                         :placeholder="'Select Field'"
@@ -250,6 +263,7 @@
     const componentState: ComponentStateModel = reactive({
         pipelineStage: '',
         stageQuery: '',
+        resultDocumentsCount: 0,
         dataExporting: false,
         showSummarySection: false,
         showEditorModal: false,
@@ -299,6 +313,14 @@
     }
 
     updateLocalFieldsAndSummary(false);
+
+    const updateResultDocumentsCount = () => {
+        const resultData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+        if(resultData != null) {
+            componentState.resultDocumentsCount = resultData.aggregationDocumentsCount;
+        }
+    }
 
     const triggerPipelineEditorModal = (): void => {
         componentState.showEditorModal = true
@@ -432,6 +454,7 @@
     }
 
     tabsDataStore.$subscribe((mutation, state) => {
+        updateResultDocumentsCount();
         updateLocalFieldsAndSummary(true);
     });
 </script>

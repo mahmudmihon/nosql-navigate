@@ -20,29 +20,49 @@
                         </div>
 
                         <div>
-                            <n-select size="small" v-model:value="filterModel.field" filterable :options="componentState.documentFields" :render-option="NaiveUiService.renderOption" :placeholder="'Field'" />
+                            <n-select 
+                                size="small" 
+                                v-model:value="filterModel.field" 
+                                filterable
+                                clearable 
+                                :options="componentState.documentFields" 
+                                :render-option="NaiveUiService.renderOption" 
+                                :placeholder="'Field'" 
+                            />
                         </div>
 
                         <div class="w-48">
-                            <n-select size="small" v-model:value="filterModel.filterType" :options="DocumentFiltering.filterTypes" :render-option="NaiveUiService.renderOption" :placeholder="'Fiter type'" />
+                            <n-select 
+                                size="small" 
+                                clearable
+                                v-model:value="filterModel.filterType" 
+                                :options="DocumentFiltering.filterTypes" 
+                                :render-option="NaiveUiService.renderOption" 
+                                :placeholder="'Fiter type'" 
+                            />
                         </div>
 
                         <div class="w-full flex pr-1">
-                            <n-input-group>
-                                <!-- <n-select size="small" v-model:value="filterModel.dataType" :style="{ width: '20%' }" :options="dataTypes" :placeholder="'Data type'" /> -->
-                                <n-input size="small" v-model:value="filterModel.value" type="text" :placeholder="'Value'" />
-                            </n-input-group>
+                            <n-input
+                                clearable 
+                                size="small" 
+                                v-model:value="filterModel.value" 
+                                type="text" 
+                                :placeholder="'Value'" 
+                            />
 
                             <svg v-if="componentState.simpleFiltering && index == 0" @click="addNewFilter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-green-400 hover:cursor-pointer">
                                 <path fill-rule="evenodd"
                                     d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
-                                    clip-rule="evenodd" />
+                                    clip-rule="evenodd" 
+                                />
                             </svg>
 
                             <svg v-if="index != 0" @click="removeFilter(index)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 ml-1 text-red-600 hover:cursor-pointer">
                                 <path fill-rule="evenodd"
                                     d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z"
-                                    clip-rule="evenodd" />
+                                    clip-rule="evenodd" 
+                                />
                             </svg>
                         </div>
                     </div>
@@ -96,19 +116,19 @@
                 </n-tag>
             </div>
             <div class="flex">
-                <span class="hover:cursor-pointer hover:text-blue-400" title="Insert Document" @click="insertDocument">
+                <span class="hover:cursor-pointer hover:text-green-400" title="Insert Document" @click="insertDocument">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
                 </span>
 
-                <span class="hover:cursor-pointer hover:text-blue-400" title="Import Collection" @click="importDocuments">
+                <span class="hover:cursor-pointer hover:text-green-400" title="Import Collection" @click="importDocuments">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                     </svg>
                 </span>
 
-                <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="exportDocuments">
+                <span class="hover:cursor-pointer hover:text-green-400" title="Export Collection" @click="exportDocuments">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                     </svg>

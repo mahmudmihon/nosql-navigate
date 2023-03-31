@@ -78,6 +78,14 @@
   color: #D19A66;
 }
 
+.n-base-selection {
+  border-radius: 5px;
+}
+
+.n-base-selection-overlay__wrapper, .n-base-selection-input__content {
+  font-size: 12px;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;

@@ -12,7 +12,7 @@
         <div v-if="componentState.aggregationDataLoading" class="mt-1">
             <GenericSkeleton />
         </div>
-        <div v-else class="max-h-[calc(100vh-430px)] overflow-y-auto mb-1">
+        <div v-else class="max-h-[calc(100vh-420px)] overflow-y-auto mb-1">
             <AggregationResult
                 :document-list="componentState.aggregationData"
             />

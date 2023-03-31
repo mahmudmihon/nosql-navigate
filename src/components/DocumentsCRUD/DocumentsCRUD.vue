@@ -20,6 +20,7 @@
                 <DocumentList
                     :db-name="props.dbName"
                     :collection-name="props.collectionName"
+                    :tab-store-key="props.tabStoreKey"
                     :show-searched-data="componentState.showSearchedData"
                     :searched-data="componentState.searchedData"
                 />

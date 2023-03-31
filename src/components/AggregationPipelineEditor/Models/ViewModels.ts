@@ -17,6 +17,7 @@ export interface UnwindModel {
 export interface ComponentStateModel {
   pipelineStage: string;
   stageQuery: string;
+  resultDocumentsCount: number;
   dataExporting: boolean;
   showSummarySection: boolean;
   showEditorModal: boolean;

@@ -1,7 +1,10 @@
 <template>
   <div class="bg-base p-3 h-screen">
     <div class="mt-1 mb-4 pr-[220px]">
-      SAVED <span class="bg-green-100 text-green-800 text-xs font-semibold ml-2 px-2.5 py-0.5 rounded-full dark:bg-green-200 dark:text-green-900">{{componentState.savedConnections.length}}</span>
+      SAVED
+      <n-tag size="small" round :bordered="false" type="success">
+        {{componentState.savedConnections.length}}
+      </n-tag>    
     </div>
 
     <div v-for="(cData, index) in componentState.savedConnections" :key="index" @click="updateSelectedDb(index)" class="bg-base rounded-lg pl-3 pr-[70px] py-[7px] mb-2 relative group hover:cursor-pointer">
@@ -26,6 +29,7 @@
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
   import { ComponentStateModel } from './Models/ViewModels';
+  import { NTag } from 'naive-ui';
 
   const crudEventsStore = useConnectionCRUDEventsStore();
 
