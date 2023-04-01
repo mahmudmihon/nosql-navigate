@@ -216,9 +216,9 @@
         rawQuery: JSON.stringify({filters: {}, sort: {}}, null, 2),
         multipleFilters: [{
             shouldApply: false,
-            field: null,
+            field: '',
             filterType: "Equal",
-            value: null
+            value: ''
         }]
     });
 
@@ -246,7 +246,7 @@
     const addNewFilter = (): void => {
         componentState.multipleFilters.push({
             shouldApply: false,
-            field: null,
+            field: '',
             filterType: "Equal",
             value: ''
         });

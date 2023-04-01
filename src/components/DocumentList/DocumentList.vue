@@ -55,10 +55,10 @@
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal, useNotification } from 'naive-ui';
     import { EJSONService } from '../../services/ejson-service';   
-    import { ComponentStateModel } from './Models/ViewModels';
+    import { ComponentStateModel } from './Models/ViewModels';   
+    import { useTabDataStore } from '../../stores/tab-data';
     import JSONView from '../JsonViewer/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
-    import { useTabDataStore } from '../../stores/tab-data';
 
     const props = defineProps<{
         dbName: string

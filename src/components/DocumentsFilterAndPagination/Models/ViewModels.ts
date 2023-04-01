@@ -1,5 +1,6 @@
 import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { AdvanceFiltering } from "../../../types/DocumentFilter&Pagination/advance-filtering";
+import { SimpleFilter } from "../../../types/DocumentFilter&Pagination/simple-filter";
 
 export interface ComponentStateModel {
     documentsCount: number;
@@ -12,5 +13,5 @@ export interface ComponentStateModel {
     runningOperationText: string;
     documentFields: SelectMixedOption[];
     rawQuery: string;
-    multipleFilters: any[];
+    multipleFilters: SimpleFilter[];
 }

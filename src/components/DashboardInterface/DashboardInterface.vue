@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-1_1_100% flex-nowrap">
+  <div class="flex flex-nowrap">
     <DatabasesNavigation />
-    <div class="p-3 w-full h-screen">
+    <div class="p-3 w-full h-screen overflow-y-hidden overflow-x-auto">
       <router-view />
     </div>
   </div>

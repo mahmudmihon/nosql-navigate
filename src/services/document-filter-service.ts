@@ -1,3 +1,4 @@
+import { SimpleFilter } from "../types/DocumentFilter&Pagination/simple-filter";
 import { CustomLinq } from "./custom-linq-service";
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
 
@@ -42,10 +43,10 @@ export class DocumentFiltering {
         }
     ];
 
-    static extractSimpleBuilderFilters = (filtersData: any[]): object => {
+    static extractSimpleBuilderFilters = (filtersData: SimpleFilter[]): object => {
         var filters = {};
 
-        var shouldApplyFilters = filtersData.filter(x => x.shouldApply);
+        var shouldApplyFilters = filtersData.filter(x => x.shouldApply && x.field != '');
 
         if(shouldApplyFilters != null && shouldApplyFilters.length > 0) {
             const fieldGroupedData = CustomLinq.groupBy(shouldApplyFilters, v => v.field);
