@@ -37,6 +37,19 @@ pub async fn validate_url(url: &str) -> bool {
     };
 }
 
+pub fn drop_database(db_name: &str) -> Result<String, CustomError> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+                client.database(db_name).drop(None);
+
+                return Ok("ok".to_string());
+            },
+            None => { return Err(CustomError::ClientNotFound) }
+        }
+    }
+}
+
 pub async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {

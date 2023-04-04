@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col p-3 w-[350px] bg-base h-screen overflow-x-auto">
-    <GenericSkeleton v-if="dataLoading" />
+    <GenericSkeleton v-if="componentState.dataLoading" />
 
     <div v-else>
       <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
@@ -29,7 +29,7 @@
         <n-input
           placeholder="Search"
           clearable
-          v-model:value="searchQuery"
+          v-model:value="componentState.searchQuery"
         >
           <template #prefix>
             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,43 +83,43 @@
   </div>
 
   <n-modal
-    v-model:show="showCollectionAddModal"
+    v-model:show="componentState.showCollectionAddModal"
     class="rounded-xl"
     preset="card"
     style="width: 50%; background-color: #313131; border: #313131;"
     :bordered="true"
     size="medium"
   >
-    <div class="mb-6" v-if="addNewDb">
+    <div class="mb-6" v-if="componentState.addNewDb">
       <label class="block mb-2 text-lg font-medium text-white">Database Name</label>
-      <input type="text" v-model="collectionAddModel.dbName"
+      <input type="text" v-model="componentState.collectionAddModel.dbName"
         class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
     </div>
 
     <div class="mb-6">
       <label class="block mb-2 text-lg font-medium text-white">Collection Name</label>
-      <input type="text" v-model="collectionAddModel.collectionName"
+      <input type="text" v-model="componentState.collectionAddModel.collectionName"
         class="border border-gray-300 text-white text-sm rounded-xl block w-full p-2 bg-[#313131]">
     </div>
 
     <div class="flex justify-end mt-3 gap-2">
-      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="creatingCollection"
+      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="componentState.creatingCollection"
         @click="createCollection">
-        <svg v-if="creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
+        <svg v-if="componentState.creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
           </path>
         </svg>
-        <span v-if="addNewDb">Create Database</span>
+        <span v-if="componentState.addNewDb">Create Database</span>
         <span v-else>Create Collection</span>
       </button>
     </div>
   </n-modal>
 
   <n-modal
-    v-model:show="showDeleteConfirmationModal"
+    v-model:show="componentState.showDeleteConfirmationModal"
     class="rounded-xl"
     preset="card"
     style="width: 50%; background-color: #313131; border: #313131;"
@@ -127,13 +127,13 @@
     size="medium"
   >
     <div  class="bg-base p-4 rounded-xl w-full text-lg">
-      Are you sure you want to delete <span class="text-red-500">{{ deleteEntityName }}</span>
+      Are you sure you want to delete <span class="text-red-500">{{ componentState.deleteEntityName }}</span>
     </div>
 
     <div class="flex justify-end mt-3 gap-2">
-      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="deletingEntity"
+      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="componentState.deletingEntity"
         @click="dropEntity">
-        <svg v-if="deletingEntity" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
+        <svg v-if="componentState.deletingEntity" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor"
@@ -147,9 +147,8 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, reactive, ref } from 'vue';
-  import { invoke } from '@tauri-apps/api';
-  import { ComponentDataModel, DbsNavigationViewModel } from './Models/ViewModels';
+  import { computed, reactive } from 'vue';
+  import { ComponentStateModel, DbsNavigationViewModel } from './Models/ViewModels';
   import { NModal, useNotification, NInput } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
@@ -159,7 +158,8 @@
   import { useDocumentsCountStore } from '../../stores/documents-count';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
   import { useImportExportEventsStore } from '../../stores/import-export-events';
-  import { useDatabaseCollectionsStore } from '../../stores/db-collections';
+  import { useDatabaseCollectionsStore } from '../../stores/db-collections'; 
+  import { MongoDbService } from '../../services/data/mongo-service';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   const tabsStore = useCollectionTabsStore();
@@ -172,121 +172,130 @@
   const router = useRouter();
   const notification = useNotification();
 
-  let searchQuery = ref<string>("");
-  let dataLoading = ref(true);
-  let showCollectionAddModal = ref<boolean>(false);
-  let showDeleteConfirmationModal = ref<boolean>(false);
-  let deleteEntityName = ref<string>("");
-  let creatingCollection = ref<boolean>(false);
-  let deletingEntity = ref<boolean>(false);
-  let addNewDb = ref<boolean>(true);
-  let collectionAddModel = reactive<any>({
-    dbName: '',
-    collectionName: ''
+  const componentState: ComponentStateModel = reactive({
+    searchQuery: '',
+    deleteEntityName: '',
+    dataLoading: true,
+    showCollectionAddModal: false,
+    showDeleteConfirmationModal: false,
+    creatingCollection: false,
+    deletingEntity: false,
+    addNewDb: false,
+    collectionAddModel: {
+      dbName: '',
+      collectionName: ''
+    },
+    dbsWithCollections: []
   });
-  let componentData: ComponentDataModel = reactive<ComponentDataModel>({dbsWithCollections: []});
 
-  const getDbsWithCollections = (): void => {
-    invoke('get_dbs_with_collections').then(value => {
-      if(value !== 'error') {
-        componentData.dbsWithCollections = value as DbsNavigationViewModel[];
+  const getDbsWithCollections = async (): Promise<void> => {
+    const result = await MongoDbService.getDbsWithCollectionNames();
 
-        dataLoading.value = false;
+    if(result !== 'error') {
+      componentState.dbsWithCollections = result as DbsNavigationViewModel[];
 
-        collectionsStore.addDbsWithCollections(componentData.dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
-      }
-    });
+      componentState.dataLoading = false;
+
+      collectionsStore.addDbsWithCollections(componentState.dbsWithCollections.map(x => {return {dbName: x.db_name, dbCollections: x.db_collections}}))
+    }
   }
 
-  getDbsWithCollections();
+  (async () => {
+    await getDbsWithCollections();
+  })();
 
   const addNewDatabase = (): void => {
-    addNewDb.value = true;
-    collectionAddModel.dbName = '';
-    showCollectionAddModal.value = true;
+    componentState.addNewDb = true;
+    componentState.collectionAddModel.dbName = '';
+    componentState.showCollectionAddModal = true;
   }
 
   const addNewCollection = (dbName: string): void => {
-    addNewDb.value = false;
-    collectionAddModel.dbName = dbName;
-    showCollectionAddModal.value = true;
+    componentState.addNewDb = false;
+    componentState.collectionAddModel.dbName = dbName;
+    componentState.showCollectionAddModal = true;
   }
 
-  const createCollection = () => {
-    creatingCollection.value = true;
+  const createCollection = async (): Promise<void> => {
+    componentState.creatingCollection = true;
 
-    invoke('create_collection', { dbName: collectionAddModel.dbName, collectionName: collectionAddModel.collectionName }).then(value => {
-      if(value != 'error') {
-        if(addNewDb.value) {
-          componentData.dbsWithCollections.push({db_name: collectionAddModel.dbName, db_collections: [collectionAddModel.collectionName]});
-        }
-        else {
-          let updatedDb = componentData.dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
+    const result = await MongoDbService.createCollection(componentState.collectionAddModel.dbName, componentState.collectionAddModel.collectionName);
 
-          if(updatedDb != null) {
-            const updatedDbIndex = componentData.dbsWithCollections.indexOf(updatedDb);
-
-            componentData.dbsWithCollections[updatedDbIndex].db_collections.push(collectionAddModel.collectionName);
-            componentData.dbsWithCollections[updatedDbIndex].db_collections.sort();
-          }
-        }
-
-        showCollectionAddModal.value = false;
+    if(result != 'error') {
+      if(componentState.addNewDb) {
+        componentState.dbsWithCollections.push({db_name: componentState.collectionAddModel.dbName, db_collections: [componentState.collectionAddModel.collectionName]});
       }
-      else{
-        notification.error({title: "Something went wrong! Please try again later."});
+      else {
+        const updatedDb = componentState.dbsWithCollections.filter(x => x.db_name == componentState.collectionAddModel.dbName)[0];
+
+        if(updatedDb != null) {
+          const updatedDbIndex = componentState.dbsWithCollections.indexOf(updatedDb);
+
+          componentState.dbsWithCollections[updatedDbIndex].db_collections.push(componentState.collectionAddModel.collectionName);
+          componentState.dbsWithCollections[updatedDbIndex].db_collections.sort();
+        }
       }
 
-      creatingCollection.value = false;
-    }).catch(e => {
-        notification.error({ title: "Something went wrong!" });
-
-        creatingCollection.value = false;
-    });
-  }
-
-  const dropEntity = () => {
-    const dbCollectionName = deleteEntityName.value.split('->');
-
-    deletingEntity.value = true;
-
-    if(dbCollectionName.length > 1) {
-      invoke('drop_collection', { dbName: dbCollectionName[0].trim(), collectionName: dbCollectionName[1].trim() }).then(value => {
-        if(value != 'error') {
-          let updatedDb = componentData.dbsWithCollections.filter(x => x.db_name == collectionAddModel.dbName)[0];
-
-          if(updatedDb != null) {
-            const updatedDbIndex = componentData.dbsWithCollections.indexOf(updatedDb);
-
-            let newDb = {...updatedDb};
-
-            const deletedCollectionIndex = updatedDb.db_collections.indexOf(dbCollectionName[1].trim());
-
-            newDb.db_collections.splice(deletedCollectionIndex, 1);
-
-            componentData.dbsWithCollections.splice(updatedDbIndex, 1, newDb);
-
-            notification.success({title: "Collection deleted."});
-          }
-        }
-        else{
-          notification.error({title: "Something went wrong! Please try again later."});
-        }
-      });
+      componentState.showCollectionAddModal = false;
+    }
+    else{
+      notification.error({title: "Operation Failed!"});
     }
 
-    deletingEntity.value = false;
-    showDeleteConfirmationModal.value = false;
+    componentState.creatingCollection = false;
+  }
+
+  const dropEntity = async (): Promise<void> => {
+    const dbCollectionName = componentState.deleteEntityName.split('->');
+
+    componentState.deletingEntity = true;
+
+    let result;
+
+    if(dbCollectionName.length > 1) {
+      result = await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
+    }
+    else {
+      result = await MongoDbService.dropDatabase(dbCollectionName[0].trim());
+    }
+
+    if(result != 'error') {
+
+      await refreshDb();
+      // let updatedDb = componentState.dbsWithCollections.filter(x => x.db_name == componentState.collectionAddModel.dbName)[0];
+
+      // if(updatedDb != null) {
+      //   const updatedDbIndex = componentState.dbsWithCollections.indexOf(updatedDb);
+
+      //   let newDb = {...updatedDb};
+
+      //   const deletedCollectionIndex = updatedDb.db_collections.indexOf(dbCollectionName[1].trim());
+
+      //   newDb.db_collections.splice(deletedCollectionIndex, 1);
+
+      //   componentState.dbsWithCollections.splice(updatedDbIndex, 1, newDb);
+
+      //   notification.success({title: "Collection deleted."});
+      // }
+    }
+    else{
+      notification.error({title: "Operation Failed!"});
+    }
+
+    componentState.collectionAddModel.dbName = '';
+    componentState.collectionAddModel.collectionName = '';
+    componentState.deletingEntity = false;
+    componentState.showDeleteConfirmationModal = false;
   }
 
   const showConfirmationModal = (dbName: string, collectionName: string) => {
-    deleteEntityName.value = dbName;
+    componentState.deleteEntityName = dbName;
 
     if(collectionName != '') {
-      deleteEntityName.value += ` -> ${collectionName}`;
+      componentState.deleteEntityName += ` -> ${collectionName}`;
     }
 
-    showDeleteConfirmationModal.value = true;
+    componentState.showDeleteConfirmationModal = true;
   }
 
   const addCollectionTabInStore = (dbName: string, collectionName: string) => {
@@ -295,8 +304,8 @@
     router.push({path: '/collection-tabs'});
   }
 
-  const refreshDb = () => {
-    getDbsWithCollections();
+  const refreshDb = async () => {
+    await getDbsWithCollections();
 
     refreshEventsStore.updateRefreshDbSummary(true);
   }
@@ -304,14 +313,14 @@
   const dbSearchableData = computed(() => {
     let searchedData: DbsNavigationViewModel[] = [];
 
-    const term = searchQuery.value;
+    const term = componentState.searchQuery;
 
     if(term == null || term == '') {
-      searchedData = componentData.dbsWithCollections;
+      searchedData = componentState.dbsWithCollections;
     }
     else {
-      for(let i = 0; i < componentData.dbsWithCollections.length; i++) {
-        const dbData = componentData.dbsWithCollections[i];
+      for(let i = 0; i < componentState.dbsWithCollections.length; i++) {
+        const dbData = componentState.dbsWithCollections[i];
 
         if(dbData != null) {
           let data: DbsNavigationViewModel = {db_name: "", db_collections: []};
@@ -337,8 +346,8 @@
     return searchedData;
   });
 
-  const disconnectDb = () => {
-    invoke('drop_client');
+  const disconnectDb = async (): Promise<void> => {
+    await MongoDbService.dropMongoClient();
 
     collectionsStore.$reset();
     documentsStore.$reset();
