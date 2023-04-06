@@ -21,9 +21,9 @@ fn drop_client() {
   mongo_service::drop_client();
 }
 
-#[tauri::command]
-fn drop_database(db_name: &str) -> Result<String, CustomError> {
-  return mongo_service::drop_database(db_name);
+#[tauri::command(async)]
+async fn drop_database(db_name: &str) -> Result<String, CustomError> {
+  return mongo_service::drop_database(db_name).await;
 }
 
 #[tauri::command(async)]
@@ -37,7 +37,7 @@ async fn documents_aggregation(db_name: &str, collection_name: &str, aggregation
 }
 
 #[tauri::command(async)]
-async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<String, CustomError> {
+async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u128, CustomError> {
   return mongo_service::export_aggregation_result(db_name, collection_name, aggregations, path).await;
 }
 
@@ -72,12 +72,12 @@ async fn insert_docuemnt(db_name: &str, collection_name: &str, document: &str) -
 }
 
 #[tauri::command(async)]
-async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
   return mongo_service::import_collection(db_name, collection_name, path).await;
 }
 
 #[tauri::command(async)]
-async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
   return mongo_service::export_collection(db_name, collection_name, path).await;
 }
 

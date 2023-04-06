@@ -153,22 +153,15 @@
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
   import { v4 as uid } from 'uuid';
-  import { useCollectionDocumentsStore } from '../../stores/collection-documents';
-  import { useDocumentFieldsStore } from '../../stores/document-fields';
-  import { useDocumentsCountStore } from '../../stores/documents-count';
   import { useRefreshEventsStore } from '../../stores/refresh-events';
-  import { useImportExportEventsStore } from '../../stores/import-export-events';
   import { useDatabaseCollectionsStore } from '../../stores/db-collections'; 
-  import { MongoDbService } from '../../services/data/mongo-service';
+  import { MongoDbService } from '../../services/data/mongo-service';  
+  import { StoreService } from '../../services/store-service';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   const tabsStore = useCollectionTabsStore();
-  const documentsStore = useCollectionDocumentsStore();
   const collectionsStore = useDatabaseCollectionsStore();
-  const fieldsStore = useDocumentFieldsStore();
-  const countsStore = useDocumentsCountStore();
   const refreshEventsStore = useRefreshEventsStore();
-  const importExportStore = useImportExportEventsStore();
   const router = useRouter();
   const notification = useNotification();
 
@@ -222,19 +215,8 @@
     const result = await MongoDbService.createCollection(componentState.collectionAddModel.dbName, componentState.collectionAddModel.collectionName);
 
     if(result != 'error') {
-      if(componentState.addNewDb) {
-        componentState.dbsWithCollections.push({db_name: componentState.collectionAddModel.dbName, db_collections: [componentState.collectionAddModel.collectionName]});
-      }
-      else {
-        const updatedDb = componentState.dbsWithCollections.filter(x => x.db_name == componentState.collectionAddModel.dbName)[0];
 
-        if(updatedDb != null) {
-          const updatedDbIndex = componentState.dbsWithCollections.indexOf(updatedDb);
-
-          componentState.dbsWithCollections[updatedDbIndex].db_collections.push(componentState.collectionAddModel.collectionName);
-          componentState.dbsWithCollections[updatedDbIndex].db_collections.sort();
-        }
-      }
+      await refreshDb();
 
       componentState.showCollectionAddModal = false;
     }
@@ -262,21 +244,6 @@
     if(result != 'error') {
 
       await refreshDb();
-      // let updatedDb = componentState.dbsWithCollections.filter(x => x.db_name == componentState.collectionAddModel.dbName)[0];
-
-      // if(updatedDb != null) {
-      //   const updatedDbIndex = componentState.dbsWithCollections.indexOf(updatedDb);
-
-      //   let newDb = {...updatedDb};
-
-      //   const deletedCollectionIndex = updatedDb.db_collections.indexOf(dbCollectionName[1].trim());
-
-      //   newDb.db_collections.splice(deletedCollectionIndex, 1);
-
-      //   componentState.dbsWithCollections.splice(updatedDbIndex, 1, newDb);
-
-      //   notification.success({title: "Collection deleted."});
-      // }
     }
     else{
       notification.error({title: "Operation Failed!"});
@@ -349,13 +316,7 @@
   const disconnectDb = async (): Promise<void> => {
     await MongoDbService.dropMongoClient();
 
-    collectionsStore.$reset();
-    documentsStore.$reset();
-    fieldsStore.$reset();
-    countsStore.$reset();
-    tabsStore.$reset();
-    refreshEventsStore.$reset();
-    importExportStore.$reset();
+    StoreService.resetStores();
 
     router.push({path: '/'});
   }

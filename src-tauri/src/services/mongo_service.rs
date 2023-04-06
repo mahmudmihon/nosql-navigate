@@ -37,11 +37,11 @@ pub async fn validate_url(url: &str) -> bool {
     };
 }
 
-pub fn drop_database(db_name: &str) -> Result<String, CustomError> {
+pub async fn drop_database(db_name: &str) -> Result<String, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
-                client.database(db_name).drop(None);
+                client.database(db_name).drop(None).await;
 
                 return Ok("ok".to_string());
             },
@@ -181,7 +181,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
     }
 }
 
-pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<String, CustomError> {
+pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u128, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -198,16 +198,20 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
 
+                let mut count: u128 = 0;
+
                 writeln!(file, "[")?;
 
                 while let Some(doc) = cursor.next().await {
                     let doc_to_string = serde_json::to_string_pretty(&doc?)?;
                     writeln!(file, "{},", doc_to_string)?;
+
+                    count += 1;
                 }
 
                 writeln!(file, "]")?;
 
-                return Ok("ok".to_string());
+                return Ok(count);
             },
             None => { return Err(CustomError::ClientNotFound); }
         }
@@ -234,7 +238,7 @@ pub async fn get_collection_documents_count(db_name: &str, collection_name: &str
     }
 }
 
-pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -249,23 +253,27 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let mut cursor = db.collection::<Document>(collection_name).find(None, None).await?;
 
+                let mut count: u128 = 0;
+
                 writeln!(file, "[")?;
 
                 while let Some(doc) = cursor.next().await {
                     let doc_to_string = serde_json::to_string_pretty(&doc?)?;
                     writeln!(file, "{},", doc_to_string)?;
+
+                    count += 1;
                 }
 
                 writeln!(file, "]")?;
 
-                return Ok("ok".to_string());
+                return Ok(count);
             },
             None => { return Err(CustomError::ClientNotFound); }
         }
     }
 }
 
-pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<String, CustomError> {
+pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -274,13 +282,15 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
 
+                let documents_count = u128::try_from(documents.len()).unwrap();
+
                 if !documents.is_empty() && documents.len() > 0 {
                     let db = client.database(db_name);
 
                     db.collection::<Document>(collection_name).insert_many(documents, None).await?;
                 }
 
-                return Ok("ok".to_string());
+                return Ok(documents_count);
             },
             None => { return Err(CustomError::ClientNotFound); }
         }
