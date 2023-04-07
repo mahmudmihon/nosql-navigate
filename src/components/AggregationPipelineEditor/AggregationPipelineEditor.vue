@@ -242,7 +242,7 @@
     import { useTabDataStore } from '../../stores/tab-data';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { save } from '@tauri-apps/api/dialog';
-    import { invoke } from '@tauri-apps/api';
+    import { MongoDbService } from '../../services/data/mongo-service';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../JsonViewer/JSONView.vue';
 
@@ -406,10 +406,12 @@
         const parsedQuery = JSON.parse(componentState.stageQuery);
 
         if(Object.keys(parsedQuery).length > 0) {
-            componentState.stagesQuery.push({ shouldApply: false, query: componentState.stageQuery });
+            componentState.stagesQuery.push({ shouldApply: true, query: componentState.stageQuery });
 
             componentState.stageQuery = '';
             componentState.showEditorModal = false;
+
+            parseAndTriggerAggregation();
         }
     }
 
@@ -443,13 +445,13 @@
 
             const pipelines = shouldApplyStages.map(x => { return x.query });
 
-            invoke('export_aggregation_result', { dbName: props.dbName, collectionName: props.collectionName, aggregations: pipelines, path: filePath }).then(value => {
-                if (value != 'error') {
-                    notification.success({ title: "Result exported." });
-                }
+            const result = await MongoDbService.exportAggregationResult(props.dbName, props.collectionName, pipelines, filePath);
 
-                componentState.dataExporting = false;
-            });
+            if (result != 'error') {
+                notification.success({ title: "Result exported." });
+            }
+
+            componentState.dataExporting = false;
         }
     }
 

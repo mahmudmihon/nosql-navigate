@@ -29,6 +29,18 @@ export class MongoDbService {
         return await invoke('insert_docuemnt', { dbName: dbName, collectionName: collectionName, document: document });
     }
 
+    static importCollection = async (dbName: string, collectionName: string, path: string): Promise<number | string> => {
+        return await invoke('import_collection', { dbName: dbName, collectionName: collectionName, path: path });
+    }
+
+    static exportCollection = async (dbName: string, collectionName: string, path: string): Promise<number | string> => {
+        return await invoke('export_collection', { dbName: dbName, collectionName: collectionName, path: path });
+    }
+
+    static exportAggregationResult = async (dbName: string, collectionName: string, aggregations: string[], path: string): Promise<number | string> => {
+        return await invoke('export_aggregation_result', { dbName: dbName, collectionName: collectionName, aggregations: aggregations, path: path });
+    }
+
     static dropMongoClient = async (): Promise<void> => {
         invoke('drop_client');
     }

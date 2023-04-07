@@ -160,12 +160,11 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
     import { DocumentFields } from '../../types/DocumentFields/document-fields';
-    import { NSwitch, NCheckbox, NSelect, NInput, NInputGroup, NPagination, NTag, useNotification } from 'naive-ui';
+    import { NSwitch, NCheckbox, NSelect, NInput, NPagination, NTag, useNotification } from 'naive-ui';
     import { DocumentFiltering } from '../../services/document-filter-service';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
     import { DocumentsCount } from '../../types/DocumentsCount/documents-count';
     import { open, save } from '@tauri-apps/api/dialog';
-    import { invoke } from '@tauri-apps/api/tauri';
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { useImportExportEventsStore } from '../../stores/import-export-events';
@@ -173,7 +172,8 @@
     import { NaiveUiService } from '../../services/naive-ui-service';   
     import { CommonConsts } from '../../utilities/common-consts';
     import { ComponentStateModel } from './Models/ViewModels';   
-    import { useTabDataStore } from '../../stores/tab-data';
+    import { useTabDataStore } from '../../stores/tab-data';   
+    import { MongoDbService } from '../../services/data/mongo-service';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
@@ -215,7 +215,7 @@
         documentFields: [],
         rawQuery: JSON.stringify({filters: {}, sort: {}}, null, 2),
         multipleFilters: [{
-            shouldApply: false,
+            shouldApply: true,
             field: '',
             filterType: "Equal",
             value: ''
@@ -245,7 +245,7 @@
 
     const addNewFilter = (): void => {
         componentState.multipleFilters.push({
-            shouldApply: false,
+            shouldApply: true,
             field: '',
             filterType: "Equal",
             value: ''
@@ -350,16 +350,16 @@
             componentState.runningOperation = true;
             componentState.runningOperationText = "Importing";
 
-            invoke('import_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
-                if (value != 'error') {
-                    importExportStore.updateDocumentsImported(true);
+            const result = await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
 
-                    notification.success({ title: "Collection imported." });
-                }
+            if (result != 'error') {
+                importExportStore.updateDocumentsImported(true);
 
-                componentState.runningOperation = false;
-                componentState.runningOperationText = "";
-            });
+                notification.success({ title: "Collection imported." });
+            }
+
+            componentState.runningOperation = false;
+            componentState.runningOperationText = "";
         }
     }
 
@@ -376,14 +376,14 @@
             componentState.runningOperation = true;
             componentState.runningOperationText = "Exporting";
 
-            invoke('export_collection', { dbName: props.dbName, collectionName: props.collectionName, path: filePath }).then(value => {
-                if (value != 'error') {
-                    notification.success({ title: "Collection exported." });
-                }
+            const result = await MongoDbService.exportCollection(props.dbName, props.collectionName, filePath as string);
 
-                componentState.runningOperation = false;
-                componentState.runningOperationText = "";
-            });
+            if (result != 'error') {
+                notification.success({ title: "Collection exported." });
+            }
+
+            componentState.runningOperation = false;
+            componentState.runningOperationText = "";
         }
     }
 

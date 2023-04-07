@@ -181,7 +181,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
     }
 }
 
-pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u128, CustomError> {
+pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -198,7 +198,7 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
 
-                let mut count: u128 = 0;
+                let mut count: u64 = 0;
 
                 writeln!(file, "[")?;
 
@@ -238,7 +238,7 @@ pub async fn get_collection_documents_count(db_name: &str, collection_name: &str
     }
 }
 
-pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
+pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -253,7 +253,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let mut cursor = db.collection::<Document>(collection_name).find(None, None).await?;
 
-                let mut count: u128 = 0;
+                let mut count: u64 = 0;
 
                 writeln!(file, "[")?;
 
@@ -273,7 +273,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
-pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u128, CustomError> {
+pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -282,7 +282,7 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
 
-                let documents_count = u128::try_from(documents.len()).unwrap();
+                let documents_count = u64::try_from(documents.len()).unwrap();
 
                 if !documents.is_empty() && documents.len() > 0 {
                     let db = client.database(db_name);
