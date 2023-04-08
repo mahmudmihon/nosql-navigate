@@ -8,8 +8,14 @@ mod models;
 
 use mongodb::bson::{doc, Document};
 use services::mongo_service;
+use services::sql_lite_service;
 use models::dtos::DbWithCollections;
 use models::errors::CustomError;
+
+#[tauri::command]
+fn create_initial_tables() {
+  sql_lite_service::create_initial_tables();
+}
 
 #[tauri::command]
 async fn check_mongo_url(url: &str) -> Result<bool, ()> {
@@ -93,8 +99,8 @@ async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> 
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_sqlite::init())
         .invoke_handler(tauri::generate_handler![
+          create_initial_tables,
           check_mongo_url, 
           drop_client, 
           drop_database, 

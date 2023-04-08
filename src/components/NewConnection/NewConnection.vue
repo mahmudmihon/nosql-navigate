@@ -113,8 +113,6 @@
 
   const saveConnection = async () => {
     if(componentState.connectionName != '' && componentState.connectionUrl != '') {
-      await SqlLiteService.saveDbConnection({id: uid(), name: componentState.connectionName, url: componentState.connectionUrl });
-
       crudEventsStore.updateConnectionSavedEvent(true);
 
       return;

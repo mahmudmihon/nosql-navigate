@@ -173,7 +173,8 @@
     import { CommonConsts } from '../../utilities/common-consts';
     import { ComponentStateModel } from './Models/ViewModels';   
     import { useTabDataStore } from '../../stores/tab-data';   
-    import { MongoDbService } from '../../services/data/mongo-service';
+    import { MongoDbService } from '../../services/data/mongo-service';   
+    import { useOperationSummaryStore } from '../../stores/operation-summary';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
@@ -191,6 +192,7 @@
     const countStore = useDocumentsCountStore();
     const tabsDataStore = useTabDataStore();
     const importExportStore = useImportExportEventsStore();
+    const operationSummaryStore = useOperationSummaryStore();
     const notification = useNotification();
 
     const calculateTotalPageCount = (counsData: DocumentsCount[]) => {

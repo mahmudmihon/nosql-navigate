@@ -40,14 +40,11 @@
   })();
 
   async function getSavedConnections() {
-    componentState.savedConnections = await SqlLiteService.getSavedConnections();
   };
 
   getSavedConnections();
 
   async function DeleteConnection(id: string) {
-    await SqlLiteService.deleteSavedConnection(id);
-
     await getSavedConnections();
   }
 

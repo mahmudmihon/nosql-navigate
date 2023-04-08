@@ -11,3 +11,28 @@ impl DbWithCollections {
         DbWithCollections { db_name: String::new(), db_collections: Vec::new() }
     }
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct ImportExportSummary {
+    pub id: String,
+    pub db_name: String,
+    pub collection_name: String,
+    pub operation_type: String,
+    pub operation_status: String,
+    pub documents_count: u64,
+    pub created_on: String
+}
+
+impl ImportExportSummary {
+    pub fn new() -> ImportExportSummary {
+        ImportExportSummary {
+            id: String::new(),  
+            db_name: String::new(), 
+            collection_name: String::new(),
+            operation_type: String::new(),
+            operation_status: String::new(),
+            documents_count: 0,
+            created_on: String::new()    
+        }
+    }
+}

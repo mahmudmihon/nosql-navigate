@@ -1222,15 +1222,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:1.0.0-rc.4":
-  version: 1.0.0-rc.4
-  resolution: "@tauri-apps/api@npm:1.0.0-rc.4"
-  dependencies:
-    type-fest: 2.12.2
-  checksum: 44744a61d470f578cfa3272a36ec81dd68507467b343e1f4a10960ca8ee11554a31109b4001cf0b94d43cc26643b7f6a2dde896613dc14de733acd783431ed91
-  languageName: node
-  linkType: hard
-
 "@tauri-apps/api@npm:^1.2.0":
   version: 1.2.0
   resolution: "@tauri-apps/api@npm:1.2.0"
@@ -2999,7 +2990,6 @@ __metadata:
     sass: ^1.58.0
     stream-browserify: ^3.0.0
     tailwindcss: ^3.2.4
-    tauri-plugin-sqlite-api: "github:lzdyes/tauri-plugin-sqlite#v0.1.1"
     typescript: ^4.6.4
     util: ^0.12.5
     uuid: ^9.0.0
@@ -3767,16 +3757,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tauri-plugin-sqlite-api@github:lzdyes/tauri-plugin-sqlite#v0.1.1":
-  version: 0.1.1
-  resolution: "tauri-plugin-sqlite-api@https://github.com/lzdyes/tauri-plugin-sqlite.git#commit=3d09a5a963f96a06debe27b3e37d9337aca18dcc"
-  dependencies:
-    "@tauri-apps/api": 1.0.0-rc.4
-    tslib: ^2.4.0
-  checksum: a970ce1faa210ec1b3c06568b143ece499df0831b49ea06e421a76594de9e4e2b477a8c1073f5440b2d73342b1703df68dd13fc62f8fb1ac2d472c54a4b5b789
-  languageName: node
-  linkType: hard
-
 "tiny-emitter@npm:^2.0.0":
   version: 2.1.0
   resolution: "tiny-emitter@npm:2.1.0"
@@ -3827,20 +3807,6 @@ __metadata:
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.4.0":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
-  languageName: node
-  linkType: hard
-
-"type-fest@npm:2.12.2":
-  version: 2.12.2
-  resolution: "type-fest@npm:2.12.2"
-  checksum: ee69676da1f69d2b14bbec28c7b95220a3221ab14093f54bde179c59e185a80470859553eada535ec35d8637a245c2f0efe9d7c99cc46a43f3b4c7ef64db7957
   languageName: node
   linkType: hard
 

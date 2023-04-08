@@ -1,12 +1,16 @@
+use chrono::Utc;
 use mongodb::{options::FindOptions, options::UpdateModifications, Client};
 use mongodb::bson::{doc, Document};
 use serde_json::{Map, Value};
+use uuid::Uuid;
 use std::convert::TryFrom;
 use futures::stream::{StreamExt};
 use std::fs::{File, OpenOptions};
 use std::io::{Write};
-use crate::models::dtos::DbWithCollections;
+use crate::models::dtos::{DbWithCollections, ImportExportSummary};
 use crate::models::errors::CustomError;
+
+use super::sql_lite_service;
 
 static mut CONNECTED_CLIENT: Option<Client> = None;
 
@@ -255,6 +259,10 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let mut count: u64 = 0;
 
+                let summary_for = "export";
+
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name);
+
                 writeln!(file, "[")?;
 
                 while let Some(doc) = cursor.next().await {
@@ -265,6 +273,11 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                 }
 
                 writeln!(file, "]")?;
+
+                export_summary.documents_count = count;
+                export_summary.operation_status = String::from("completed");
+
+                update_summary(export_summary);
 
                 return Ok(count);
             },
@@ -394,4 +407,24 @@ fn create_options(sort: Document, limit: i64, skip: u64) -> FindOptions {
         .limit(limit)
         .skip(skip)
         .build()
+}
+
+fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str) -> ImportExportSummary {
+    let mut summary: ImportExportSummary = ImportExportSummary::new();
+
+    summary.id = Uuid::new_v4().to_string();
+    summary.db_name = db_name.to_string();
+    summary.collection_name = collection_name.to_string();
+    summary.operation_type = summary_for.to_string();
+    summary.operation_status = String::from("pending");
+    summary.documents_count = 0;
+    summary.created_on = Utc::now().to_string();
+
+    sql_lite_service::insert_import_export_summary(&summary);
+
+    return summary;
+}
+
+fn update_summary(summary: ImportExportSummary) {
+    sql_lite_service::update_import_export_summary(&summary);
 }
