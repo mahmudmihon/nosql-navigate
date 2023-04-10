@@ -156,7 +156,8 @@
   import { useRefreshEventsStore } from '../../stores/refresh-events';
   import { useDatabaseCollectionsStore } from '../../stores/db-collections'; 
   import { MongoDbService } from '../../services/data/mongo-service';  
-  import { StoreService } from '../../services/store-service';
+  import { StoreService } from '../../services/store-service'; 
+  import { SqlLiteService } from '../../services/data/sqlLite-service';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   const tabsStore = useCollectionTabsStore();
@@ -314,6 +315,8 @@
   });
 
   const disconnectDb = async (): Promise<void> => {
+    await SqlLiteService.clearImportExportSummary();
+
     await MongoDbService.dropMongoClient();
 
     StoreService.resetStores();

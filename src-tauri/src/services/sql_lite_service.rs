@@ -74,6 +74,35 @@ pub fn delete_db_connection(id: &str) -> Result<()> {
     return Ok(());
 }
 
+pub fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>> {
+    let db_path = get_db_path();
+
+    let conn = Connection::open(db_path)?;
+
+    let mut summary_list: Vec<ImportExportSummary> = Vec::new();
+
+    let mut stmt = conn.prepare("SELECT id, db_name, collection_name, path, operation_type, operation_status, documents_count, created_on FROM import_export_summary")?;
+
+    let summary_iter = stmt.query_map([], |row| {
+        Ok(ImportExportSummary {
+            id: row.get(0)?,
+            db_name: row.get(1)?,
+            collection_name: row.get(2)?,
+            path: row.get(3)?,
+            operation_type: row.get(4)?,
+            operation_status: row.get(5)?,
+            documents_count: row.get(6)?,
+            created_on: row.get(7)?
+        })
+    })?;
+
+    for summary in summary_iter {
+        summary_list.push(summary.unwrap());
+    }
+
+    return Ok(summary_list);
+}
+
 pub fn insert_import_export_summary(summary: &ImportExportSummary) -> Result<()> {
     let db_path = get_db_path();
 
@@ -95,6 +124,19 @@ pub fn update_import_export_summary(summary: &ImportExportSummary) -> Result<()>
     conn.execute(
         "UPDATE import_export_summary SET operation_status=?1, documents_count=?2 WHERE id=?3",
         (summary.operation_status, summary.documents_count, summary.id)
+    )?;
+
+    return Ok(());
+}
+
+pub fn clear_import_export_summary() -> Result<()> {
+    let db_path = get_db_path();
+
+    let conn = Connection::open(db_path)?;
+
+    conn.execute(
+        "DELETE FROM import_export_summary",
+        ()
     )?;
 
     return Ok(());

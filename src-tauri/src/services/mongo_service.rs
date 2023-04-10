@@ -7,6 +7,7 @@ use std::convert::TryFrom;
 use futures::stream::{StreamExt};
 use std::fs::{File, OpenOptions};
 use std::io::{Write};
+
 use crate::models::dtos::{DbWithCollections, ImportExportSummary};
 use crate::models::errors::CustomError;
 
@@ -204,6 +205,10 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let mut count: u64 = 0;
 
+                let summary_for = "export";
+
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
+
                 writeln!(file, "[")?;
 
                 while let Some(doc) = cursor.next().await {
@@ -214,6 +219,11 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
                 }
 
                 writeln!(file, "]")?;
+
+                export_summary.documents_count = count;
+                export_summary.operation_status = String::from("completed");
+
+                update_summary(export_summary);
 
                 return Ok(count);
             },
@@ -261,7 +271,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let summary_for = "export";
 
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name);
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
 
                 writeln!(file, "[")?;
 
@@ -297,11 +307,20 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let documents_count = u64::try_from(documents.len()).unwrap();
 
+                let summary_for = "import";
+
+                let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
+
                 if !documents.is_empty() && documents.len() > 0 {
                     let db = client.database(db_name);
 
                     db.collection::<Document>(collection_name).insert_many(documents, None).await?;
                 }
+
+                import_summary.documents_count = documents_count;
+                import_summary.operation_status = String::from("completed");
+
+                update_summary(import_summary);
 
                 return Ok(documents_count);
             },
@@ -409,12 +428,13 @@ fn create_options(sort: Document, limit: i64, skip: u64) -> FindOptions {
         .build()
 }
 
-fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str) -> ImportExportSummary {
+fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str, path: &str) -> ImportExportSummary {
     let mut summary: ImportExportSummary = ImportExportSummary::new();
 
     summary.id = Uuid::new_v4().to_string();
     summary.db_name = db_name.to_string();
     summary.collection_name = collection_name.to_string();
+    summary.path = path.to_string();
     summary.operation_type = summary_for.to_string();
     summary.operation_status = String::from("pending");
     summary.documents_count = 0;

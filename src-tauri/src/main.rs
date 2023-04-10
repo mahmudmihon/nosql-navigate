@@ -6,6 +6,7 @@
 mod services;
 mod models;
 
+use models::dtos::ImportExportSummary;
 use mongodb::bson::{doc, Document};
 use services::mongo_service;
 use services::sql_lite_service;
@@ -15,6 +16,16 @@ use models::errors::CustomError;
 #[tauri::command]
 fn create_initial_tables() {
   sql_lite_service::create_initial_tables();
+}
+
+#[tauri::command]
+fn clear_import_export_summary() {
+  sql_lite_service::clear_import_export_summary();
+}
+
+#[tauri::command]
+fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>, ()> {
+  return Ok(sql_lite_service::get_all_import_export_summary().unwrap());
 }
 
 #[tauri::command]
@@ -101,6 +112,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
           create_initial_tables,
+          clear_import_export_summary,
           check_mongo_url, 
           drop_client, 
           drop_database, 
