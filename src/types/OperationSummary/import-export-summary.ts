@@ -1,27 +1,10 @@
 export interface ImportExportSummary {
     id: string;
-    operationType: ImportExportOperationType;
-    documentType: ImportExportDocumentType;
-    operationStatus: ImportExportStatus;
-    dbName: string;
-    collectionName: string;
+    db_name: string;
+    collection_name: string;
     path: string;
-    documentsCount: number;
-    createdOn: Date;
-}
-
-export enum ImportExportOperationType {
-    Import,
-    Export
-}
-
-export enum ImportExportDocumentType {
-    Documents,
-    Aggregation
-}
-
-export enum ImportExportStatus {
-    Pending,
-    Completed,
-    Failed
+    operation_type: string;
+    operation_status: string;   
+    documents_count: number;
+    created_on: string;
 }

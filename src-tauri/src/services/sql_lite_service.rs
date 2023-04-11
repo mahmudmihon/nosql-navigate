@@ -110,7 +110,7 @@ pub fn insert_import_export_summary(summary: &ImportExportSummary) -> Result<()>
 
     conn.execute(
         "INSERT INTO import_export_summary (id, db_name, collection_name, path, operation_type, operation_status, documents_count, created_on) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-        (summary.id, summary.db_name, summary.collection_name, summary.path, summary.operation_type, summary.operation_status, summary.documents_count, summary.created_on)
+        (&summary.id, &summary.db_name, &summary.collection_name, &summary.path, &summary.operation_type, &summary.operation_status, &summary.documents_count, &summary.created_on)
     )?;
 
     return Ok(());
@@ -123,7 +123,7 @@ pub fn update_import_export_summary(summary: &ImportExportSummary) -> Result<()>
 
     conn.execute(
         "UPDATE import_export_summary SET operation_status=?1, documents_count=?2 WHERE id=?3",
-        (summary.operation_status, summary.documents_count, summary.id)
+        (&summary.operation_status, &summary.documents_count, &summary.id)
     )?;
 
     return Ok(());
