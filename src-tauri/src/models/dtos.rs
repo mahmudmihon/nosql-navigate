@@ -13,6 +13,7 @@ impl DbWithCollections {
 }
 
 #[derive(Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct ImportExportSummary {
     pub id: String,
     pub db_name: String,

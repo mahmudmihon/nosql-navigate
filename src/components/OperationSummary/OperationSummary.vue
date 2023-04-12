@@ -1,11 +1,11 @@
 <template>
-  <div class="flex w-full">
-    <n-button strong secondary round type="success" size="small">
+  <div class="flex justify-end w-full">
+    <n-button secondary round type="success" size="small">
       Refresh
     </n-button>
   </div>
 
-  <div class="mt-5">
+  <div class="mt-2">
     <n-tabs type="line" animated>
       <n-tab-pane name="import_export" tab="Import Export">
         <ImportExportSummary />

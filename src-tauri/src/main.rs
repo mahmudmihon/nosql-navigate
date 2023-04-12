@@ -112,6 +112,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
           create_initial_tables,
+          get_all_import_export_summary,
           clear_import_export_summary,
           check_mongo_url, 
           drop_client, 

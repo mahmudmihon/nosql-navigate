@@ -14,6 +14,7 @@ export interface ComponentStateModel {
     dataLoading: boolean;
     showCollectionAddModal: boolean;
     showDeleteConfirmationModal: boolean;
+    showLogsModal: boolean;
     creatingCollection: boolean;
     deletingEntity: boolean;
     addNewDb: boolean;

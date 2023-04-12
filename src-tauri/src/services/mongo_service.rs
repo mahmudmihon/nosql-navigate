@@ -205,7 +205,7 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let mut count: u64 = 0;
 
-                let summary_for = "export";
+                let summary_for = "xport";
 
                 let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
 
@@ -436,7 +436,7 @@ fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str, path:
     summary.collection_name = collection_name.to_string();
     summary.path = path.to_string();
     summary.operation_type = summary_for.to_string();
-    summary.operation_status = String::from("pending");
+    summary.operation_status = String::from("running");
     summary.documents_count = 0;
     summary.created_on = Utc::now().to_string();
 
