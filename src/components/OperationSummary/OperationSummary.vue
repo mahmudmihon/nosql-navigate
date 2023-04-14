@@ -1,8 +1,8 @@
 <template>
   <div class="flex justify-end w-full">
-    <n-button secondary round type="success" size="small">
-      Refresh
-    </n-button>
+    <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[1px] px-2 ml-2" @click="triggerSummaryRefresh">
+        Refresh
+    </button>
   </div>
 
   <div class="mt-2">
@@ -20,4 +20,8 @@
   import ImportExportSummary from '../ImportExportSummary/ImportExportSummary.vue';
 
   const refreshEventsStore = useRefreshEventsStore();
+
+  const triggerSummaryRefresh = () => {
+    refreshEventsStore.updateRefreshOperationSummary(true);
+  }
 </script>

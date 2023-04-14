@@ -64,6 +64,10 @@
   getImportExportSummaryLog();
   
   refreshEventsStore.$subscribe((mutation, state) => {
+    if(state.refreshOperationSummary) {
+      getImportExportSummaryLog();
 
+      refreshEventsStore.updateRefreshOperationSummary(false);
+    }
   });
 </script>

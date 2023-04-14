@@ -3,8 +3,8 @@
     <GenericSkeleton />
   </div>
 
-  <div v-else class="flex items-stretch flex-wrap content-start gap-4 max-h-[calc(100vh-25px)] overflow-y-auto">
-    <div v-for="dbStats in componentState.dbStatsData" class="bg-base rounded-3xl pl-5 pt-3 pb-3 w-64 self-start">
+  <div v-else class="flex flex-wrap content-start gap-4 max-h-[calc(100vh-25px)] overflow-y-auto">
+    <div v-for="dbStats in componentState.dbStatsData" class="bg-base rounded-3xl pl-5 pt-3 pb-3 w-64 self-start flex-auto">
       <p class="text-green-200 text-xl mt-1 overflow-hidden w-56 text-ellipsis">{{dbStats.db}}</p>
       <p class="text-sm mt-5 overflow-hidden w-56 text-ellipsis">Collections: {{dbStats.collections}}</p>
       <p class="text-sm mt-2 overflow-hidden w-56 text-ellipsis">Documents: {{dbStats.objects}}</p>

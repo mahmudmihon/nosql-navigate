@@ -140,6 +140,7 @@
                     </n-tag>
                 </div>
             </div>
+
             <div class="max-w-[50%]">
                 <n-pagination
                 v-model:page="componentState.pageNumber"
@@ -153,6 +154,10 @@
                     </template>
                 </n-pagination>
             </div>
+
+            <button class="bg-[#63ffb729] text-[#63e2b7] text-xs rounded-lg py-[1px] px-2 ml-2">
+                Refresh
+            </button>
         </div>
     </div>
 </template>
