@@ -64,27 +64,7 @@
 
                         clearObjectKeys();
 
-                        let existingData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
-
-                        if(existingData != null) {
-                            existingData = {
-                                ...existingData,
-                                aggregationResultFields: fields,
-                                aggregationDocumentsCount: componentState.aggregationData.length,
-                                isExporting: false
-                            }
-                        }
-                        else {
-                            existingData = {
-                                storeKey: props.tabStoreKey,
-                                documentsCount: 0,
-                                aggregationResultFields: fields,
-                                aggregationDocumentsCount: componentState.aggregationData.length,
-                                isExporting: false
-                            }
-                        }
-
-                        tabsDataStore.upsertData(existingData);
+                        updateTabStoreData(fields);
                     }
                 }
 
@@ -97,6 +77,32 @@
         }
         else {
             componentState.aggregationData = [];
+
+            updateTabStoreData([]);
         }
+    }
+
+    const updateTabStoreData = (fields: any[]): void => {
+        let existingData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+        if(existingData != null) {
+            existingData = {
+                ...existingData,
+                aggregationResultFields: fields,
+                aggregationDocumentsCount: componentState.aggregationData.length,
+                isExporting: false
+            }
+        }
+        else {
+            existingData = {
+                storeKey: props.tabStoreKey,
+                documentsCount: 0,
+                aggregationResultFields: fields,
+                aggregationDocumentsCount: componentState.aggregationData.length,
+                isExporting: false
+            }
+        }
+
+        tabsDataStore.upsertData(existingData);
     }
 </script>

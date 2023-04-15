@@ -199,15 +199,15 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let db = client.database(db_name);
 
+                let summary_for = "export";
+
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
+
                 let pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
 
                 let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
 
                 let mut count: u64 = 0;
-
-                let summary_for = "xport";
-
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
 
                 writeln!(file, "[")?;
 
@@ -303,13 +303,13 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let file_to_import = File::open(&path)?;
 
-                let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
-
-                let documents_count = u64::try_from(documents.len()).unwrap();
-
                 let summary_for = "import";
 
                 let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
+
+                let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
+
+                let documents_count = u64::try_from(documents.len()).unwrap();
 
                 if !documents.is_empty() && documents.len() > 0 {
                     let db = client.database(db_name);

@@ -50,7 +50,7 @@
                 </n-tag>
             </div>
 
-            <span class="hover:cursor-pointer hover:text-blue-400" title="Export Collection" @click="exportAggregationResult">
+            <span class="hover:cursor-pointer hover:text-[#63e2b7]" title="Export Collection" @click="exportAggregationResult">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 mr-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                 </svg>
@@ -84,7 +84,7 @@
 
             <div v-if="componentState.showLookupSection" class="mt-3">
                 <div class="flex gap-2">
-                    <div class="grow flex-col">
+                    <div class="flex-1 flex-col">
                         <p class="text-xs mb-1">From</p>
                         <n-select
                             size="small"
@@ -97,7 +97,7 @@
                         />
                     </div>
 
-                    <div class="grow flex-col">
+                    <div class="flex-1 flex-col">
                         <p class="text-xs mb-1">Foreign Field</p>
                         <n-select
                             size="small"
@@ -111,7 +111,7 @@
                 </div>
 
                 <div class="flex basis-0 gap-2 mt-2">
-                    <div class="grow flex-col">
+                    <div class="flex-1 flex-col">
                         <p class="text-xs mb-1">Local Field</p>
                         <n-select
                             size="small"
@@ -123,7 +123,7 @@
                         />
                     </div>
 
-                    <div class="grow flex-col">
+                    <div class="flex-1 flex-col">
                         <p class="text-xs mb-1">As</p>
                         <n-input
                             size="small"
@@ -133,7 +133,7 @@
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
-                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateLookupQuery">
+                    <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[2px] px-4" @click="populateLookupQuery">
                         Done
                     </button>
                 </div>
@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
-                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateProjectQuery">
+                    <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[2px] px-4" @click="populateProjectQuery">
                         Done
                     </button>
                 </div>
@@ -175,7 +175,7 @@
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
-                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateUnsetQuery">
+                    <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[2px] px-4" @click="populateUnsetQuery">
                         Done
                     </button>
                 </div>
@@ -204,7 +204,7 @@
                 </div>
 
                 <div class="flex justify-end mt-2 gap-2">
-                    <button class="bg-[#4bb153] text-white rounded-lg py-[2px] px-4" @click="populateunwindQuery">
+                    <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[2px] px-4" @click="populateunwindQuery">
                         Done
                     </button>
                 </div>
@@ -224,7 +224,7 @@
         </div>
 
         <div class="flex justify-end mt-3 gap-2">
-            <button class="bg-[#4bb153] text-white rounded-lg py-[3px] px-6" @click="addStageQuery">
+            <button class="bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[3px] px-6" @click="addStageQuery">
                 Add
             </button>
         </div>
@@ -290,18 +290,27 @@
     });
 
     const updateLocalFieldsAndSummary = (fromLocalStore: boolean): void => {
+        console.log("Inside fileds update");
+        console.log(componentState.stagesQuery);
+
         let fields: string[] = [];
 
         if(fromLocalStore) {
-            const resultData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
-
-            if(resultData != null) {
-                fields = resultData.aggregationResultFields;
-
-                if(resultData.aggregationDocumentsCount > 0) {
-                    componentState.showSummarySection = true;
-                }
+            
+            if(componentState.stagesQuery.length == 0 || componentState.stagesQuery.filter(x => x.shouldApply)?.length == 0) {
+                fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
             }
+            else {
+                const resultData = tabsDataStore.tabsData.filter(x => x.storeKey == props.tabStoreKey)[0];
+
+                if(resultData != null) {
+                    fields = resultData.aggregationResultFields;
+
+                    if(resultData.aggregationDocumentsCount > 0) {
+                        componentState.showSummarySection = true;
+                    }
+                }
+            }            
         }
         else {
             fields = globalFieldsStore.fieldsList.filter(x => x.documentOf == `${props.dbName}.${props.collectionName}`)[0]?.documentFields;
@@ -408,14 +417,22 @@
         if(Object.keys(parsedQuery).length > 0) {
             componentState.stagesQuery.push({ shouldApply: true, query: componentState.stageQuery });
 
+            componentState.pipelineStage = '';
             componentState.stageQuery = '';
             componentState.showEditorModal = false;
+            componentState.showUnsetSection = false;
+            componentState.showProjectSection = false;
+            componentState.showLookupSection = false;
+            componentState.showUnwindSection = false;
 
             parseAndTriggerAggregation();
         }
     }
 
     const parseAndTriggerAggregation = (): void => {
+        console.log("Inside parse and trigger");
+        console.log(componentState.stagesQuery);
+
         const shouldApplyStages = componentState.stagesQuery.filter(x => x.shouldApply);
 
         const pipelines = shouldApplyStages.map(x => {return x.query});

@@ -109,7 +109,7 @@
     </div>
 
     <div class="flex justify-end mt-3 gap-2">
-      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="componentState.creatingCollection"
+      <button class="inline-flex bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[3px] px-6" :disabled="componentState.creatingCollection"
         @click="createCollection">
         <svg v-if="componentState.creatingCollection" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@
     </div>
 
     <div class="flex justify-end mt-3 gap-2">
-      <button class="inline-flex bg-[#4bb153] text-white rounded-lg py-[3px] px-6" :disabled="componentState.deletingEntity"
+      <button class="inline-flex bg-[#63ffb729] text-[#63e2b7] rounded-lg py-[3px] px-6" :disabled="componentState.deletingEntity"
         @click="dropEntity">
         <svg v-if="componentState.deletingEntity" class="animate-spin mt-1 -ml-1 mr-2 h-4 w-4 text-black"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -308,6 +308,8 @@
 
     if(term == null || term == '') {
       searchedData = componentState.dbsWithCollections;
+
+      document.body.querySelectorAll('details').forEach((e) => e.removeAttribute('open'));
     }
     else {
       for(let i = 0; i < componentState.dbsWithCollections.length; i++) {
@@ -332,6 +334,8 @@
           }
         }
       }
+
+      document.body.querySelectorAll('details').forEach((e) => e.setAttribute('open', 'true'));
     }
 
     return searchedData;
