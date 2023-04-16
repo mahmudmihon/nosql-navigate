@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use rusqlite::{Connection, Result};
 use uuid::Uuid;
 
-use crate::models::dtos::ImportExportSummary;
+use crate::models::dtos::{ImportExportSummary, ConnectionInfo};
 
 fn get_db_path() -> PathBuf {
     match project_root::get_project_root() {
@@ -46,7 +46,31 @@ pub fn create_initial_tables() -> Result<()> {
     return Ok(());
 }
 
-pub fn save_db_connection(connection_name: &str, connection_url: &str) -> Result<()> {
+pub fn get_all_connection_info() -> Result<Vec<ConnectionInfo>> {
+    let db_path = get_db_path();
+
+    let conn = Connection::open(db_path)?;
+
+    let mut info_list: Vec<ConnectionInfo> = Vec::new();
+
+    let mut stmt = conn.prepare("SELECT id, name, url FROM saved_connections")?;
+
+    let info_iter = stmt.query_map([], |row| {
+        Ok(ConnectionInfo {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            url: row.get(2)?
+        })
+    })?;
+
+    for info in info_iter {
+        info_list.push(info.unwrap());
+    }
+
+    return Ok(info_list);
+}
+
+pub fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<()> {
     let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;
@@ -54,14 +78,14 @@ pub fn save_db_connection(connection_name: &str, connection_url: &str) -> Result
     let id = Uuid::new_v4().to_string();
 
     conn.execute(
-        "INSERT INTO saved_connections (id, connection_name, connection_url) VALUES (?1, ?2, ?3)",
+        "INSERT INTO saved_connections (id, name, url) VALUES (?1, ?2, ?3)",
         (id, connection_name, connection_url)
     )?;
 
     return Ok(());
 }
 
-pub fn delete_db_connection(id: &str) -> Result<()> {
+pub fn delete_connection_info(id: &str) -> Result<()> {
     let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;

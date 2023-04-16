@@ -3,8 +3,13 @@
     <GenericSkeleton v-if="componentState.dataLoading" />
 
     <div v-else>
-      <p class="bg-base text-ellipsis text-sm rounded-lg pl-3 pt-3 pb-3">mongodb://localhost:27027</p>
-
+      <n-popover trigger="hover">
+        <template #trigger>
+          <p class="bg-base text-ellipsis text-[13px] rounded-lg pl-3 pt-3 pb-3">{{componentState.connectedUrl}}</p>
+        </template>
+        <span>{{componentState.connectedUrl}}</span>
+      </n-popover>
+      
       <div class="flex mt-2 align-middle justify-center gap-2">
         <span class="bg-base p-2.5 rounded-full hover:cursor-pointer" title="Add Database" @click="addNewDatabase">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
@@ -166,7 +171,7 @@
 <script setup lang="ts">
   import { computed, reactive } from 'vue';
   import { ComponentStateModel, DbsNavigationViewModel } from './Models/ViewModels';
-  import { NModal, useNotification, NInput } from 'naive-ui';
+  import { NModal, useNotification, NInput, NPopover } from 'naive-ui';
   import { useCollectionTabsStore } from '../../stores/collection-tabs';
   import { useRouter } from 'vue-router';
   import { v4 as uid } from 'uuid';
@@ -175,18 +180,21 @@
   import { MongoDbService } from '../../services/data/mongo-service';  
   import { StoreService } from '../../services/store-service'; 
   import { SqlLiteService } from '../../services/data/sqlLite-service';
+  import { useConnectionEventsStore } from '../../stores/connection-events';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
   import OperationSummary from '../OperationSummary/OperationSummary.vue';
 
   const tabsStore = useCollectionTabsStore();
   const collectionsStore = useDatabaseCollectionsStore();
   const refreshEventsStore = useRefreshEventsStore();
+  const connectionEventsStore = useConnectionEventsStore();
   const router = useRouter();
   const notification = useNotification();
 
   const componentState: ComponentStateModel = reactive({
     searchQuery: '',
     deleteEntityName: '',
+    connectedUrl: connectionEventsStore.$state.connectedUrl,
     dataLoading: true,
     showCollectionAddModal: false,
     showDeleteConfirmationModal: false,

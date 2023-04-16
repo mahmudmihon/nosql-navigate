@@ -11,6 +11,7 @@ export interface CollectionAddModel {
 export interface ComponentStateModel {
     searchQuery: string;
     deleteEntityName: string;
+    connectedUrl: string
     dataLoading: boolean;
     showCollectionAddModal: boolean;
     showDeleteConfirmationModal: boolean;

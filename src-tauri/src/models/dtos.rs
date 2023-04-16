@@ -13,7 +13,6 @@ impl DbWithCollections {
 }
 
 #[derive(Serialize, Deserialize)]
-#[derive(Debug)]
 pub struct ImportExportSummary {
     pub id: String,
     pub db_name: String,
@@ -36,6 +35,23 @@ impl ImportExportSummary {
             operation_status: String::new(),
             documents_count: 0,
             created_on: String::new()    
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ConnectionInfo {
+    pub id: String,
+    pub name: String,
+    pub url: String
+}
+
+impl ConnectionInfo {
+    pub fn new() -> ConnectionInfo {
+        ConnectionInfo {
+            id: String::new(),  
+            name: String::new(), 
+            url: String::new()  
         }
     }
 }

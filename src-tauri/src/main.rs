@@ -6,6 +6,7 @@
 mod services;
 mod models;
 
+use models::dtos::ConnectionInfo;
 use models::dtos::ImportExportSummary;
 use mongodb::bson::{doc, Document};
 use services::mongo_service;
@@ -16,6 +17,21 @@ use models::errors::CustomError;
 #[tauri::command]
 fn create_initial_tables() {
   sql_lite_service::create_initial_tables();
+}
+
+#[tauri::command]
+fn get_all_connection_info() -> Result<Vec<ConnectionInfo>, ()> {
+  return Ok(sql_lite_service::get_all_connection_info().unwrap());
+}
+
+#[tauri::command]
+fn save_connection_info(connection_name: &str, connection_url: &str) {
+  sql_lite_service::save_connection_info(connection_name, connection_url);
+}
+
+#[tauri::command]
+fn delete_connection_info(id: &str) {
+  sql_lite_service::delete_connection_info(id);
 }
 
 #[tauri::command]
@@ -112,6 +128,9 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
           create_initial_tables,
+          get_all_connection_info,
+          save_connection_info,
+          delete_connection_info,
           get_all_import_export_summary,
           clear_import_export_summary,
           check_mongo_url, 

@@ -32,7 +32,7 @@
     </div>
 
     <div class="flex justify-end mt-3">
-      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click.prevent="saveConnection">Save</button>
+      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click="saveConnection">Save</button>
     </div>
   </div>
 </template>
@@ -44,13 +44,12 @@
   import { useNotification } from 'naive-ui';
   import { CommonConsts } from '../../utilities/common-consts';
   import { SqlLiteService } from '../../services/data/sqlLite-service';
-  import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
-  import { v4 as uid } from 'uuid';
+  import { useConnectionEventsStore } from '../../stores/connection-events';
   import { MongoDbService } from '../../services/data/mongo-service';
  
   const router = useRouter();
   const notification = useNotification();
-  const crudEventsStore = useConnectionCRUDEventsStore();
+  const connectionEventsStore = useConnectionEventsStore();
 
   const componentState: ComponentStateModel = reactive({
     connectionName: '',
@@ -94,6 +93,7 @@
 
         case ButtonActionType.ValidateAndRedirectToHomePage: {
           componentState.connectButtonLoading = false;
+          connectionEventsStore.updateConnectedUrl(componentState.connectionUrl);
           router.push({path: '/dashboard'});
           break;
         }
@@ -113,7 +113,10 @@
 
   const saveConnection = async () => {
     if(componentState.connectionName != '' && componentState.connectionUrl != '') {
-      crudEventsStore.updateConnectionSavedEvent(true);
+
+      await SqlLiteService.saveConnectionInfo(componentState.connectionName, componentState.connectionUrl);
+
+      connectionEventsStore.updateConnectionSavedEvent(true);
 
       return;
     }
@@ -121,7 +124,7 @@
     notification.error({ title: 'Connection name or URL is empty.' });
   }
 
-  crudEventsStore.$subscribe((mutation, state) => {
+  connectionEventsStore.$subscribe((mutation, state) => {
     if(state.selectedConnection?.url != '') {
       componentState.connectionUrl = state.selectedConnection?.url;
     }

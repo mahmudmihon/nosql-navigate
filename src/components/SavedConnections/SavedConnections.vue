@@ -27,11 +27,11 @@
 <script setup lang="ts">
   import { reactive } from 'vue';
   import { SqlLiteService } from '../../services/data/sqlLite-service';
-  import { useConnectionCRUDEventsStore } from '../../stores/connection-crud-events';
+  import { useConnectionEventsStore } from '../../stores/connection-events';
   import { ComponentStateModel } from './Models/ViewModels';
   import { NTag } from 'naive-ui';
 
-  const crudEventsStore = useConnectionCRUDEventsStore();
+  const connectionEventsStore = useConnectionEventsStore();
 
   const componentState: ComponentStateModel = reactive({savedConnections: []});
 
@@ -40,23 +40,26 @@
   })();
 
   async function getSavedConnections() {
+    componentState.savedConnections = await SqlLiteService.getAllConnectionInfo();
   };
 
   getSavedConnections();
 
   async function DeleteConnection(id: string) {
+    await SqlLiteService.deleteConnectionInfo(id);
+
     await getSavedConnections();
   }
 
   function updateSelectedDb(index: number) {
-    crudEventsStore.updateSelectedConnection(componentState.savedConnections[index]);
+    connectionEventsStore.updateSelectedConnection(componentState.savedConnections[index]);
   }
 
-  crudEventsStore.$subscribe((mutation, state) => {
+  connectionEventsStore.$subscribe((mutation, state) => {
     if (state.connectionSaved) {
       getSavedConnections();;
 
-      crudEventsStore.updateConnectionSavedEvent(false);
+      connectionEventsStore.updateConnectionSavedEvent(false);
     }
   });
 </script>

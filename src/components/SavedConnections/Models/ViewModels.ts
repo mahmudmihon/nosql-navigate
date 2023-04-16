@@ -1,5 +1,5 @@
-import { DbConnection } from "../../../types/DbConnections/db-connection";
+import { ConnectionInfo } from "../../../types/DbConnections/db-connection";
 
 export interface ComponentStateModel {
-    savedConnections: DbConnection[];
+    savedConnections: ConnectionInfo[];
 }
