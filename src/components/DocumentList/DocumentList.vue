@@ -51,12 +51,12 @@
 
 <script setup lang="ts">
     import { reactive } from 'vue';
-    import { invoke } from '@tauri-apps/api/tauri';
     import { useCollectionDocumentsStore } from '../../stores/collection-documents';
     import { NModal, useNotification } from 'naive-ui';
     import { EJSONService } from '../../services/ejson-service';   
     import { ComponentStateModel } from './Models/ViewModels';   
-    import { useTabDataStore } from '../../stores/tab-data';
+    import { useTabDataStore } from '../../stores/tab-data';   
+    import { MongoDbService } from '../../services/data/mongo-service';
     import JSONView from '../JsonViewer/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
@@ -94,7 +94,7 @@
         componentState.showDocEditModal = true;
     }
 
-    const docFilterQuery = (documentId: string): string => {
+    const docFilterQuery = (documentId: any): string => {
         return `
             {
                 "_id": {
@@ -104,33 +104,39 @@
         `;
     }
 
-    const updateDoc = () => {
+    const updateDoc = async () => {
         const parsedObject = JSON.parse(componentState.editableDoc);
+
+        if(!parsedObject.hasOwnProperty('_id')) {
+            notification.error({title: "Invalid document!"});
+
+            return;
+        }
 
         const updateFilter = docFilterQuery(parsedObject["_id"]);
 
         const updateDoc = {"$set": parsedObject};
 
-        invoke('update_document', { dbName: props.dbName, collectionName: props.collectionName, filter: updateFilter, document: JSON.stringify(updateDoc) }).then(value => {
-            if(value != 'error') {
-                const updatedDoc = componentState.documentList.filter(x => x._id == parsedObject._id)[0];
+        const result = await MongoDbService.updateDocument(props.dbName, props.collectionName, updateFilter, JSON.stringify(updateDoc));
 
-                if(updatedDoc != null) {
-                    const updatedDocIndex = componentState.documentList.indexOf(updatedDoc);
+        if(result != 'error') {
+            const updatedDoc = componentState.documentList.filter(x => x._id == parsedObject._id)[0];
 
-                    componentState.documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
+            if(updatedDoc != null) {
+                const updatedDocIndex = componentState.documentList.indexOf(updatedDoc);
 
-                    componentState.showDocEditModal = false;
-                }
+                componentState.documentList[updatedDocIndex] = EJSONService.BsonDocToObject(parsedObject);
 
-                documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
-
-                notification.success({title: value as string});
+                componentState.showDocEditModal = false;
             }
-            else {
-                notification.error({title: "Document can not be updated."});
-            }
-        });
+
+            documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+
+            notification.success({title: result as string});
+        }
+        else {
+            notification.error({title: "Document can not be updated."});
+        }
     }
 
     const updateDocumentsCount = () => {
@@ -146,26 +152,26 @@
         }
     }
 
-    const deleteDoc = (document: object) => {
+    const deleteDoc = async (document: object) => {
         const deleteFilter = docFilterQuery(document["_id"]);
 
-        invoke('delete_document', { dbName: props.dbName, collectionName: props.collectionName, filter: deleteFilter }).then(value => {
-            if(value != 'error') {
+        const result = await MongoDbService.deleteDocument(props.dbName, props.collectionName, deleteFilter);
 
-                const deletedDocument = componentState.documentList.filter(x => x._id == document["_id"])[0];
+        if(result != 'error') {
 
-                if(deletedDocument != null) {
-                    const deletedDocumentIndex = componentState.documentList.indexOf(deletedDocument);
+            const deletedDocument = componentState.documentList.filter(x => x._id == document["_id"])[0];
 
-                    componentState.documentList.splice(deletedDocumentIndex, 1);
+            if(deletedDocument != null) {
+                const deletedDocumentIndex = componentState.documentList.indexOf(deletedDocument);
 
-                    documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
+                componentState.documentList.splice(deletedDocumentIndex, 1);
 
-                    updateDocumentsCount();
+                documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
 
-                    notification.success({title: "Document deleted."});
-                }
+                updateDocumentsCount();
+
+                notification.success({title: "Document deleted."});
             }
-        });
+        }
     }
 </script>
