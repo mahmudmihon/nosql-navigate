@@ -213,7 +213,15 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 while let Some(doc) = cursor.next().await {
                     let doc_to_string = serde_json::to_string_pretty(&doc?)?;
-                    writeln!(file, "{},", doc_to_string)?;
+
+                    if count == 0 {
+                        writeln!(file, "{}", doc_to_string)?;
+                    }
+                    else {
+                        writeln!(file, ",")?;
+
+                        writeln!(file, "{}", doc_to_string)?;
+                    }
 
                     count += 1;
                 }
@@ -276,8 +284,18 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                 writeln!(file, "[")?;
 
                 while let Some(doc) = cursor.next().await {
+
                     let doc_to_string = serde_json::to_string_pretty(&doc?)?;
-                    writeln!(file, "{},", doc_to_string)?;
+
+                    if count == 0 {
+                        writeln!(file, "{}", doc_to_string)?;
+                    }
+                    else {
+                        writeln!(file, ",")?;
+
+                        writeln!(file, "{}", doc_to_string)?;
+                    }
+                    
 
                     count += 1;
                 }

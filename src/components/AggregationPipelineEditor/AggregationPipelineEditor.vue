@@ -290,8 +290,6 @@
     });
 
     const updateLocalFieldsAndSummary = (fromLocalStore: boolean): void => {
-        console.log("Inside fileds update");
-        console.log(componentState.stagesQuery);
 
         let fields: string[] = [];
 
@@ -370,6 +368,7 @@
         }
 
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", {});
+
         componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
     }
 
@@ -381,12 +380,25 @@
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", componentState.lookUpModel);
 
         componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
+
+        componentState.lookUpModel = {
+            from: '',
+            foreignField: '',
+            localField: '',
+            as: ''
+        };
     }
 
     const populateunwindQuery = (): void => {
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", componentState.unwindModel);
 
         componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
+
+        componentState.unwindModel = {
+            field: '',
+            includeArrayIndex: false,
+            preserveNullAndEmptyArrays: false
+        };
     }
 
     const populateProjectQuery = (): void => {
@@ -399,6 +411,8 @@
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", fieldsToProject);
 
         componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
+
+        componentState.projectedFields = [];
     }
 
     const populateUnsetQuery = (): void => {
@@ -409,6 +423,8 @@
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", fieldsToUnset);
 
         componentState.stageQuery = JSON.stringify(selectedStageOutput, null, 2);
+
+        componentState.unsetFields = [];
     }
 
     const addStageQuery = () => {
@@ -430,8 +446,6 @@
     }
 
     const parseAndTriggerAggregation = (): void => {
-        console.log("Inside parse and trigger");
-        console.log(componentState.stagesQuery);
 
         const shouldApplyStages = componentState.stagesQuery.filter(x => x.shouldApply);
 
