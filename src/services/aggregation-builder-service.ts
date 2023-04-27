@@ -2,156 +2,157 @@ import { SelectMixedOption } from "naive-ui/es/select/src/interface";
 import { clearObjectKeys, extractObjectKeys } from "../utilities/object-keys";
 import { CollectionsAndDocumentsService } from "./collections-documents-service";
 import { EJSONService } from "./ejson-service";
+import { AggregationStages } from "../types/AggregationBuilder/aggregation-stages";
 
 export class AggregationBuilderService {
   static pipelineStages: SelectMixedOption[] = [
     {
-      label: "$addFields",
-      value: "$addFields",
+      label: AggregationStages.AddFields,
+      value: AggregationStages.AddFields
     },
     {
-      label: "$bucket",
-      value: "$bucket",
+      label: AggregationStages.Bucket,
+      value: AggregationStages.Bucket
     },
     {
-      label: "$bucketAuto",
-      value: "$bucketAuto",
+      label: AggregationStages.BucketAuto,
+      value: AggregationStages.BucketAuto
     },
     {
-      label: "$changeStream",
-      value: "$changeStream",
+      label: AggregationStages.ChangeStream,
+      value: AggregationStages.ChangeStream
     },
     {
-      label: "$collStats",
-      value: "$collStats",
+      label: AggregationStages.CollStats,
+      value: AggregationStages.CollStats
     },
     {
-      label: "$count",
-      value: "$count",
+      label: AggregationStages.Count,
+      value: AggregationStages.Count
     },
     {
-      label: "$currentOp",
-      value: "$currentOp",
+      label: AggregationStages.CurrentOp,
+      value: AggregationStages.CurrentOp
     },
     {
-      label: "$densify",
-      value: "$densify",
+      label: AggregationStages.Densify,
+      value: AggregationStages.Densify
     },
     {
-      label: "$documents",
-      value: "$documents",
+      label: AggregationStages.Documents,
+      value: AggregationStages.Documents
     },
     {
-      label: "$facet",
-      value: "$facet",
+      label: AggregationStages.Facet,
+      value: AggregationStages.Facet
     },
     {
-      label: "$fill",
-      value: "$fill",
+      label: AggregationStages.Fill,
+      value: AggregationStages.Fill
     },
     {
-      label: "$geoNear",
-      value: "$geoNear",
+      label: AggregationStages.GeoNear,
+      value: AggregationStages.GeoNear
     },
     {
-      label: "$graphLookup",
-      value: "$graphLookup",
+      label: AggregationStages.GraphLookup,
+      value: AggregationStages.GraphLookup
     },
     {
-      label: "$group",
-      value: "$group",
+      label: AggregationStages.Group,
+      value: AggregationStages.Group
     },
     {
-      label: "$indexStats",
-      value: "$indexStats",
+      label: AggregationStages.IndexStats,
+      value: AggregationStages.IndexStats
     },
     {
-      label: "$limit",
-      value: "$limit",
+      label: AggregationStages.Limit,
+      value: AggregationStages.Limit
     },
     {
-      label: "$lookup",
-      value: "$lookup",
+      label: AggregationStages.Lookup,
+      value: AggregationStages.Lookup
     },
     {
-      label: "$match",
-      value: "$match",
+      label: AggregationStages.Match,
+      value: AggregationStages.Match
     },
     {
-      label: "$merge",
-      value: "$merge",
+      label: AggregationStages.Merge,
+      value: AggregationStages.Merge
     },
     {
-      label: "$out",
-      value: "$out",
+      label: AggregationStages.Out,
+      value: AggregationStages.Out
     },
     {
-      label: "$planCacheStats",
-      value: "$planCacheStats",
+      label: AggregationStages.PlanCacheStats,
+      value: AggregationStages.PlanCacheStats
     },
     {
-      label: "$project",
-      value: "$project",
+      label: AggregationStages.Project,
+      value: AggregationStages.Project
     },
     {
-      label: "$redact",
-      value: "$redact",
+      label: AggregationStages.Redact,
+      value: AggregationStages.Redact
     },
     {
-      label: "$replaceRoot",
-      value: "$replaceRoot",
+      label: AggregationStages.ReplaceRoot,
+      value: AggregationStages.ReplaceRoot
     },
     {
-      label: "$replaceWith",
-      value: "$replaceWith",
+      label: AggregationStages.ReplaceWith,
+      value: AggregationStages.ReplaceWith
     },
     {
-      label: "$sample",
-      value: "$sample",
+      label: AggregationStages.Sample,
+      value: AggregationStages.Sample
     },
     {
-      label: "$search",
-      value: "$search",
+      label: AggregationStages.Search,
+      value: AggregationStages.Search
     },
     {
-      label: "$searchMeta",
-      value: "$searchMeta",
+      label: AggregationStages.SearchMeta,
+      value: AggregationStages.SearchMeta
     },
     {
-      label: "$set",
-      value: "$set",
+      label: AggregationStages.Set,
+      value: AggregationStages.Set
     },
     {
-      label: "$setWindowFields",
-      value: "$setWindowFields",
+      label: AggregationStages.SetWindowFields,
+      value: AggregationStages.SetWindowFields
     },
     {
-      label: "$shardedDataDistribution",
-      value: "$shardedDataDistribution",
+      label: AggregationStages.ShardedDataDistribution,
+      value: AggregationStages.ShardedDataDistribution
     },
     {
-      label: "$skip",
-      value: "$skip",
+      label: AggregationStages.Skip,
+      value: AggregationStages.Skip
     },
     {
-      label: "$sort",
-      value: "$sort",
+      label: AggregationStages.Sort,
+      value: AggregationStages.Sort
     },
     {
-      label: "$sortByCount",
-      value: "$sortByCount",
+      label: AggregationStages.SortByCount,
+      value: AggregationStages.SortByCount
     },
     {
-      label: "$unionWith",
-      value: "$unionWith",
+      label: AggregationStages.UnionWith,
+      value: AggregationStages.UnionWith
     },
     {
-      label: "$unset",
-      value: "$unset",
+      label: AggregationStages.Unset,
+      value: AggregationStages.Unset
     },
     {
-      label: "$unwind",
-      value: "$unwind",
+      label: AggregationStages.Unwind,
+      value: AggregationStages.Unwind
     }
   ];
 
