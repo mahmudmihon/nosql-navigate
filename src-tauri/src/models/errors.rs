@@ -1,14 +1,14 @@
 #[derive(Debug, thiserror::Error)]
 pub enum CustomError {
-    #[error("error")]
+    #[error("Mongo client not found!")]
     ClientNotFound,
-    #[error("error")]
+    #[error("Error occured in mongo!")]
     MongoError(#[from] mongodb::error::Error),
-    #[error("error")]
+    #[error("Error occured in serde json!")]
     SerdeError(#[from] serde_json::Error),
-    #[error("error")]
+    #[error("Error occured in bson deserialization!")]
     BsonDocError(#[from] mongodb::bson::extjson::de::Error),
-    #[error("error")]
+    #[error("Error occured while IO operation!")]
     IOError(#[from] std::io::Error)    
 }
 

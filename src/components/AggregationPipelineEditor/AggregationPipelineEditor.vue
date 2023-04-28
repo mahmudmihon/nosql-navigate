@@ -75,7 +75,7 @@
                     v-model:value="componentState.pipelineStage"
                     filterable
                     clearable
-                    :options="AggregationBuilderService.pipelineStages"
+                    :options="AggregationBuilderService.aggregationStages()"
                     :render-option="NaiveUiService.renderOption"
                     :placeholder="'Select Stage'"
                     @update:value="handleStageSelect"
@@ -242,7 +242,8 @@
     import { useTabDataStore } from '../../stores/tab-data';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
     import { save } from '@tauri-apps/api/dialog';
-    import { MongoDbService } from '../../services/data/mongo-service';
+    import { MongoDbService } from '../../services/data/mongo-service';  
+    import { AggregationStages } from '../../types/AggregationBuilder/aggregation-stages';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
     import JSONView from '../JsonViewer/JSONView.vue';
 
@@ -334,7 +335,7 @@
     }
 
     const handleStageSelect = (value: string, option: SelectOption) => {
-        if(componentState.pipelineStage == '$lookup') {
+        if(componentState.pipelineStage == AggregationStages.Lookup) {
             componentState.showLookupSection = true;
             componentState.showProjectSection = false;
             componentState.showUnwindSection = false;
@@ -342,7 +343,7 @@
 
             return;
         }
-        else if(componentState.pipelineStage == '$project') {
+        else if(componentState.pipelineStage == AggregationStages.Project) {
             componentState.showProjectSection = true;
             componentState.showLookupSection = false;
             componentState.showUnwindSection = false;
@@ -350,7 +351,7 @@
 
             return;
         }
-        else if(componentState.pipelineStage == '$unset') {
+        else if(componentState.pipelineStage == AggregationStages.Unset) {
             componentState.showUnsetSection = true;
             componentState.showProjectSection = false;
             componentState.showLookupSection = false;
@@ -358,7 +359,7 @@
 
             return;
         }
-        else if(componentState.pipelineStage == '$unwind') {
+        else if(componentState.pipelineStage == AggregationStages.Unwind) {
             componentState.showUnwindSection = true;
             componentState.showProjectSection = false;
             componentState.showLookupSection = false;

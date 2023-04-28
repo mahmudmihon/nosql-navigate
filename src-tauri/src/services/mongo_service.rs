@@ -8,7 +8,7 @@ use futures::stream::{StreamExt};
 use std::fs::{File, OpenOptions};
 use std::io::{Write};
 
-use crate::models::dtos::{DbWithCollections, ImportExportSummary};
+use crate::models::dtos::{DbWithCollections, ImportExportSummary, ErrorResult};
 use crate::models::errors::CustomError;
 
 use super::sql_lite_service;
@@ -42,45 +42,54 @@ pub async fn validate_url(url: &str) -> bool {
     };
 }
 
-pub async fn drop_database(db_name: &str) -> Result<String, CustomError> {
+pub async fn drop_database(db_name: &str) -> Result<String, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
-                client.database(db_name).drop(None).await;
+                let result = client.database(db_name).drop(None).await;
 
-                return Ok("ok".to_string());
+                match result {
+                    Ok(_r) => return Ok("ok".to_string()),
+                    Err(_e) => return Err(ErrorResult {message: "Error occured while dropping connection.".to_string() })
+                }             
             },
-            None => { return Err(CustomError::ClientNotFound) }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }
 
-pub async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+pub async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
 
-                db.create_collection(collection_name, None).await?;
+                let result = db.create_collection(collection_name, None).await;
 
-                return Ok("ok".to_string());
+                match result {
+                    Ok(_r) => return Ok("Collection created.".to_string()),
+                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                }  
             },
-            None => { return Err(CustomError::ClientNotFound) }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }
 
-pub async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+pub async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let db = client.database(db_name);
 
-                db.collection::<String>(collection_name).drop(None).await?;
+                let result = db.collection::<String>(collection_name).drop(None).await;
 
-                return Ok("ok".to_string());
+                match result {
+                    Ok(_r) => return Ok("Collection deleted.".to_string()),
+                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                }  
             },
-            None => { return Err(CustomError::ClientNotFound) }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }
@@ -296,7 +305,6 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                         writeln!(file, "{}", doc_to_string)?;
                     }
                     
-
                     count += 1;
                 }
 
@@ -314,35 +322,50 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
-pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
+pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
 
-                let file_to_import = File::open(&path)?;
+                let file_to_import = File::open(&path);
 
-                let summary_for = "import";
+                match file_to_import {
+                    Ok(file) => {
+                        let summary_for = "import";
 
-                let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
+                        let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
 
-                let documents:Vec<Document> = serde_json::from_reader(file_to_import).unwrap();
+                        let documents: Result<Vec<Document>, serde_json::Error> = serde_json::from_reader(file);
 
-                let documents_count = u64::try_from(documents.len()).unwrap();
+                        match documents {
+                            Ok(docs) => {
+                                let documents_count = u64::try_from(docs.len()).unwrap();
 
-                if !documents.is_empty() && documents.len() > 0 {
-                    let db = client.database(db_name);
+                                if !docs.is_empty() && docs.len() > 0 {
+                                    let db = client.database(db_name);
 
-                    db.collection::<Document>(collection_name).insert_many(documents, None).await?;
-                }
+                                    let insert_result = db.collection::<Document>(collection_name).insert_many(docs, None).await;
 
-                import_summary.documents_count = documents_count;
-                import_summary.operation_status = String::from("completed");
+                                    match insert_result {
+                                        Ok(_r) => {}
+                                        Err(_e) => return Err(ErrorResult {message: "Error occured while inserting the documents!".to_string() })
+                                    }
+                                }
 
-                update_summary(import_summary);
+                                import_summary.documents_count = documents_count;
+                                import_summary.operation_status = String::from("completed");
 
-                return Ok(documents_count);
+                                update_summary(import_summary);
+
+                                return Ok(documents_count);                              
+                            },
+                            Err(e) => return Err(ErrorResult {message: e.to_string() })
+                        }                       
+                    },
+                    Err(_e) => return Err(ErrorResult {message: "Error occured while opening the file!".to_string() })
+                }                 
             },
-            None => { return Err(CustomError::ClientNotFound); }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }

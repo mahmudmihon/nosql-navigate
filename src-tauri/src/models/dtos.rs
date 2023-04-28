@@ -55,3 +55,16 @@ impl ConnectionInfo {
         }
     }
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct ErrorResult {
+    pub message: String
+}
+
+impl ErrorResult {
+    pub fn new() -> ErrorResult {
+        ErrorResult {
+            message: String::new() 
+        }
+    }
+}

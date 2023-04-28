@@ -5,156 +5,14 @@ import { EJSONService } from "./ejson-service";
 import { AggregationStages } from "../types/AggregationBuilder/aggregation-stages";
 
 export class AggregationBuilderService {
-  static pipelineStages: SelectMixedOption[] = [
-    {
-      label: AggregationStages.AddFields,
-      value: AggregationStages.AddFields
-    },
-    {
-      label: AggregationStages.Bucket,
-      value: AggregationStages.Bucket
-    },
-    {
-      label: AggregationStages.BucketAuto,
-      value: AggregationStages.BucketAuto
-    },
-    {
-      label: AggregationStages.ChangeStream,
-      value: AggregationStages.ChangeStream
-    },
-    {
-      label: AggregationStages.CollStats,
-      value: AggregationStages.CollStats
-    },
-    {
-      label: AggregationStages.Count,
-      value: AggregationStages.Count
-    },
-    {
-      label: AggregationStages.CurrentOp,
-      value: AggregationStages.CurrentOp
-    },
-    {
-      label: AggregationStages.Densify,
-      value: AggregationStages.Densify
-    },
-    {
-      label: AggregationStages.Documents,
-      value: AggregationStages.Documents
-    },
-    {
-      label: AggregationStages.Facet,
-      value: AggregationStages.Facet
-    },
-    {
-      label: AggregationStages.Fill,
-      value: AggregationStages.Fill
-    },
-    {
-      label: AggregationStages.GeoNear,
-      value: AggregationStages.GeoNear
-    },
-    {
-      label: AggregationStages.GraphLookup,
-      value: AggregationStages.GraphLookup
-    },
-    {
-      label: AggregationStages.Group,
-      value: AggregationStages.Group
-    },
-    {
-      label: AggregationStages.IndexStats,
-      value: AggregationStages.IndexStats
-    },
-    {
-      label: AggregationStages.Limit,
-      value: AggregationStages.Limit
-    },
-    {
-      label: AggregationStages.Lookup,
-      value: AggregationStages.Lookup
-    },
-    {
-      label: AggregationStages.Match,
-      value: AggregationStages.Match
-    },
-    {
-      label: AggregationStages.Merge,
-      value: AggregationStages.Merge
-    },
-    {
-      label: AggregationStages.Out,
-      value: AggregationStages.Out
-    },
-    {
-      label: AggregationStages.PlanCacheStats,
-      value: AggregationStages.PlanCacheStats
-    },
-    {
-      label: AggregationStages.Project,
-      value: AggregationStages.Project
-    },
-    {
-      label: AggregationStages.Redact,
-      value: AggregationStages.Redact
-    },
-    {
-      label: AggregationStages.ReplaceRoot,
-      value: AggregationStages.ReplaceRoot
-    },
-    {
-      label: AggregationStages.ReplaceWith,
-      value: AggregationStages.ReplaceWith
-    },
-    {
-      label: AggregationStages.Sample,
-      value: AggregationStages.Sample
-    },
-    {
-      label: AggregationStages.Search,
-      value: AggregationStages.Search
-    },
-    {
-      label: AggregationStages.SearchMeta,
-      value: AggregationStages.SearchMeta
-    },
-    {
-      label: AggregationStages.Set,
-      value: AggregationStages.Set
-    },
-    {
-      label: AggregationStages.SetWindowFields,
-      value: AggregationStages.SetWindowFields
-    },
-    {
-      label: AggregationStages.ShardedDataDistribution,
-      value: AggregationStages.ShardedDataDistribution
-    },
-    {
-      label: AggregationStages.Skip,
-      value: AggregationStages.Skip
-    },
-    {
-      label: AggregationStages.Sort,
-      value: AggregationStages.Sort
-    },
-    {
-      label: AggregationStages.SortByCount,
-      value: AggregationStages.SortByCount
-    },
-    {
-      label: AggregationStages.UnionWith,
-      value: AggregationStages.UnionWith
-    },
-    {
-      label: AggregationStages.Unset,
-      value: AggregationStages.Unset
-    },
-    {
-      label: AggregationStages.Unwind,
-      value: AggregationStages.Unwind
-    }
-  ];
+
+  static aggregationStages = (): SelectMixedOption[] => {
+    var stages = Object.values(AggregationStages);
+
+    return stages.map(x => {
+      return {label: x, value: x}
+    });
+  }
 
   static getOtherCollectionNames = (dbName: string, collectionName: string): SelectMixedOption[] => {
     const collectionNames = CollectionsAndDocumentsService.getDbCollectionNames(dbName);
@@ -191,103 +49,103 @@ export class AggregationBuilderService {
 
   static populateSelectedStageOutput = (stage: string, stageData: { [key: string]: any }): object => {
     switch(stage) {
-      case "$addFields": {
+      case AggregationStages.AddFields: {
         return this.prepareaddFieldsStageOutput();
       }
-      case "$bucket": {
+      case AggregationStages.Bucket: {
         return this.prepareBucketStageOutput();
       }
-      case "$bucketAuto": {
+      case AggregationStages.BucketAuto: {
         return this.prepareBucketAutoStageOutput();
       }
-      case "$collStats": {
+      case AggregationStages.CollStats: {
         return this.prepareCollStatsStageOutput();
       }
-      case "$count": {
+      case AggregationStages.Count: {
         return this.prepareCountStageOutput();
       }
-      case "$densify": {
+      case AggregationStages.Densify: {
         return this.prepareDensifyStageOutput();
       }
-      case "$documents": {
+      case AggregationStages.Documents: {
         return this.prepareDocumentsStageOutput();
       }
-      case "$facet": {
+      case AggregationStages.Facet: {
         return this.prepareFacetStageOutput();
       }
-      case "$fill": {
+      case AggregationStages.Fill: {
         return this.prepareFacetStageOutput();
       }
-      case "$geoNear": {
+      case AggregationStages.GeoNear: {
         return this.prepareGeoNearStageOutput();
       }
-      case "$graphLookup": {
+      case AggregationStages.GraphLookup: {
         return this.prepareGraphLookupStageOutput();
       }
-      case "$group": {
+      case AggregationStages.Group: {
         return this.prepareFillStageOutput();
       }
-      case "$indexStats": {
+      case AggregationStages.IndexStats: {
         return this.prepareIndexStatsStageOutput();
       }
-      case "$limit": {
+      case AggregationStages.Limit: {
         return this.prepareLimitStageOutput();
       }
-      case "$lookup": {
+      case AggregationStages.Lookup: {
         return this.prepareLookupStageOutput(stageData);
       }
-      case "$match": {
+      case AggregationStages.Match: {
         return this.prepareMatchStageOutput();
       }
-      case "$merge": {
+      case AggregationStages.Merge: {
         return this.prepareMergeStageOutput();
       }
-      case "$out": {
+      case AggregationStages.Out: {
         return this.prepareOutStageOutput();
       }
-      case "$planCacheStats": {
+      case AggregationStages.PlanCacheStats: {
         return this.preparePlanCacheStatsStageOutput();
       }
-      case "$project": {
+      case AggregationStages.Project: {
         return this.prepareProjectStageOutput(stageData);
       }
-      case "$redact": {
+      case AggregationStages.Redact: {
         return this.prepareRedactStageOutput();
       }
-      case "$replaceRoot": {
+      case AggregationStages.ReplaceRoot: {
         return this.prepareReplaceRootStageOutput();
       }
-      case "$replaceWith": {
+      case AggregationStages.ReplaceWith: {
         return this.prepareReplaceWithStageOutput();
       }
-      case "$sample": {
+      case AggregationStages.Sample: {
         return this.prepareSampleStageOutput();
       }
-      case "$set": {
+      case AggregationStages.Set: {
         return this.prepareSetStageOutput();
       }
-      case "$setWindowFields": {
+      case AggregationStages.SetWindowFields: {
         return this.prepareSetWindowFieldsStageOutput();
       }
-      case "$shardedDataDistribution": {
+      case AggregationStages.ShardedDataDistribution: {
         return this.prepareShardedDataDistributionStageOutput();
       }
-      case "$skip": {
+      case AggregationStages.Skip: {
         return this.prepareSkipStageOutput();
       }
-      case "$sort": {
+      case AggregationStages.Sort: {
         return this.prepareSortStageOutput();
       }
-      case "$sortByCount": {
+      case AggregationStages.SortByCount: {
         return this.prepareSortByCountStageOutput();
       }
-      case "$unionWith": {
+      case AggregationStages.UnionWith: {
         return this.prepareUnionWithStageOutput();
       }
-      case "$unset": {
+      case AggregationStages.Unset: {
         return this.prepareUnsetStageOutput(stageData);
       }
-      case "$unwind": {
+      case AggregationStages.Unwind: {
         return this.prepareUnwindStageOutput(stageData);
       }
       default: {
@@ -297,140 +155,140 @@ export class AggregationBuilderService {
   }
 
   static prepareaddFieldsStageOutput = (): object => {
-    return {"$addFields": {"newField": "expression"}};
+    return {[AggregationStages.AddFields]: {"newField": "expression"}};
   }
 
   static prepareBucketStageOutput = (): object => {
-    return {"$bucket": {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}}};
+    return {[AggregationStages.Bucket]: {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}}};
   }
 
   static prepareBucketAutoStageOutput = (): object => {
-    return {"$bucketAuto": {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}, "granularity": ""}};
+    return {[AggregationStages.BucketAuto]: {"groupBy": "expression", "boundaries": [], "default": "literal", "output": {"output": {}}, "granularity": ""}};
   }
 
   static prepareCollStatsStageOutput = (): object => {
-    return {"$collStats": {"latencyStats": {"histograms": false}, "storageStats": {"scale": 1}, "count": {}, "queryExecStats": {}}};
+    return {[AggregationStages.CollStats]: {"latencyStats": {"histograms": false}, "storageStats": {"scale": 1}, "count": {}, "queryExecStats": {}}};
   }
 
   static prepareCountStageOutput = (): object => {
-    return {"$count": "outputField"};
+    return {[AggregationStages.Count]: "outputField"};
   }
 
   static prepareDensifyStageOutput = (): object => {
-    return {"$densify": {}};
+    return {[AggregationStages.Densify]: {}};
   }
 
   static prepareDocumentsStageOutput = (): object => {
-    return {"$documents": "expression"};
+    return {[AggregationStages.Documents]: "expression"};
   }
 
   static prepareFacetStageOutput = (): object => {
-    return {"$facet": {"outputField1": ["stage1, stage2"], "outputField2": ["stage1, stage2"]}};
+    return {[AggregationStages.Facet]: {"outputField1": ["stage1, stage2"], "outputField2": ["stage1, stage2"]}};
   }
 
   static prepareFillStageOutput = (): object => {
-    return {"$fill": {}};
+    return {[AggregationStages.Fill]: {}};
   }
 
   static prepareGeoNearStageOutput = (): object => {
-    return {"$geoNear": {"near": {}, "distanceField": "", "maxDistance": 0, "query": {}, "includeLocs": "", spherical: false}};
+    return {[AggregationStages.GeoNear]: {"near": {}, "distanceField": "", "maxDistance": 0, "query": {}, "includeLocs": "", spherical: false}};
   }
 
   static prepareGraphLookupStageOutput = (): object => {
-    return {"$graphLookup": {"from": "", "startWith": "", "connectFromField": "", "connectToField": "", "as": ""}};
+    return {[AggregationStages.GraphLookup]: {"from": "", "startWith": "", "connectFromField": "", "connectToField": "", "as": ""}};
   }
 
   static prepareGroupStageOutput = (): object => {
-    return {"$group": {"_id": "expression", "field": {"accumulator": "expression"}}};
+    return {[AggregationStages.Group]: {"_id": "expression", "field": {"accumulator": "expression"}}};
   }
 
   static prepareIndexStatsStageOutput = (): object => {
-    return {"$indexStats": {}};
+    return {[AggregationStages.IndexStats]: {}};
   }
 
   static prepareLimitStageOutput = (): object => {
-    return {"$limit": 0};
+    return {[AggregationStages.Limit]: 0};
   }
 
   static prepareLookupStageOutput = (stageData: { [key: string]: any }): object => {
-    return {"$lookup": {"from": stageData.from, "localField": stageData.localField, "foreignField": stageData.foreignField, "as": stageData.as != '' ? stageData.as : stageData.from}};
+    return {[AggregationStages.Lookup]: {"from": stageData.from, "localField": stageData.localField, "foreignField": stageData.foreignField, "as": stageData.as != '' ? stageData.as : stageData.from}};
   }
 
   static prepareProjectStageOutput = (stageData: { [key: string]: any }): object => {
     if(Object.keys(stageData).length > 0) {
-      return {"$project": stageData};
+      return {[AggregationStages.Project]: stageData};
     }
     else {
-      return {"$project": {"field1": 1, "field2": 1}};
+      return {[AggregationStages.Project]: {"field1": 1, "field2": 1}};
     }
   }
 
   static prepareMatchStageOutput = (): object => {
-    return {"$match": {"field": "value"}};
+    return {[AggregationStages.Match]: {"field": "value"}};
   }
 
   static prepareMergeStageOutput = (): object => {
-    return {"$merge": {"into": "", "on": "", "whenMatched": "", "whenNotMatched": ""}};
+    return {[AggregationStages.Merge]: {"into": "", "on": "", "whenMatched": "", "whenNotMatched": ""}};
   }
 
   static prepareOutStageOutput = (): object => {
-    return {"$out": {"db": "output-db", "coll": "output-collection"}};
+    return {[AggregationStages.Out]: {"db": "output-db", "coll": "output-collection"}};
   }
 
   static preparePlanCacheStatsStageOutput = (): object => {
-    return {"$planCacheStats": {}};
+    return {[AggregationStages.PlanCacheStats]: {}};
   }
 
   static prepareRedactStageOutput = (): object => {
-    return {"$redact": {}};
+    return {[AggregationStages.Redact]: {}};
   }
 
   static prepareReplaceRootStageOutput = (): object => {
-    return {"$replaceRoot": {"newRoot": {}}};
+    return {[AggregationStages.ReplaceRoot]: {"newRoot": {}}};
   }
 
   static prepareReplaceWithStageOutput = (): object => {
-    return {"$replaceWith": ""};
+    return {[AggregationStages.ReplaceWith]: ""};
   }
 
   static prepareSampleStageOutput = (): object => {
-    return {"$sample": { "size": 0 }};
+    return {[AggregationStages.Sample]: { "size": 0 }};
   }
 
   static prepareSetStageOutput = (): object => {
-    return {"$set": { "newField": "expression" }};
+    return {[AggregationStages.Set]: { "newField": "expression" }};
   }
 
   static prepareSetWindowFieldsStageOutput = (): object => {
-    return {"$setWindowFields": {}};
+    return {[AggregationStages.SetWindowFields]: {}};
   }
 
   static prepareShardedDataDistributionStageOutput = (): object => {
-    return {"$shardedDataDistribution": {}};
+    return {[AggregationStages.ShardedDataDistribution]: {}};
   }
 
   static prepareSkipStageOutput = (): object => {
-    return {"$skip": 0};
+    return {[AggregationStages.Skip]: 0};
   }
 
   static prepareSortStageOutput = (): object => {
-    return {"$sort": {"field1": 1, "field2": 1}};
+    return {[AggregationStages.Sort]: {"field1": 1, "field2": 1}};
   }
 
   static prepareSortByCountStageOutput = (): object => {
-    return {"$sortByCount": "expression"};
+    return {[AggregationStages.SortByCount]: "expression"};
   }
 
   static prepareUnionWithStageOutput = (): object => {
-    return {"$unionWith": {"coll": "collectionName", "pipeline": []}};
+    return {[AggregationStages.UnionWith]: {"coll": "collectionName", "pipeline": []}};
   }
 
   static prepareUnsetStageOutput = (stageData: { [key: string]: any }): object => {
     if(stageData.fields.length > 0) {
-      return {"$unset": stageData.fields}
+      return {[AggregationStages.Unset]: stageData.fields}
     }
     else {
-      return {"$unset": "fieldName"}
+      return {[AggregationStages.Unset]: "fieldName"}
     }
   }
 
@@ -447,6 +305,6 @@ export class AggregationBuilderService {
       unwindObject.includeArrayIndex = true;
     }
 
-    return {"$unwind": unwindObject};
+    return {[AggregationStages.Unwind]: unwindObject};
   }
 }

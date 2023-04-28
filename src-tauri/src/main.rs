@@ -7,6 +7,7 @@ mod services;
 mod models;
 
 use models::dtos::ConnectionInfo;
+use models::dtos::ErrorResult;
 use models::dtos::ImportExportSummary;
 use mongodb::bson::{doc, Document};
 use services::mongo_service;
@@ -55,7 +56,7 @@ fn drop_client() {
 }
 
 #[tauri::command(async)]
-async fn drop_database(db_name: &str) -> Result<String, CustomError> {
+async fn drop_database(db_name: &str) -> Result<String, ErrorResult> {
   return mongo_service::drop_database(db_name).await;
 }
 
@@ -75,12 +76,12 @@ async fn export_aggregation_result(db_name: &str, collection_name: &str, aggrega
 }
 
 #[tauri::command(async)]
-async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+async fn create_collection(db_name: &str, collection_name: &str) -> Result<String, ErrorResult> {
   return mongo_service::create_collection(db_name, collection_name).await;
 }
 
 #[tauri::command(async)]
-async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, CustomError> {
+async fn drop_collection(db_name: &str, collection_name: &str) -> Result<String, ErrorResult> {
   return mongo_service::drop_collection(db_name, collection_name).await;
 }
 
@@ -105,7 +106,7 @@ async fn insert_docuemnt(db_name: &str, collection_name: &str, document: &str) -
 }
 
 #[tauri::command(async)]
-async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
+async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, ErrorResult> {
   return mongo_service::import_collection(db_name, collection_name, path).await;
 }
 
