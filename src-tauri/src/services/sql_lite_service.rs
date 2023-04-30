@@ -2,14 +2,14 @@ use std::path::PathBuf;
 use rusqlite::{Connection, Result};
 use uuid::Uuid;
 
-use crate::models::dtos::{ImportExportSummary, ConnectionInfo};
+use crate::models::dtos::{ImportExportSummary, ConnectionInfo, ErrorResult};
 
 fn get_db_path() -> PathBuf {
     match project_root::get_project_root() {
         Ok(root_path) => {
             return  root_path.join("db").join("navigateDb.db");
         },
-        Err(e) => return PathBuf::new()
+        Err(_e) => return PathBuf::new()
     };
 }
 
@@ -70,32 +70,52 @@ pub fn get_all_connection_info() -> Result<Vec<ConnectionInfo>> {
     return Ok(info_list);
 }
 
-pub fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<()> {
+pub fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<String, ErrorResult> {
     let db_path = get_db_path();
 
-    let conn = Connection::open(db_path)?;
+    let conn = Connection::open(db_path);
 
-    let id = Uuid::new_v4().to_string();
+    match conn {
+        Ok(connection) => {
+            let id = Uuid::new_v4().to_string();
 
-    conn.execute(
-        "INSERT INTO saved_connections (id, name, url) VALUES (?1, ?2, ?3)",
-        (id, connection_name, connection_url)
-    )?;
+            let result = connection.execute(
+                "INSERT INTO saved_connections (id, name, url) VALUES (?1, ?2, ?3)",
+                (id, connection_name, connection_url)
+            );
 
-    return Ok(());
+            match result {
+                Ok(_r) => return Ok("Connection info saved.".to_string()),
+                Err(e) => return Err(ErrorResult {message: e.to_string() })
+            }
+        },
+        Err(e) => return Err(ErrorResult {message: e.to_string() })
+    }
 }
 
-pub fn delete_connection_info(id: &str) -> Result<()> {
+pub fn delete_connection_info(id: &str) -> Result<String, ErrorResult> {
     let db_path = get_db_path();
 
-    let conn = Connection::open(db_path)?;
+    let conn = Connection::open(db_path);
 
-    conn.execute(
-        "DELETE FROM saved_connections WHERE id=?1", 
-        [id]
-    )?;
+    match conn {
+        Ok(connection) => {
 
-    return Ok(());
+            let result = connection.execute(
+                "DELETE FROM saved_connections WHERE id=?1", 
+                [id]
+            );
+
+            match result {
+                Ok(_r) => return Ok("Connection info deleted.".to_string()),
+                Err(e) => {
+                    println!("{:?}", e);
+                    return Err(ErrorResult {message: e.to_string() });
+                }
+            }
+        },
+        Err(e) => return Err(ErrorResult {message: e.to_string() })
+    }
 }
 
 pub fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>> {

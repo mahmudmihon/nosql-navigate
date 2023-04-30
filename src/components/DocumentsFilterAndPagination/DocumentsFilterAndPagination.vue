@@ -369,10 +369,13 @@
 
             const result = await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
 
-            if (result != 'error') {
+            if (typeof result === "number") {
                 importExportStore.updateDocumentsImported(true);
 
                 notification.success({ title: "Collection imported." });
+            }
+            else {
+                notification.error({ title: result.message });
             }
 
             componentState.runningOperation = false;

@@ -1,6 +1,7 @@
 import { ConnectionInfo } from './../../types/DbConnections/db-connection';
 import { invoke } from "@tauri-apps/api";
 import { ImportExportSummary } from "../../types/OperationSummary/import-export-summary";
+import { ErrorResult } from '../../types/OperationSummary/error-result';
 
 export class SqlLiteService {
     static checkAndCreateInitialTable = async () => {
@@ -11,12 +12,12 @@ export class SqlLiteService {
         return await invoke('get_all_connection_info');
     }
 
-    static saveConnectionInfo = async (name: string, url: string) => {
-        await invoke('save_connection_info', { connectionName: name, connectionUrl: url });
+    static saveConnectionInfo = async (name: string, url: string): Promise<string | ErrorResult> => {
+        return await invoke('save_connection_info', { connectionName: name, connectionUrl: url });
     }
 
-    static deleteConnectionInfo = async (id: string) => {
-        await invoke('delete_connection_info', { id: id });
+    static deleteConnectionInfo = async (id: string): Promise<string | ErrorResult> => {
+        return await invoke('delete_connection_info', { id: id });
     }
     
     static clearImportExportSummary = async () => {

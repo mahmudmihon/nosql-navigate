@@ -119,7 +119,7 @@
 
         const result = await MongoDbService.updateDocument(props.dbName, props.collectionName, updateFilter, JSON.stringify(updateDoc));
 
-        if(result != 'error') {
+        if(typeof result === "string") {
             const updatedDoc = componentState.documentList.filter(x => x._id == parsedObject._id)[0];
 
             if(updatedDoc != null) {
@@ -132,10 +132,10 @@
 
             documentsStore.removeDocuments(`${props.dbName}.${props.collectionName}`);
 
-            notification.success({title: result as string});
+            notification.success({title: result});
         }
         else {
-            notification.error({title: "Document can not be updated."});
+            notification.error({title: result.message});
         }
     }
 
@@ -157,7 +157,7 @@
 
         const result = await MongoDbService.deleteDocument(props.dbName, props.collectionName, deleteFilter);
 
-        if(result != 'error') {
+        if(typeof result === "string") {
 
             const deletedDocument = componentState.documentList.filter(x => x._id == document["_id"])[0];
 
@@ -172,6 +172,9 @@
 
                 notification.success({title: "Document deleted."});
             }
+        }
+        else {
+            notification.error({title: result.message});
         }
     }
 </script>

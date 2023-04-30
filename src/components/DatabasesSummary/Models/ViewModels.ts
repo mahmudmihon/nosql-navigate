@@ -1,21 +1,6 @@
-export interface DbsSummaryViewModel {
-    db: string,
-    avgObjSize: number,
-    collections: number,
-    dataSize: number,
-    fsTotalSize: number,
-    fsUsedSize: number,
-    indexSize: number,
-    indexes: number,
-    objects: number,
-    ok: number,
-    scaleFactor: number,
-    storageSize: number,
-    totalSize: number,
-    views: number
-}
+import { DbStats } from "../../../types/DbCollections/db-stats";
 
 export interface ComponentStateModel {
-    dbStatsData: DbsSummaryViewModel[];
+    dbStatsData: DbStats[];
     dataLoading: boolean;
 }

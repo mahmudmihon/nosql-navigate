@@ -26,13 +26,13 @@ fn get_all_connection_info() -> Result<Vec<ConnectionInfo>, ()> {
 }
 
 #[tauri::command]
-fn save_connection_info(connection_name: &str, connection_url: &str) {
-  sql_lite_service::save_connection_info(connection_name, connection_url);
+fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<String, ErrorResult> {
+  return sql_lite_service::save_connection_info(connection_name, connection_url);
 }
 
 #[tauri::command]
-fn delete_connection_info(id: &str) {
-  sql_lite_service::delete_connection_info(id);
+fn delete_connection_info(id: &str) -> Result<String, ErrorResult> {
+  return sql_lite_service::delete_connection_info(id);
 }
 
 #[tauri::command]
@@ -101,7 +101,7 @@ async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
 }
 
 #[tauri::command(async)]
-async fn insert_docuemnt(db_name: &str, collection_name: &str, document: &str) -> Result<String, CustomError> {
+async fn insert_docuemnt(db_name: &str, collection_name: &str, document: &str) -> Result<String, ErrorResult> {
   return mongo_service::insert_document(db_name, collection_name, document).await;
 }
 
@@ -116,12 +116,12 @@ async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> 
 }
 
 #[tauri::command(async)]
-async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, CustomError> {
+async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, ErrorResult> {
   return mongo_service::update_document(db_name, collection_name, filter, document).await;
 }
 
 #[tauri::command(async)]
-async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> Result<String, CustomError> {
+async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> Result<String, ErrorResult> {
   return mongo_service::delete_document(db_name, collection_name, filter).await;
 }
 

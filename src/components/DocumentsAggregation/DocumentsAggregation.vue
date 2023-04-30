@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-    import { invoke } from '@tauri-apps/api';
     import { reactive } from 'vue';
     import { AggregationPipelines } from '../../types/AggregationBuilder/aggregation-pipelines';
     import { useTabDataStore } from '../../stores/tab-data';
@@ -29,7 +28,8 @@
     import { clearObjectKeys, extractObjectKeys } from '../../utilities/object-keys';
     import { useNotification } from 'naive-ui';
     import { CommonConsts } from '../../utilities/common-consts';
-    import { ComponentStateModel } from './Models/ViewModels';
+    import { ComponentStateModel } from './Models/ViewModels';   
+    import { MongoDbService } from '../../services/data/mongo-service';
     import AggregationPipelineEditor from '../AggregationPipelineEditor/AggregationPipelineEditor.vue';
     import AggregationResult from '../AggregationResult/AggregationResult.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
@@ -48,32 +48,30 @@
         aggregationData: []
     });
 
-    const triggerAggregation = (data: AggregationPipelines) => {
+    const triggerAggregation = async (data: AggregationPipelines) => {
         if(data.pipelines.length > 0) {
             componentState.aggregationDataLoading = true;
 
-            invoke('documents_aggregation', { dbName: props.dbName, collectionName: props.collectionName, aggregations: data.pipelines, limit: CommonConsts.defaultAggregationPageSize }).then((value: any) => {
+            const result = await MongoDbService.getAggregatedDocuments(props.dbName, props.collectionName, data.pipelines, CommonConsts.defaultAggregationPageSize);
 
-                if(value != 'error') {
-                    componentState.aggregationData = value.map(x => EJSONService.BsonDocToObject(x));
+            if(typeof result !== "string") {
+                componentState.aggregationData = result.map(x => EJSONService.BsonDocToObject(x));
 
-                    if(componentState.aggregationData.length > 0) {
-                        const firstData = componentState.aggregationData[0];
+                if(componentState.aggregationData.length > 0) {
+                    const firstData = componentState.aggregationData[0];
 
-                        const fields = extractObjectKeys(firstData).sort();
+                    const fields = extractObjectKeys(firstData).sort();
 
-                        clearObjectKeys();
+                    clearObjectKeys();
 
-                        updateTabStoreData(fields);
-                    }
+                    updateTabStoreData(fields);
                 }
+            }
+            else {
+                notification.error({title: result});
+            }
 
-                componentState.aggregationDataLoading = false;
-            }).catch(e => {
-                notification.error({ title: "Error occured while running the pipeline." });
-
-                componentState.aggregationDataLoading = false;
-            });
+            componentState.aggregationDataLoading = false;
         }
         else {
             componentState.aggregationData = [];

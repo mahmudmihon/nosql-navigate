@@ -5,7 +5,7 @@
     <div v-else>
       <n-popover trigger="hover">
         <template #trigger>
-          <p class="bg-base text-ellipsis text-[13px] rounded-lg pl-3 pt-3 pb-3">{{componentState.connectedUrl}}</p>
+          <p class="bg-base w-[251px] truncate text-[13px] rounded-lg pl-3 pt-3 pb-3">{{componentState.connectedUrl}}</p>
         </template>
         <span>{{componentState.connectedUrl}}</span>
       </n-popover>
@@ -181,6 +181,7 @@
   import { StoreService } from '../../services/store-service'; 
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionEventsStore } from '../../stores/connection-events';
+  import { ErrorResult } from '../../types/OperationSummary/error-result';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
   import OperationSummary from '../OperationSummary/OperationSummary.vue';
 
@@ -260,7 +261,7 @@
 
     componentState.deletingEntity = true;
 
-    let result;
+    let result: string | ErrorResult;
 
     if(dbCollectionName.length > 1) {
       result = await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
@@ -269,12 +270,12 @@
       result = await MongoDbService.dropDatabase(dbCollectionName[0].trim());
     }
 
-    if(result != 'error') {
+    if(typeof result === "string") {
 
       await refreshDb();
     }
     else{
-      notification.error({title: "Operation Failed!"});
+      notification.error({title: result.message});
     }
 
     componentState.collectionAddModel.dbName = '';

@@ -1,4 +1,6 @@
 import { invoke } from "@tauri-apps/api";
+import { DbStats } from "../../types/DbCollections/db-stats";
+import { ErrorResult } from "../../types/OperationSummary/error-result";
 
 export class MongoDbService {
     static checkUrl = async (url: string): Promise<boolean> => {
@@ -7,6 +9,10 @@ export class MongoDbService {
 
     static getDbsWithCollectionNames = async (): Promise<object[] | string> => {
         return await invoke('get_dbs_with_collections');
+    }
+
+    static getDbsStats = async(): Promise<DbStats[] | string> => {
+        return await invoke('dbs_with_stats');
     }
 
     static getCollectionDocuments = async (dbName: string, collectionName: string, filters: string, sort: string, limit: number, skip: number): Promise<object[] | string> => {
@@ -21,28 +27,32 @@ export class MongoDbService {
         return await invoke('create_collection', { dbName: dbName, collectionName: collectionName });
     }
 
-    static dropCollection = async (dbName: string, collectionName: string): Promise<string> => {
+    static dropCollection = async (dbName: string, collectionName: string): Promise<string | ErrorResult> => {
         return await invoke('drop_collection', { dbName: dbName, collectionName: collectionName });
     }
 
-    static insertDocument = async (dbName: string, collectionName: string, document: string): Promise<string> => {
+    static insertDocument = async (dbName: string, collectionName: string, document: string): Promise<string | ErrorResult> => {
         return await invoke('insert_docuemnt', { dbName: dbName, collectionName: collectionName, document: document });
     }
 
-    static updateDocument = async (dbName: string, collectionName: string, filter: string, document: string): Promise<string> => {
+    static updateDocument = async (dbName: string, collectionName: string, filter: string, document: string): Promise<string | ErrorResult> => {
         return await invoke('update_document', { dbName: dbName, collectionName: collectionName, filter: filter, document: document });
     }
 
-    static deleteDocument = async (dbName: string, collectionName: string, filter: string): Promise<string> => {
+    static deleteDocument = async (dbName: string, collectionName: string, filter: string): Promise<string | ErrorResult> => {
         return await invoke('delete_document', { dbName: dbName, collectionName: collectionName, filter: filter });
     }
 
-    static importCollection = async (dbName: string, collectionName: string, path: string): Promise<number | string> => {
+    static importCollection = async (dbName: string, collectionName: string, path: string): Promise<number | ErrorResult> => {
         return await invoke('import_collection', { dbName: dbName, collectionName: collectionName, path: path });
     }
 
     static exportCollection = async (dbName: string, collectionName: string, path: string): Promise<number | string> => {
         return await invoke('export_collection', { dbName: dbName, collectionName: collectionName, path: path });
+    }
+
+    static getAggregatedDocuments = async (dbName: string, collectionName: string, stages: string[], limit: number): Promise<object[] | string> => {
+        return await invoke('documents_aggregation', { dbName: dbName, collectionName: collectionName, aggregations: stages, limit: limit });
     }
 
     static exportAggregationResult = async (dbName: string, collectionName: string, aggregations: string[], path: string): Promise<number | string> => {
@@ -53,7 +63,7 @@ export class MongoDbService {
         invoke('drop_client');
     }
 
-    static dropDatabase = async (dbName: string): Promise<string> => {
+    static dropDatabase = async (dbName: string): Promise<string | ErrorResult> => {
         return invoke('drop_database', { dbName: dbName });
     }
 }

@@ -16,9 +16,9 @@
 
 <script setup lang="ts">
   import { reactive } from 'vue';
-  import { invoke } from '@tauri-apps/api';
-  import { ComponentStateModel, DbsSummaryViewModel } from './Models/ViewModels';
-  import { useRefreshEventsStore } from '../../stores/refresh-events';
+  import { ComponentStateModel } from './Models/ViewModels';
+  import { useRefreshEventsStore } from '../../stores/refresh-events'; 
+  import { MongoDbService } from '../../services/data/mongo-service';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
 
   const refreshEventsStore = useRefreshEventsStore();
@@ -28,13 +28,14 @@
     dataLoading: true
   });
   
-  const getDbSummary = () => {
-    invoke('dbs_with_stats').then(value => {
-      if(value !== 'error') {
-        componentState.dbStatsData = value as DbsSummaryViewModel[];
-        componentState.dataLoading = false;
-      }
-    });
+  const getDbSummary = async () => {
+
+    const result = await MongoDbService.getDbsStats();
+
+    if(typeof result !== "string") {
+      componentState.dbStatsData = result;
+      componentState.dataLoading = false;
+    }
   }
 
   getDbSummary();

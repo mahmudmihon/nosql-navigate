@@ -370,73 +370,124 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
-pub async fn insert_document(db_name: &str, collection_name: &str, document: &str) -> Result<String, CustomError> {
+pub async fn insert_document(db_name: &str, collection_name: &str, document: &str) -> Result<String, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
 
                 let db = client.database(db_name);
 
-                let doc_mapping: Map<String, Value> = serde_json::from_str(document)?;
+                let doc_mapping: Result<Map<String, Value>, serde_json::Error> = serde_json::from_str(document);
 
-                let doc_to_insert = Document::try_from(doc_mapping)?;
+                match doc_mapping {
+                    Ok(mapped_doc) => {
+                        let doc_to_insert = Document::try_from(mapped_doc);
 
-                db.collection::<Document>(collection_name).insert_one(doc_to_insert, None).await?;
+                        match doc_to_insert {
+                            Ok(bson_doc) => {
+                                let result = db.collection::<Document>(collection_name).insert_one(bson_doc, None).await;
 
-                return Ok("ok".to_string());
+                                match result {
+                                    Ok(_r) => return Ok("Document inserted.".to_string()),
+                                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                                }  
+                            },
+                            Err(_e) => return Err(ErrorResult {message: "Error occured while converting into BSON document!".to_string() })
+                        }
+                    },
+                    Err(_e) => return Err(ErrorResult {message: "Error occured while converting into JSON!".to_string() })
+                }                
             },
-            None => { return Err(CustomError::ClientNotFound); }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }
 
-pub async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, CustomError> {
+pub async fn update_document(db_name: &str, collection_name: &str, filter: &str, document: &str) -> Result<String, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
 
                 let db = client.database(db_name);
 
-                let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
+                let filter_mapping: Result<Map<String, Value>, serde_json::Error> = serde_json::from_str(filter);
 
-                let document_update_filter = Document::try_from(filter_mapping)?;
+                match filter_mapping {
+                    Ok(mapped_filter) => {
+                        let document_update_filter = Document::try_from(mapped_filter);
 
-                let document_mapping: Map<String, Value> = serde_json::from_str(document)?;
+                        match document_update_filter {
+                            Ok(filter) => {
+                                let doc_mapping: Result<Map<String, Value>, serde_json::Error> = serde_json::from_str(document);
 
-                let document_to_update = Document::try_from(document_mapping)?;
+                                match doc_mapping {
+                                    Ok(mapped_doc) => {
+                                        let document_to_update = Document::try_from(mapped_doc);
 
-                let update_modifications = UpdateModifications::Document(document_to_update);
+                                        match document_to_update {
+                                            Ok(bson_doc) => {
+                                                let update_modifications = UpdateModifications::Document(bson_doc);
 
-                let update_result = db.collection::<Document>(collection_name).update_one(document_update_filter, update_modifications, None).await?;
+                                                let update_result = db.collection::<Document>(collection_name).update_one(filter, update_modifications, None).await;
 
-                if update_result.modified_count > 0 {
-                    return Ok("Document updated.".to_string());
+                                                match update_result {
+                                                    Ok(update_result) => {
+                                                        if update_result.modified_count > 0 {
+                                                            return Ok("Document updated.".to_string());
+                                                        }
+                                                        else {
+                                                            return Ok("No document found to update!".to_string());
+                                                        } 
+                                                    },
+                                                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                                                }                                                  
+                                            },
+                                            Err(_e) => return Err(ErrorResult {message: "Error occured while converting into BSON document!".to_string() })
+                                        }
+                                    },
+                                    Err(_e) => return Err(ErrorResult {message: "Error occured while converting document into JSON!".to_string() })
+                                }
+                            },
+                            Err(_e) => return Err(ErrorResult {message: "Error occured while converting into BSON document!".to_string() })
+                        }
+                    },
+                    Err(_e) => return Err(ErrorResult {message: "Error occured while converting document filter into JSON!".to_string() })
+                }                           
+            },
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
+        }
+    }
+}
+
+pub async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> Result<String, ErrorResult> {
+    unsafe {
+        match &CONNECTED_CLIENT {
+            Some(client) => {
+
+                let db = client.database(db_name);
+
+                let filter_mapping: Result<Map<String, Value>, serde_json::Error> = serde_json::from_str(filter);
+
+                match filter_mapping {
+                    Ok(filter) => {
+                        let document_delete_filter = Document::try_from(filter);
+
+                        match document_delete_filter {
+                            Ok(bson_doc) => {
+                                let result = db.collection::<Document>(collection_name).find_one_and_delete(bson_doc, None).await;
+
+                                match result {
+                                    Ok(_r) => return Ok("Document deleted.".to_string()),
+                                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                                }
+                            },
+                            Err(_e) => return Err(ErrorResult {message: "Error occured while converting into BSON document!".to_string() })
+                        }
+                    },
+                    Err(_e) => return Err(ErrorResult {message: "Error occured while converting document filter into JSON!".to_string() })
                 }
-                else {
-                    return Ok("No document found to update!".to_string());
-                }               
             },
-            None => { return Err(CustomError::ClientNotFound); }
-        }
-    }
-}
-
-pub async fn delete_document(db_name: &str, collection_name: &str, filter: &str) -> Result<String, CustomError> {
-    unsafe {
-        match &CONNECTED_CLIENT {
-            Some(client) => {
-
-                let db = client.database(db_name);
-
-                let filter_mapping: Map<String, Value> = serde_json::from_str(filter)?;
-
-                let document_delete_filter = Document::try_from(filter_mapping)?;
-
-                db.collection::<Document>(collection_name).find_one_and_delete(document_delete_filter, None).await?;
-
-                return Ok("ok".to_string());
-            },
-            None => { return Err(CustomError::ClientNotFound); }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }

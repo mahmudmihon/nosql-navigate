@@ -29,9 +29,11 @@
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionEventsStore } from '../../stores/connection-events';
   import { ComponentStateModel } from './Models/ViewModels';
-  import { NTag } from 'naive-ui';
+  import { NTag, useNotification } from 'naive-ui';
+  import { ErrorResult } from '../../types/OperationSummary/error-result';
 
   const connectionEventsStore = useConnectionEventsStore();
+  const notification = useNotification();
 
   const componentState: ComponentStateModel = reactive({savedConnections: []});
 
@@ -46,9 +48,16 @@
   getSavedConnections();
 
   async function DeleteConnection(id: string) {
-    await SqlLiteService.deleteConnectionInfo(id);
+    let result = await SqlLiteService.deleteConnectionInfo(id);
 
-    await getSavedConnections();
+    if(typeof result === "string") {
+      await getSavedConnections();
+    }
+    else {
+      result = result as ErrorResult;
+
+      notification.error({title: result.message});
+    }    
   }
 
   function updateSelectedDb(index: number) {
@@ -57,7 +66,7 @@
 
   connectionEventsStore.$subscribe((mutation, state) => {
     if (state.connectionSaved) {
-      getSavedConnections();;
+      getSavedConnections();
 
       connectionEventsStore.updateConnectionSavedEvent(false);
     }

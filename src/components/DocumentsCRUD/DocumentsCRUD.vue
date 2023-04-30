@@ -206,11 +206,14 @@
 
             const result = await MongoDbService.insertDocument(props.dbName, props.collectionName, JSON.stringify(parsedObject));
 
-            if(result == 'ok') {
+            if(typeof result === "string") {
                 notification.success({ title: "Document inserted." });
 
                 componentState.showDocInsertModal = false;
                 componentState.docToInsert = '';
+            }
+            else {
+                notification.error({ title: result.message });
             }
         }
     }
