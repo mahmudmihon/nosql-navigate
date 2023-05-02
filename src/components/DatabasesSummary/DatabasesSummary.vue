@@ -32,10 +32,14 @@
 
     const result = await MongoDbService.getDbsStats();
 
-    if(typeof result !== "string") {
-      componentState.dbStatsData = result;
-      componentState.dataLoading = false;
+    if(Array.isArray(result)) {
+      componentState.dbStatsData = result;     
     }
+    else {
+      componentState.dbStatsData = [];
+    }
+
+    componentState.dataLoading = false;
   }
 
   getDbSummary();

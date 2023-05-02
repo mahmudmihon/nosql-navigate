@@ -11,7 +11,7 @@ export class MongoDbService {
         return await invoke('get_dbs_with_collections');
     }
 
-    static getDbsStats = async(): Promise<DbStats[] | string> => {
+    static getDbsStats = async(): Promise<DbStats[] | ErrorResult> => {
         return await invoke('dbs_with_stats');
     }
 

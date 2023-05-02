@@ -96,7 +96,7 @@ async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, CustomErro
 }
 
 #[tauri::command(async)]
-async fn dbs_with_stats() -> Result<Vec<Document>, CustomError> {
+async fn dbs_with_stats() -> Result<Vec<Document>, ErrorResult> {
   return mongo_service::get_dbs_stats().await;
 }
 

@@ -118,21 +118,33 @@ pub async fn get_dbs_with_collections() -> Result<Vec<DbWithCollections>, Custom
     }
 }
 
-pub async fn get_dbs_stats() -> Result<Vec<Document>, CustomError> {
+pub async fn get_dbs_stats() -> Result<Vec<Document>, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
                 let mut dbs_stats: Vec<Document> = Vec::new();
 
-                for db_name in client.list_database_names(None, None).await? {
-                    let stats = client.database(&db_name).run_command(doc! { "dbStats": 1, "scale": 1024*1024*1024 }, None).await?;
+                let dbs = client.list_database_names(None, None).await;
 
-                    dbs_stats.push(stats);
+                match dbs {
+                    Ok(db_names) => {
+                        for db_name in db_names {
+                            let stats = client.database(&db_name).run_command(doc! { "dbStats": 1, "scale": 1024*1024*1024 }, None).await;
+
+                            match stats {
+                                Ok(data) => {
+                                    dbs_stats.push(data);
+                                },
+                                Err(_e) => {}
+                            }
+                        }
+                    }
+                    Err(_e) => {}
                 }
 
                 return Ok(dbs_stats);
             },
-            None => { return Err(CustomError::ClientNotFound); }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }
