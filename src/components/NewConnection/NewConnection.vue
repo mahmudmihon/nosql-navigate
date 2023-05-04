@@ -3,7 +3,7 @@
     <h5 class="text-xl font-medium text-white">New Connection</h5>
     <div class="mt-5">
         <label class="block mb-2 text-sm font-medium text-white">URL</label>
-        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1.5 dark:bg-base dark:border-base dark:placeholder-gray-400 dark:text-white" placeholder="mongodb://localhost:27017" v-model.trim="componentState.connectionUrl">
+        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg block w-full p-2 dark:bg-base dark:border-base dark:placeholder-gray-400 dark:text-white" placeholder="mongodb://localhost:27017" v-model.trim="componentState.connectionUrl">
     </div>
 
     <div class="flex justify-end mt-3 gap-2">

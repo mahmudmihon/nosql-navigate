@@ -56,7 +56,8 @@
     import { EJSONService } from '../../services/ejson-service';   
     import { ComponentStateModel } from './Models/ViewModels';   
     import { useTabDataStore } from '../../stores/tab-data';   
-    import { MongoDbService } from '../../services/data/mongo-service';
+    import { MongoDbService } from '../../services/data/mongo-service';   
+    import { useCRUDEventsStore } from '../../stores/crud-events';
     import JSONView from '../JsonViewer/JSONView.vue';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
@@ -70,6 +71,7 @@
 
     const documentsStore = useCollectionDocumentsStore();
     const tabsDataStore = useTabDataStore();
+    const crudEventStore = useCRUDEventsStore();
     const notification = useNotification();
 
     const componentState: ComponentStateModel = reactive({
@@ -78,15 +80,19 @@
         showDocEditModal: false
     });
 
-    if(props.showSearchedData) {
-        componentState.documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
-    }
-    else {
+    const updateDocumentList = () => {
         const documents = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;
 
         if(documents != null && documents.length > 0) {
             componentState.documentList = documents.map(x => EJSONService.BsonDocToObject(x));
         }
+    }
+
+    if(props.showSearchedData) {
+        componentState.documentList = props.searchedData.map(x => EJSONService.BsonDocToObject(x));
+    }
+    else {
+        updateDocumentList();
     }
 
     const editDoc = (document: object): void => {
@@ -177,4 +183,12 @@
             notification.error({title: result.message});
         }
     }
+
+    crudEventStore.$subscribe((mutation, state) => {
+        if(state.updateDocumentList) {
+            updateDocumentList();
+
+            crudEventStore.updateDocumentList(false);
+        }
+    });
 </script>

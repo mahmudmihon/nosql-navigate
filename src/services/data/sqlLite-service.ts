@@ -16,7 +16,7 @@ export class SqlLiteService {
         return await invoke('save_connection_info', { connectionName: name, connectionUrl: url });
     }
 
-    static deleteConnectionInfo = async (id: string): Promise<string | ErrorResult> => {
+    static deleteConnectionInfo = async (id: string): Promise<string> => {
         return await invoke('delete_connection_info', { id: id });
     }
     

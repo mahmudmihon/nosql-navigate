@@ -172,13 +172,14 @@
     import { open, save } from '@tauri-apps/api/dialog';
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { useDocumentFieldsStore } from '../../stores/document-fields';
-    import { useImportExportEventsStore } from '../../stores/import-export-events';
+    import { useCRUDEventsStore } from '../../stores/crud-events';
     import { AdvanceFiltering } from '../../types/DocumentFilter&Pagination/advance-filtering';
     import { NaiveUiService } from '../../services/naive-ui-service';   
     import { CommonConsts } from '../../utilities/common-consts';
     import { ComponentStateModel } from './Models/ViewModels';   
     import { useTabDataStore } from '../../stores/tab-data';   
     import { MongoDbService } from '../../services/data/mongo-service';   
+    import { TriggerDocumentCreate } from '../../types/DocumentCRUD/document-crud';
     import VueJsoneditor from 'vue3-ts-jsoneditor';
 
     const props = defineProps<{
@@ -189,13 +190,13 @@
 
     const emit = defineEmits<{
         (e: 'triggerFilter', data: DocumentsFilteringPagination): void
-        (e: 'triggerDocInsertModal', value: boolean): void
+        (e: 'triggerDocInsertModal', data: TriggerDocumentCreate): void
     }>();
 
     const fieldsStore = useDocumentFieldsStore();
     const countStore = useDocumentsCountStore();
     const tabsDataStore = useTabDataStore();
-    const importExportStore = useImportExportEventsStore();
+    const crudEventsStore = useCRUDEventsStore();
     const notification = useNotification();
 
     const calculateTotalPageCount = (counsData: DocumentsCount[]) => {
@@ -350,7 +351,7 @@
     }
 
     const insertDocument = () => {
-        emit('triggerDocInsertModal', true);
+        emit('triggerDocInsertModal', {triggerModal: true, pageNumber: componentState.pageNumber});
     }
 
     const importDocuments = async () => {
@@ -367,15 +368,15 @@
             componentState.runningOperation = true;
             componentState.runningOperationText = "Importing";
 
-            const result = await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
-
-            if (typeof result === "number") {
-                importExportStore.updateDocumentsImported(true);
+            try {
+                const result = await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
 
                 notification.success({ title: "Collection imported." });
+
+                crudEventsStore.updateDocumentsImported(true);               
             }
-            else {
-                notification.error({ title: result.message });
+            catch(exception: any) {
+                notification.error({ title: exception.message });
             }
 
             componentState.runningOperation = false;

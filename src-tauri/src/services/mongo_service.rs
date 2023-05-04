@@ -50,7 +50,9 @@ pub async fn drop_database(db_name: &str) -> Result<String, ErrorResult> {
 
                 match result {
                     Ok(_r) => return Ok("ok".to_string()),
-                    Err(_e) => return Err(ErrorResult {message: "Error occured while dropping connection.".to_string() })
+                    Err(e) => {
+                        return Err(ErrorResult {message: e.kind.to_string() });
+                    }
                 }             
             },
             None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
@@ -165,12 +167,19 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
 
                 let filters_doc = Document::try_from(filters_mapping)?;
 
-                let mut cursor = db.collection(collection_name).find(filters_doc, options).await?;
+                let cursor = db.collection(collection_name).find(filters_doc, options).await;
 
                 let mut collection_docs: Vec<Document> = Vec::new();
 
-                while let Some(doc) = cursor.next().await {
-                    collection_docs.push(doc?);
+                match cursor {
+                    Ok(mut doc_cursor) => {
+                        while let Some(doc) = doc_cursor.next().await {
+                            collection_docs.push(doc?);
+                        }
+                    },
+                    Err(_e) => {
+
+                    }
                 }
 
                 return Ok(collection_docs);
@@ -345,7 +354,7 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
                     Ok(file) => {
                         let summary_for = "import";
 
-                        let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
+                        //let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
 
                         let documents: Result<Vec<Document>, serde_json::Error> = serde_json::from_reader(file);
 
@@ -364,10 +373,10 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
                                     }
                                 }
 
-                                import_summary.documents_count = documents_count;
-                                import_summary.operation_status = String::from("completed");
+                                // import_summary.documents_count = documents_count;
+                                // import_summary.operation_status = String::from("completed");
 
-                                update_summary(import_summary);
+                                // update_summary(import_summary);
 
                                 return Ok(documents_count);                              
                             },

@@ -3,7 +3,7 @@ import { useCollectionTabsStore } from "../stores/collection-tabs";
 import { useDatabaseCollectionsStore } from "../stores/db-collections";
 import { useDocumentFieldsStore } from "../stores/document-fields";
 import { useDocumentsCountStore } from "../stores/documents-count";
-import { useImportExportEventsStore } from "../stores/import-export-events";
+import { useImportExportEventsStore } from "../stores/crud-events";
 import { useRefreshEventsStore } from "../stores/refresh-events";
 
 export class StoreService {

@@ -27,11 +27,11 @@ export class MongoDbService {
         return await invoke('create_collection', { dbName: dbName, collectionName: collectionName });
     }
 
-    static dropCollection = async (dbName: string, collectionName: string): Promise<string | ErrorResult> => {
+    static dropCollection = async (dbName: string, collectionName: string): Promise<string> => {
         return await invoke('drop_collection', { dbName: dbName, collectionName: collectionName });
     }
 
-    static insertDocument = async (dbName: string, collectionName: string, document: string): Promise<string | ErrorResult> => {
+    static insertDocument = async (dbName: string, collectionName: string, document: string): Promise<string> => {
         return await invoke('insert_docuemnt', { dbName: dbName, collectionName: collectionName, document: document });
     }
 
@@ -43,7 +43,7 @@ export class MongoDbService {
         return await invoke('delete_document', { dbName: dbName, collectionName: collectionName, filter: filter });
     }
 
-    static importCollection = async (dbName: string, collectionName: string, path: string): Promise<number | ErrorResult> => {
+    static importCollection = async (dbName: string, collectionName: string, path: string): Promise<number> => {
         return await invoke('import_collection', { dbName: dbName, collectionName: collectionName, path: path });
     }
 
@@ -63,7 +63,7 @@ export class MongoDbService {
         invoke('drop_client');
     }
 
-    static dropDatabase = async (dbName: string): Promise<string | ErrorResult> => {
+    static dropDatabase = async (dbName: string): Promise<string> => {
         return invoke('drop_database', { dbName: dbName });
     }
 }

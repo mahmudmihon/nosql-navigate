@@ -13,7 +13,17 @@ export const useCollectionDocumentsStore = defineStore('collection-documents', {
     },
     actions: {
         addNewDocuments(newDocuments: CollectionDocuments) {
-            this.$state.collectionDocuments.push(newDocuments);
+
+            const existingData = this.$state.collectionDocuments.filter(x => x.collectionName == newDocuments.collectionName)[0];
+
+            if(existingData != null) {
+                const dataIndex = this.$state.collectionDocuments.indexOf(existingData);
+
+                this.$state.collectionDocuments.splice(dataIndex, 1, newDocuments);
+            }
+            else {
+                this.$state.collectionDocuments.push(newDocuments);
+            }            
         },
         removeDocuments(collectionName: string) {
             const collectionToDelete = this.$state.collectionDocuments.filter(x => x.collectionName == collectionName)[0];

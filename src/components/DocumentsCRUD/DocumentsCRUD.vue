@@ -67,12 +67,13 @@
     import { EJSONService } from '../../services/ejson-service';
     import { useDocumentsCountStore } from '../../stores/documents-count';
     import { DocumentsFilteringPagination } from '../../types/DocumentFilter&Pagination/documents-filtering-pagination';
-    import { useImportExportEventsStore } from '../../stores/import-export-events';
+    import { useCRUDEventsStore } from '../../stores/crud-events';
     import { ObjectId } from 'bson';
     import { CommonConsts } from '../../utilities/common-consts';
     import { MongoDbService } from '../../services/data/mongo-service';
     import { ComponentStateModel } from './Models/ViewModels';
-    import { useTabDataStore } from '../../stores/tab-data';
+    import { useTabDataStore } from '../../stores/tab-data';  
+    import { TriggerDocumentCreate } from '../../types/DocumentCRUD/document-crud';
     import DocumentsFilterAndPagination from '../DocumentsFilterAndPagination/DocumentsFilterAndPagination.vue';
     import GenericSkeleton from '../Common/GenericSkeleton.vue';
     import DocumentList from '../DocumentList/DocumentList.vue';
@@ -88,7 +89,7 @@
     const documentsStore = useCollectionDocumentsStore();
     const countStore = useDocumentsCountStore();
     const tabsDataStore = useTabDataStore();
-    const importExportStore = useImportExportEventsStore();
+    const crudEventStore = useCRUDEventsStore();
     const notification = useNotification();
 
     const componentState: ComponentStateModel = reactive({
@@ -184,16 +185,16 @@
         getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);
     }
 
-    importExportStore.$subscribe((mutation, state) => {
+    crudEventStore.$subscribe((mutation, state) => {
         if(state.documentsImported) {
             getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
 
-            importExportStore.updateDocumentsImported(false);
+            crudEventStore.updateDocumentsImported(false);
         }
     });
 
-    const triggerDocInsertModal = (value: boolean) => {
-        componentState.showDocInsertModal = value;
+    const triggerDocInsertModal = (data: TriggerDocumentCreate) => {
+        componentState.showDocInsertModal = data.triggerModal;
     }
 
     const insertDoc = async () => {
@@ -204,16 +205,16 @@
                 parsedObject = { "_id": ObjectId.generate().toString('hex'), ...parsedObject }
             }
 
-            const result = await MongoDbService.insertDocument(props.dbName, props.collectionName, JSON.stringify(parsedObject));
+            try {
+                await MongoDbService.insertDocument(props.dbName, props.collectionName, JSON.stringify(parsedObject));
 
-            if(typeof result === "string") {
                 notification.success({ title: "Document inserted." });
 
                 componentState.showDocInsertModal = false;
                 componentState.docToInsert = '';
             }
-            else {
-                notification.error({ title: result.message });
+            catch(exception: any) {
+                notification.error({ title: exception.message });
             }
         }
     }

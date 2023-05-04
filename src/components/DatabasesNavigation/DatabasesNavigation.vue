@@ -182,6 +182,7 @@
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionEventsStore } from '../../stores/connection-events';
   import { ErrorResult } from '../../types/OperationSummary/error-result';
+  import { extractMessageFromMongoError } from '../../utilities/message-extract';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
   import OperationSummary from '../OperationSummary/OperationSummary.vue';
 
@@ -261,27 +262,31 @@
 
     componentState.deletingEntity = true;
 
-    let result: string | ErrorResult;
+    try {
+      let result: string;
 
-    if(dbCollectionName.length > 1) {
-      result = await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
-    }
-    else {
-      result = await MongoDbService.dropDatabase(dbCollectionName[0].trim());
-    }
+      if(dbCollectionName.length > 1) {
+        result = await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
+      }
+      else {
+        result = await MongoDbService.dropDatabase(dbCollectionName[0].trim());
+      }
 
-    if(typeof result === "string") {
+      if(typeof result === "string") {
 
-      await refreshDb();
-    }
-    else{
-      notification.error({title: result.message});
-    }
+        await refreshDb();
+      }
 
-    componentState.collectionAddModel.dbName = '';
-    componentState.collectionAddModel.collectionName = '';
-    componentState.deletingEntity = false;
-    componentState.showDeleteConfirmationModal = false;
+      componentState.collectionAddModel.dbName = '';
+      componentState.collectionAddModel.collectionName = '';
+      componentState.deletingEntity = false;
+      componentState.showDeleteConfirmationModal = false;
+    }
+    catch(exception: any) {
+      notification.error({title: extractMessageFromMongoError(exception.message)});
+
+      componentState.deletingEntity = false;
+    }   
   }
 
   const showConfirmationModal = (dbName: string, collectionName: string) => {
