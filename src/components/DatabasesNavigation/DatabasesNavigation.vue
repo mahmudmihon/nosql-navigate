@@ -181,11 +181,12 @@
   import { StoreService } from '../../services/store-service'; 
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionEventsStore } from '../../stores/connection-events';
-  import { ErrorResult } from '../../types/OperationSummary/error-result';
   import { extractMessageFromMongoError } from '../../utilities/message-extract';
+  import { useCollectionDocumentsStore } from '../../stores/collection-documents';
   import GenericSkeleton from '../Common/GenericSkeleton.vue';
   import OperationSummary from '../OperationSummary/OperationSummary.vue';
 
+  const documentsStore = useCollectionDocumentsStore();
   const tabsStore = useCollectionTabsStore();
   const collectionsStore = useDatabaseCollectionsStore();
   const refreshEventsStore = useRefreshEventsStore();
@@ -266,16 +267,17 @@
       let result: string;
 
       if(dbCollectionName.length > 1) {
-        result = await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
+        await MongoDbService.dropCollection(dbCollectionName[0].trim(), dbCollectionName[1].trim());
+
+        removeDocumentsCache(false, dbCollectionName[0].trim(), dbCollectionName[1].trim());
       }
       else {
-        result = await MongoDbService.dropDatabase(dbCollectionName[0].trim());
+        await MongoDbService.dropDatabase(dbCollectionName[0].trim());
+
+        removeDocumentsCache(true, dbCollectionName[0].trim(), "");
       }
 
-      if(typeof result === "string") {
-
-        await refreshDb();
-      }
+      await refreshDb();
 
       componentState.collectionAddModel.dbName = '';
       componentState.collectionAddModel.collectionName = '';
@@ -363,5 +365,18 @@
     StoreService.resetStores();
 
     router.push({path: '/'});
+  }
+
+  const removeDocumentsCache = (wholeDb: boolean, dbName: string, collectionName: string): void => {
+    if(wholeDb) {
+      const dbCollections = componentState.dbsWithCollections.filter(x => x.db_name == dbName);
+
+      if(dbCollections?.length > 0) {
+        dbCollections.forEach(x => documentsStore.removeDocuments(`${x.db_name}.${x.db_collections}`));
+      }
+      else {
+        documentsStore.removeDocuments(`${dbName}.${collectionName}`);
+      }
+    }
   }
 </script>

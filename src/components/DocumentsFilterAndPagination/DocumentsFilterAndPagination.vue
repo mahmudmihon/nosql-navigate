@@ -351,7 +351,7 @@
     }
 
     const insertDocument = () => {
-        emit('triggerDocInsertModal', {triggerModal: true, pageNumber: componentState.pageNumber});
+        emit('triggerDocInsertModal', { triggerModal: true });
     }
 
     const importDocuments = async () => {
@@ -369,7 +369,7 @@
             componentState.runningOperationText = "Importing";
 
             try {
-                const result = await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
+                await MongoDbService.importCollection(props.dbName, props.collectionName, filePath as string);
 
                 notification.success({ title: "Collection imported." });
 

@@ -89,7 +89,7 @@
     const documentsStore = useCollectionDocumentsStore();
     const countStore = useDocumentsCountStore();
     const tabsDataStore = useTabDataStore();
-    const crudEventStore = useCRUDEventsStore();
+    const crudEventsStore = useCRUDEventsStore();
     const notification = useNotification();
 
     const componentState: ComponentStateModel = reactive({
@@ -102,7 +102,7 @@
         collectionDocuments: []
     });
 
-    const getStoreCollectionDocumentsAndCount = async (filters: string, sort: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false) => {
+    const getStoreCollectionDocumentsAndCount = async (filters: string, sort: string, limit: number, skip: number, triggeredFromFilterAndPagination: boolean = false, triggerListUpdateEvent: boolean = false) => {
 
         const promises = [
             await MongoDbService.getCollectionDocuments(props.dbName, props.collectionName, filters, sort, limit, skip),
@@ -169,6 +169,10 @@
                 }
             }
 
+            if(triggerListUpdateEvent) {
+                crudEventsStore.updateDocumentList(true);
+            }
+
             componentState.fullPageLoading = false;
             componentState.searchedDataLoading = false;
         });
@@ -181,15 +185,15 @@
         getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
     }
 
-    const triggerFilter = (data: DocumentsFilteringPagination) => {
-        getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);
+    const triggerFilter = async (data: DocumentsFilteringPagination) => {
+        await getStoreCollectionDocumentsAndCount(data.filters, data.sort, data.limit, data.skip, true);
     }
 
-    crudEventStore.$subscribe((mutation, state) => {
+    crudEventsStore.$subscribe((mutation, state) => {
         if(state.documentsImported) {
-            getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0);
+            getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0, false, true);
 
-            crudEventStore.updateDocumentsImported(false);
+            crudEventsStore.updateDocumentsImported(false);
         }
     });
 
@@ -212,6 +216,12 @@
 
                 componentState.showDocInsertModal = false;
                 componentState.docToInsert = '';
+
+                const collectionDocuments = documentsStore.collectionDocuments.filter(x => x.collectionName == `${props.dbName}.${props.collectionName}`)[0]?.CollectionDocuments;
+
+                if(collectionDocuments == null || collectionDocuments.length < CommonConsts.defaultDocumentPageSize) {
+                    await getStoreCollectionDocumentsAndCount('{}', '{}', CommonConsts.defaultDocumentPageSize, 0, false, true);
+                }
             }
             catch(exception: any) {
                 notification.error({ title: exception.message });
