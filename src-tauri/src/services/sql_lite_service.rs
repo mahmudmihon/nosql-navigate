@@ -13,8 +13,27 @@ fn get_db_path() -> PathBuf {
     };
 }
 
-pub fn create_initial_tables() -> Result<()> {
-    let db_path = get_db_path();
+pub fn get_db(handle: tauri::AppHandle) -> PathBuf {
+    return handle.path_resolver()
+       .resolve_resource("db/navigateDb.db")
+       .expect("failed to resolve resource");
+}
+
+// fn get_db_path() -> PathBuf {
+//     tauri::Builder::default()
+//     .setup(|app| {
+//         let resource_path = app.path_resolver()
+//         .resolve_resource("db/navigateDb.db")
+//         .expect("failed to resolve resource dir");
+    
+//     return resource_path;
+//     });
+
+    
+// }
+
+pub fn create_initial_tables(db_path: &PathBuf) -> Result<()> {
+    //let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;
 
@@ -46,8 +65,7 @@ pub fn create_initial_tables() -> Result<()> {
     return Ok(());
 }
 
-pub fn get_all_connection_info() -> Result<Vec<ConnectionInfo>> {
-    let db_path = get_db_path();
+pub fn get_all_connection_info(db_path: &PathBuf) -> Result<Vec<ConnectionInfo>> {
 
     let conn = Connection::open(db_path)?;
 
@@ -70,8 +88,7 @@ pub fn get_all_connection_info() -> Result<Vec<ConnectionInfo>> {
     return Ok(info_list);
 }
 
-pub fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<String, ErrorResult> {
-    let db_path = get_db_path();
+pub fn save_connection_info(connection_name: &str, connection_url: &str, db_path: &PathBuf) -> Result<String, ErrorResult> {
 
     let conn = Connection::open(db_path);
 
@@ -93,8 +110,7 @@ pub fn save_connection_info(connection_name: &str, connection_url: &str) -> Resu
     }
 }
 
-pub fn delete_connection_info(id: &str) -> Result<String, ErrorResult> {
-    let db_path = get_db_path();
+pub fn delete_connection_info(id: &str, db_path: &PathBuf) -> Result<String, ErrorResult> {
 
     let conn = Connection::open(db_path);
 
@@ -118,8 +134,7 @@ pub fn delete_connection_info(id: &str) -> Result<String, ErrorResult> {
     }
 }
 
-pub fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>> {
-    let db_path = get_db_path();
+pub fn get_all_import_export_summary(db_path: &PathBuf) -> Result<Vec<ImportExportSummary>> {
 
     let conn = Connection::open(db_path)?;
 
@@ -147,8 +162,7 @@ pub fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>> {
     return Ok(summary_list);
 }
 
-pub fn insert_import_export_summary(summary: &ImportExportSummary) -> Result<()> {
-    let db_path = get_db_path();
+pub fn insert_import_export_summary(summary: &ImportExportSummary, db_path: &PathBuf) -> Result<()> {
 
     let conn = Connection::open(db_path)?;
 
@@ -160,7 +174,7 @@ pub fn insert_import_export_summary(summary: &ImportExportSummary) -> Result<()>
     return Ok(());
 }
 
-pub fn update_import_export_summary(summary: &ImportExportSummary) -> Result<()> {
+pub fn update_import_export_summary(summary: &ImportExportSummary, db_path: &PathBuf) -> Result<()> {
     let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;
@@ -173,8 +187,7 @@ pub fn update_import_export_summary(summary: &ImportExportSummary) -> Result<()>
     return Ok(());
 }
 
-pub fn clear_import_export_summary() -> Result<()> {
-    let db_path = get_db_path();
+pub fn clear_import_export_summary(db_path: &PathBuf) -> Result<()> {
 
     let conn = Connection::open(db_path)?;
 

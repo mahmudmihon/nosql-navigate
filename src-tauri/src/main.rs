@@ -16,33 +16,45 @@ use models::dtos::DbWithCollections;
 use models::errors::CustomError;
 
 #[tauri::command]
-fn create_initial_tables() {
-  sql_lite_service::create_initial_tables();
+fn create_initial_tables(app_handle: tauri::AppHandle) {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  sql_lite_service::create_initial_tables(&resource_path);
 }
 
 #[tauri::command]
-fn get_all_connection_info() -> Result<Vec<ConnectionInfo>, ()> {
-  return Ok(sql_lite_service::get_all_connection_info().unwrap());
+fn get_all_connection_info(app_handle: tauri::AppHandle) -> Result<Vec<ConnectionInfo>, ()> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return Ok(sql_lite_service::get_all_connection_info(&resource_path).unwrap());
 }
 
 #[tauri::command]
-fn save_connection_info(connection_name: &str, connection_url: &str) -> Result<String, ErrorResult> {
-  return sql_lite_service::save_connection_info(connection_name, connection_url);
+fn save_connection_info(connection_name: &str, connection_url: &str, app_handle: tauri::AppHandle) -> Result<String, ErrorResult> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return sql_lite_service::save_connection_info(connection_name, connection_url, &resource_path);
 }
 
 #[tauri::command]
-fn delete_connection_info(id: &str) -> Result<String, ErrorResult> {
-  return sql_lite_service::delete_connection_info(id);
+fn delete_connection_info(id: &str, app_handle: tauri::AppHandle) -> Result<String, ErrorResult> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return sql_lite_service::delete_connection_info(id, &resource_path);
 }
 
 #[tauri::command]
-fn clear_import_export_summary() {
-  sql_lite_service::clear_import_export_summary();
+fn clear_import_export_summary(app_handle: tauri::AppHandle) {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  sql_lite_service::clear_import_export_summary(&resource_path);
 }
 
 #[tauri::command]
-fn get_all_import_export_summary() -> Result<Vec<ImportExportSummary>, ()> {
-  return Ok(sql_lite_service::get_all_import_export_summary().unwrap());
+fn get_all_import_export_summary(app_handle: tauri::AppHandle) -> Result<Vec<ImportExportSummary>, ()> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return Ok(sql_lite_service::get_all_import_export_summary(&resource_path).unwrap());
 }
 
 #[tauri::command]
@@ -71,8 +83,10 @@ async fn documents_aggregation(db_name: &str, collection_name: &str, aggregation
 }
 
 #[tauri::command(async)]
-async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u64, CustomError> {
-  return mongo_service::export_aggregation_result(db_name, collection_name, aggregations, path).await;
+async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str, app_handle: tauri::AppHandle) -> Result<u64, CustomError> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return mongo_service::export_aggregation_result(db_name, collection_name, aggregations, path, &resource_path).await;
 }
 
 #[tauri::command(async)]
@@ -106,13 +120,17 @@ async fn insert_docuemnt(db_name: &str, collection_name: &str, document: &str) -
 }
 
 #[tauri::command(async)]
-async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, ErrorResult> {
-  return mongo_service::import_collection(db_name, collection_name, path).await;
+async fn import_collection(db_name: &str, collection_name: &str, path: &str, app_handle: tauri::AppHandle) -> Result<u64, ErrorResult> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return mongo_service::import_collection(db_name, collection_name, path, &resource_path).await;
 }
 
 #[tauri::command(async)]
-async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
-  return mongo_service::export_collection(db_name, collection_name, path).await;
+async fn export_collection(db_name: &str, collection_name: &str, path: &str, app_handle: tauri::AppHandle) -> Result<u64, CustomError> {
+  let resource_path = sql_lite_service::get_db(app_handle);
+
+  return mongo_service::export_collection(db_name, collection_name, path, &resource_path).await;
 }
 
 #[tauri::command(async)]

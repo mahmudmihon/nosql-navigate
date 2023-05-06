@@ -7,6 +7,7 @@ use std::convert::TryFrom;
 use futures::stream::{StreamExt};
 use std::fs::{File, OpenOptions};
 use std::io::{Write};
+use std::path::PathBuf;
 
 use crate::models::dtos::{DbWithCollections, ImportExportSummary, ErrorResult};
 use crate::models::errors::CustomError;
@@ -216,7 +217,7 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
     }
 }
 
-pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str) -> Result<u64, CustomError> {
+pub async fn export_aggregation_result(db_name: &str, collection_name: &str, aggregations: Vec<&str>, path: &str, db_path: &PathBuf) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -231,7 +232,7 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let summary_for = "export";
 
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                 let pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
 
@@ -261,7 +262,7 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
                 export_summary.documents_count = count;
                 export_summary.operation_status = String::from("completed");
 
-                update_summary(export_summary);
+                update_summary(export_summary, db_path);
 
                 return Ok(count);
             },
@@ -290,7 +291,7 @@ pub async fn get_collection_documents_count(db_name: &str, collection_name: &str
     }
 }
 
-pub async fn export_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, CustomError> {
+pub async fn export_collection(db_name: &str, collection_name: &str, path: &str, db_path: &PathBuf) -> Result<u64, CustomError> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -309,7 +310,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
 
                 let summary_for = "export";
 
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path);
+                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                 writeln!(file, "[")?;
 
@@ -334,7 +335,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
                 export_summary.documents_count = count;
                 export_summary.operation_status = String::from("completed");
 
-                update_summary(export_summary);
+                update_summary(export_summary, db_path);
 
                 return Ok(count);
             },
@@ -343,7 +344,7 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str)
     }
 }
 
-pub async fn import_collection(db_name: &str, collection_name: &str, path: &str) -> Result<u64, ErrorResult> {
+pub async fn import_collection(db_name: &str, collection_name: &str, path: &str, db_path: &PathBuf) -> Result<u64, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -354,7 +355,7 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
                     Ok(file) => {
                         let summary_for = "import";
 
-                        //let mut import_summary = insert_summary(summary_for, db_name, collection_name, path);
+                        let mut import_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                         let documents: Result<Vec<Document>, serde_json::Error> = serde_json::from_reader(file);
 
@@ -373,10 +374,10 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str)
                                     }
                                 }
 
-                                // import_summary.documents_count = documents_count;
-                                // import_summary.operation_status = String::from("completed");
+                                import_summary.documents_count = documents_count;
+                                import_summary.operation_status = String::from("completed");
 
-                                // update_summary(import_summary);
+                                update_summary(import_summary, db_path);
 
                                 return Ok(documents_count);                              
                             },
@@ -541,7 +542,7 @@ fn create_options(sort: Document, limit: i64, skip: u64) -> FindOptions {
         .build()
 }
 
-fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str, path: &str) -> ImportExportSummary {
+fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str, path: &str, db_path: &PathBuf) -> ImportExportSummary {
     let mut summary: ImportExportSummary = ImportExportSummary::new();
 
     summary.id = Uuid::new_v4().to_string();
@@ -553,11 +554,11 @@ fn insert_summary(summary_for: &str, db_name: &str, collection_name: &str, path:
     summary.documents_count = 0;
     summary.created_on = Utc::now().to_string();
 
-    sql_lite_service::insert_import_export_summary(&summary);
+    sql_lite_service::insert_import_export_summary(&summary, db_path);
 
     return summary;
 }
 
-fn update_summary(summary: ImportExportSummary) {
-    sql_lite_service::update_import_export_summary(&summary);
+fn update_summary(summary: ImportExportSummary, db_path: &PathBuf) {
+    sql_lite_service::update_import_export_summary(&summary, db_path);
 }

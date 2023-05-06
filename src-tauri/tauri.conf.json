@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "NoSQL Navigate",
+    "productName": "nosql-navigate",
     "version": "0.1.0"
   },
   "tauri": {
@@ -21,6 +21,9 @@
         "all": false,
         "open": true,
         "save": true
+      },
+      "fs": {
+        "scope": ["$RESOURCE/db/*"]
       }
     },
     "bundle": {
@@ -35,7 +38,7 @@
         "icons/navigation.png",
         "icons/navigation.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.navigate.dev",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -44,7 +47,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "db/*"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {

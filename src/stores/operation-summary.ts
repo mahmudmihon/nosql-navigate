@@ -13,7 +13,7 @@ export const useOperationSummaryStore = defineStore('operation-summary', {
     },
     actions: {
         upsertImportExportSummary(summary: ImportExportSummary) {
-            const dataToUpdate = this.$state.importExportSummary.filter(x => x.id == summary.id && x.documentType == summary.documentType && x.operationType == summary.operationType)[0];
+            const dataToUpdate = this.$state.importExportSummary.filter(x => x.id == summary.id)[0];
             
             if(dataToUpdate != null) {
                 const existingDataIndex = this.$state.importExportSummary.indexOf(dataToUpdate);
