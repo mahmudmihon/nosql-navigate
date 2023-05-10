@@ -4,36 +4,13 @@ use uuid::Uuid;
 
 use crate::models::dtos::{ImportExportSummary, ConnectionInfo, ErrorResult};
 
-fn get_db_path() -> PathBuf {
-    match project_root::get_project_root() {
-        Ok(root_path) => {
-            return  root_path.join("db").join("navigateDb.db");
-        },
-        Err(_e) => return PathBuf::new()
-    };
-}
-
 pub fn get_db(handle: tauri::AppHandle) -> PathBuf {
     return handle.path_resolver()
-       .resolve_resource("db/navigateDb.db")
+       .resolve_resource("db/navigate.db")
        .expect("failed to resolve resource");
 }
 
-// fn get_db_path() -> PathBuf {
-//     tauri::Builder::default()
-//     .setup(|app| {
-//         let resource_path = app.path_resolver()
-//         .resolve_resource("db/navigateDb.db")
-//         .expect("failed to resolve resource dir");
-    
-//     return resource_path;
-//     });
-
-    
-// }
-
 pub fn create_initial_tables(db_path: &PathBuf) -> Result<()> {
-    //let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;
 
@@ -175,7 +152,6 @@ pub fn insert_import_export_summary(summary: &ImportExportSummary, db_path: &Pat
 }
 
 pub fn update_import_export_summary(summary: &ImportExportSummary, db_path: &PathBuf) -> Result<()> {
-    let db_path = get_db_path();
 
     let conn = Connection::open(db_path)?;
 

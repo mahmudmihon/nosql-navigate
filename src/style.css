@@ -46,8 +46,14 @@
 }
 
 .jv-container.boxed {
+  border: none;
   border-color: #ffffff0a;
   border-radius: 10px;
+}
+
+.jv-container .jv-more:after {
+  background: none;
+  background: none;
 }
 
 .jv-container .jv-code {
