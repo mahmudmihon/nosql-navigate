@@ -37,11 +37,21 @@
   const componentState: ComponentStateModel = reactive({savedConnections: []});
 
   // (async () => {
-  //   await SqlLiteService.checkAndCreateInitialTable();
+  //   try {
+  //     await SqlLiteService.checkAndCreateInitialTable();
+  //   }
+  //   catch(exception: any) {
+  //     console.log(exception);
+  //   }
   // })();
 
   async function getSavedConnections() {
-    componentState.savedConnections = await SqlLiteService.getAllConnectionInfo();
+    try {
+      componentState.savedConnections = await SqlLiteService.getAllConnectionInfo();
+    }
+    catch(exception: any) {
+      console.log(exception);
+    }
   };
 
   //getSavedConnections();

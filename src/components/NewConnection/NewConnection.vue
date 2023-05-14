@@ -32,7 +32,7 @@
     </div>
 
     <div class="flex justify-end mt-3">
-      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click="saveConnection">Save</button>
+      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button">Save</button>
     </div>
   </div>
 </template>

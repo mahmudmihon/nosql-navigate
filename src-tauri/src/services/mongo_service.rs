@@ -230,9 +230,9 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 let db = client.database(db_name);
 
-                let summary_for = "export";
+                // let summary_for = "export";
 
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
+                // let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                 let pipelines: Vec<Document> = prepare_aggregation_stages(aggregations);
 
@@ -259,10 +259,10 @@ pub async fn export_aggregation_result(db_name: &str, collection_name: &str, agg
 
                 writeln!(file, "]")?;
 
-                export_summary.documents_count = count;
-                export_summary.operation_status = String::from("completed");
+                // export_summary.documents_count = count;
+                // export_summary.operation_status = String::from("completed");
 
-                update_summary(export_summary, db_path);
+                // update_summary(export_summary, db_path);
 
                 return Ok(count);
             },
@@ -308,9 +308,9 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str,
 
                 let mut count: u64 = 0;
 
-                let summary_for = "export";
+                // let summary_for = "export";
 
-                let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
+                // let mut export_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                 writeln!(file, "[")?;
 
@@ -332,10 +332,10 @@ pub async fn export_collection(db_name: &str, collection_name: &str, path: &str,
 
                 writeln!(file, "]")?;
 
-                export_summary.documents_count = count;
-                export_summary.operation_status = String::from("completed");
+                // export_summary.documents_count = count;
+                // export_summary.operation_status = String::from("completed");
 
-                update_summary(export_summary, db_path);
+                // update_summary(export_summary, db_path);
 
                 return Ok(count);
             },
@@ -353,9 +353,9 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str,
 
                 match file_to_import {
                     Ok(file) => {
-                        let summary_for = "import";
+                        // let summary_for = "import";
 
-                        let mut import_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
+                        // let mut import_summary = insert_summary(summary_for, db_name, collection_name, path, db_path);
 
                         let documents: Result<Vec<Document>, serde_json::Error> = serde_json::from_reader(file);
 
@@ -374,10 +374,10 @@ pub async fn import_collection(db_name: &str, collection_name: &str, path: &str,
                                     }
                                 }
 
-                                import_summary.documents_count = documents_count;
-                                import_summary.operation_status = String::from("completed");
+                                // import_summary.documents_count = documents_count;
+                                // import_summary.operation_status = String::from("completed");
 
-                                update_summary(import_summary, db_path);
+                                // update_summary(import_summary, db_path);
 
                                 return Ok(documents_count);                              
                             },

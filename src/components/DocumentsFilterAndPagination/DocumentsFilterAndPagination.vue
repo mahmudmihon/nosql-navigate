@@ -100,15 +100,15 @@
 
         <div class="flex justify-end px-3 py-2 text-white rounded-lg bg-base mt-3 mb-3">
             <div class="mr-auto">
-                <summary class="flex items-center">
-                    <span class="mr-1.5 text-xs font-medium">{{$props.dbName}}</span>
+                <span class="flex items-center text-xs font-medium truncate w-[420px]">
+                    {{$props.dbName}}
 
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-1 mr-1 w-6 h-6">
                         <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 11-1.06-1.06l2.47-2.47H3a.75.75 0 010-1.5h16.19l-2.47-2.47a.75.75 0 010-1.06z" clip-rule="evenodd" />
                     </svg>
 
-                    <span class="ml-1.5 text-xs font-medium text-ellipsis overflow-hidden w-96">{{$props.collectionName}}</span>
-                </summary>
+                    {{$props.collectionName}}
+                </span>             
             </div>
             <div v-if="componentState.runningOperation" class="mr-4">
                 <n-tag size="small" round :bordered="false" type="success">
