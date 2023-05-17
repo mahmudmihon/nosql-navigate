@@ -7,7 +7,7 @@
       </n-tag>    
     </div>
 
-    <div v-for="(cData, index) in componentState.savedConnections" :key="index" @click="updateSelectedDb(index)" class="bg-base rounded-lg pl-3 pr-[20px] py-[7px] mb-3 relative group hover:cursor-pointer w-[300px]">
+    <div v-for="(cData, index) in componentState.savedConnections" :key="index" @click="updateSelectedDb(index)" class="bg-base rounded-lg pl-3 pr-[10px] py-[7px] mb-3 relative group hover:cursor-pointer w-[290px]">
       <div class="z-40 absolute top-2 right-1 hidden group-hover:flex">
         <svg @click="DeleteConnection(cData.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[18px] h-[18px] ml-2 text-red-500 hover:cursor-pointer">
             <path fill-rule="evenodd"
@@ -18,7 +18,7 @@
       </div>
       <div>
         <p class="text-[#63e2b7]">{{ cData.name }}</p>
-        <p class="text-[11px] mt-1 truncate w-[280px]">{{ cData.url }}</p>
+        <p class="text-[11px] mt-1 truncate w-[260px]">{{ cData.url }}</p>
       </div>
     </div>
   </div>
@@ -36,14 +36,14 @@
 
   const componentState: ComponentStateModel = reactive({savedConnections: []});
 
-  // (async () => {
-  //   try {
-  //     await SqlLiteService.checkAndCreateInitialTable();
-  //   }
-  //   catch(exception: any) {
-  //     console.log(exception);
-  //   }
-  // })();
+  (async () => {
+    try {
+      await SqlLiteService.checkAndCreateInitialTable();
+    }
+    catch(exception: any) {
+      console.log(exception);
+    }
+  })();
 
   async function getSavedConnections() {
     try {
@@ -54,7 +54,7 @@
     }
   };
 
-  //getSavedConnections();
+  getSavedConnections();
 
   async function DeleteConnection(id: string) {
     try {

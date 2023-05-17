@@ -1,14 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 300; */
-
   color: #181818;
   background-color: #f6f6f6;
 
@@ -18,6 +12,15 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   overflow: hidden;
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-weight: 400;
+  font-style: normal;
+  font-display: auto;
+  unicode-range: U+000-5FF;
+  src: local("Roboto"), url("./fonts/Poppins-Regular.woff2") format("woff2"), url("./fonts/Poppins-Regular.woff") format("woff");
 }
 
 ::-webkit-scrollbar {

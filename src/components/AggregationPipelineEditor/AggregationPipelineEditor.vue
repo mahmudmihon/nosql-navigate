@@ -69,7 +69,8 @@
         size="medium"
     >
         <div class="mb-6 overflow-y-auto">
-            <div>
+            <div class="flex flex-col">
+                <p class="text-xs mb-1">Select Stage</p>
                 <n-select
                     size="small"
                     v-model:value="componentState.pipelineStage"

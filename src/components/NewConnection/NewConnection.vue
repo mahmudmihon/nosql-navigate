@@ -3,7 +3,7 @@
     <h5 class="text-xl font-medium text-white">New Connection</h5>
     <div class="mt-5">
         <label class="block mb-2 text-sm font-medium text-white">URL</label>
-        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg block w-full p-2 dark:bg-base dark:border-base dark:placeholder-gray-400 dark:text-white" placeholder="mongodb://localhost:27017" v-model.trim="componentState.connectionUrl">
+        <input type="text" class="text-xs rounded-lg block w-full p-2 bg-base border-base placeholder-gray-400 text-white" placeholder="mongodb://localhost:27017" v-model.trim="componentState.connectionUrl">
     </div>
 
     <div class="flex justify-end mt-3 gap-2">
@@ -28,11 +28,11 @@
 
     <label class="block mb-2 text-sm font-medium text-white">Save Connection</label>
     <div class="mt-2">
-        <input type="text" v-model.trim="componentState.connectionName" class="border-gray-300 text-[#ffffffde] text-sm rounded-lg w-full p-1 dark:bg-base dark:placeholder-gray-400" placeholder="Connection Name">
+        <input type="text" v-model.trim="componentState.connectionName" class="text-[#ffffffde] text-sm rounded-lg w-full p-1 bg-base placeholder-gray-400" placeholder="Connection Name">
     </div>
 
     <div class="flex justify-end mt-3">
-      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button">Save</button>
+      <button class="bg-base text-[#ffffffde] rounded-lg py-[3px] px-6" type="button" @click="saveConnection">Save</button>
     </div>
   </div>
 </template>
@@ -119,6 +119,8 @@
 
       if(typeof result === "string") {
         connectionEventsStore.updateConnectionSavedEvent(true);
+
+        componentState.connectionName = '';
       }
       else {
         result = result as ErrorResult;
