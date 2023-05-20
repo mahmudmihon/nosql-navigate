@@ -19,4 +19,6 @@
       borderRadius: '5px'
     }
   }
+
+  document.addEventListener('contextmenu', (e) => { e.preventDefault() });
 </script>

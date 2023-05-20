@@ -46,7 +46,6 @@
   import { SqlLiteService } from '../../services/data/sqlLite-service';
   import { useConnectionEventsStore } from '../../stores/connection-events';
   import { MongoDbService } from '../../services/data/mongo-service';
-  import { ErrorResult } from '../../types/OperationSummary/error-result';
  
   const router = useRouter();
   const notification = useNotification();
@@ -115,17 +114,15 @@
   const saveConnection = async () => {
     if(componentState.connectionName != '' && componentState.connectionUrl != '') {
 
-      let result = await SqlLiteService.saveConnectionInfo(componentState.connectionName, componentState.connectionUrl);
+      try {
+        await SqlLiteService.saveConnectionInfo(componentState.connectionName, componentState.connectionUrl);
 
-      if(typeof result === "string") {
         connectionEventsStore.updateConnectionSavedEvent(true);
 
         componentState.connectionName = '';
       }
-      else {
-        result = result as ErrorResult;
-
-        notification.error({title: result.message});
+      catch(exception: any) {
+        notification.error({title: exception.message});
       }
 
       return;

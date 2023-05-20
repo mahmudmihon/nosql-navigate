@@ -336,6 +336,9 @@
     }
 
     const handleStageSelect = (value: string, option: SelectOption) => {
+
+        componentState.stageQuery = '';
+
         if(componentState.pipelineStage == AggregationStages.Lookup) {
             componentState.showLookupSection = true;
             componentState.showProjectSection = false;
@@ -367,6 +370,12 @@
             componentState.showUnsetSection = false;
 
             return;
+        }
+        else {
+            componentState.showUnwindSection = false;
+            componentState.showProjectSection = false;
+            componentState.showLookupSection = false;
+            componentState.showUnsetSection = false;
         }
 
         const selectedStageOutput = AggregationBuilderService.populateSelectedStageOutput(componentState.pipelineStage ?? "", {});

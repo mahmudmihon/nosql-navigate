@@ -190,7 +190,7 @@ pub async fn get_collection_documents(db_name: &str, collection_name: &str, filt
     }
 }
 
-pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>, limit: i64) -> Result<Vec<Document>, CustomError> {
+pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>, limit: i64) -> Result<Vec<Document>, ErrorResult> {
     unsafe {
         match &CONNECTED_CLIENT {
             Some(client) => {
@@ -202,17 +202,27 @@ pub async fn documents_aggregation(db_name: &str, collection_name: &str, aggrega
 
                 pipelines.push(stage_limit);
 
-                let mut cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await?;
+                let cursor = db.collection::<Document>(collection_name).aggregate(pipelines, None).await;
 
-                let mut collection_docs: Vec<Document> = Vec::new();
+                match cursor {
+                    Ok(mut list_cursor) => {
+                        let mut collection_docs: Vec<Document> = Vec::new();
 
-                while let Some(doc) = cursor.next().await {
-                    collection_docs.push(doc?);
-                }
+                        while let Some(doc) = list_cursor.next().await {
+                            match doc {
+                                Ok(document) => {
+                                    collection_docs.push(document);
+                                },
+                                Err(_e) => {}
+                            }                           
+                        }
 
-                return Ok(collection_docs);
+                        return Ok(collection_docs);
+                    },
+                    Err(e) => return Err(ErrorResult {message: e.kind.to_string() })
+                }                
             },
-            None => { return Err(CustomError::ClientNotFound); }
+            None => { return Err(ErrorResult {message: "Client not found.".to_string() }) }
         }
     }
 }

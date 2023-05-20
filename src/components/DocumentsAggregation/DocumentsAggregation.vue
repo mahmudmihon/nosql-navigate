@@ -52,9 +52,9 @@
         if(data.pipelines.length > 0) {
             componentState.aggregationDataLoading = true;
 
-            const result = await MongoDbService.getAggregatedDocuments(props.dbName, props.collectionName, data.pipelines, CommonConsts.defaultAggregationPageSize);
+            try {
+                const result = await MongoDbService.getAggregatedDocuments(props.dbName, props.collectionName, data.pipelines, CommonConsts.defaultAggregationPageSize) as object[];
 
-            if(typeof result !== "string") {
                 componentState.aggregationData = result.map(x => EJSONService.BsonDocToObject(x));
 
                 if(componentState.aggregationData.length > 0) {
@@ -67,8 +67,8 @@
                     updateTabStoreData(fields);
                 }
             }
-            else {
-                notification.error({title: result});
+            catch(exception: any) {
+                notification.error({ title: exception.message });
             }
 
             componentState.aggregationDataLoading = false;

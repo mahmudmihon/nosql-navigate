@@ -78,7 +78,7 @@ async fn get_collection_documents(db_name: &str, collection_name: &str, filters:
 }
 
 #[tauri::command(async)]
-async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>, limit: i64) -> Result<Vec<Document>, CustomError> {
+async fn documents_aggregation(db_name: &str, collection_name: &str, aggregations: Vec<&str>, limit: i64) -> Result<Vec<Document>, ErrorResult> {
   return mongo_service::documents_aggregation(db_name, collection_name, aggregations, limit).await;
 }
 
