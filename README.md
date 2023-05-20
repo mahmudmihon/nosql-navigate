@@ -1,16 +1,17 @@
-# Tauri + Vue 3 + TypeScript
+<img src="https://i.ibb.co/kxsqcC2/navigation.png" alt="NoSql Navigate" style="height: 200px; width: 200px; display: block; margin-left: auto; margin-right: auto; margin-bottom: 50px">
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+###### **NoSQL Navigate** is a simple, lightweight GUI application for nosql databases based on Rust and Vue.js. Currently supports MongoDB. <br/> <br/>
 
-## Recommended IDE Setup
+###### Installation Requirement: Windows 10, 11
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+<img src="https://i.ibb.co/PhP0Gxg/newconnection.png" alt="newconnection" alt="New Connection" style="height: 400px; width: 800px; display: block; margin-left: auto; margin-right: auto; margin-top: 50px; margin-bottom: 50px">
 
-## Type Support For `.vue` Imports in TS
+<img src="https://i.ibb.co/ncnJJF8/image.png" alt="Simple Searching" style="height: 400px; width: 800px; display: block; margin-left: auto; margin-right: auto; margin-top: 50px; margin-bottom: 50px">
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
+<img src="https://i.ibb.co/fXBDVDM/image.png" alt="Multiple Searching" style="height: 400px; width: 800px; display: block; margin-left: auto; margin-right: auto; margin-top: 50px; margin-bottom: 50px">
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+<img src="https://i.ibb.co/mTbrpNG/image.png" alt="Advance Searching" style="height: 400px; width: 800px; display: block; margin-left: auto; margin-right: auto; margin-top: 50px; margin-bottom: 50px">
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+<img src="https://i.ibb.co/VW5jchy/image.png" alt="Aggregation" style="height: 400px; width: 800px; display: block; margin-left: auto; margin-right: auto; margin-top: 50px; margin-bottom: 50px">
+
+<a href="https://www.flaticon.com/free-icons/navigation" title="navigation icons">Navigation icon created by Freepik - Flaticon</a>
