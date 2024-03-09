@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { TabData } from '../types/TabData/tab-data';
+import { TabData } from '../../types/MongoDB/TabData/tab-data';
 
 interface TabDataState {
     tabsData: TabData[];

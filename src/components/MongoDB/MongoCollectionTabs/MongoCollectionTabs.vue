@@ -24,12 +24,12 @@
 </template>
 
 <script setup lang="ts">
-    import { useCollectionTabsStore } from '../../stores/collection-tabs';
-    import { CollectionTab } from '../../types/CollectionTabs/collection-tabs';
+    import { useCollectionTabsStore } from '../../../stores/Common/collection-tabs';
+    import { CollectionTab } from '../../../types/Common/collection-tabs';
     import { NTabs, NTabPane } from 'naive-ui';
     import { useRouter } from 'vue-router';
     import { ref } from 'vue';   
-    import { useTabDataStore } from '../../stores/tab-data';
+    import { useTabDataStore } from '../../../stores/MongoDB/tab-data';
     import DocumentOperations from '../DocumentOperations/DocumentOperations.vue';
 
     const tabsStore = useCollectionTabsStore();
@@ -57,7 +57,7 @@
         tabList.splice(index, 1);
 
         if(tabList.length == 0) {
-            router.push({path: '/dashboard'});
+            router.push({path: '/mongoDB'});
         }
     }
 </script>

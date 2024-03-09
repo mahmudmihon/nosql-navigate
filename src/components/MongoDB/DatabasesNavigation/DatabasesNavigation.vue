@@ -173,18 +173,18 @@
   import { computed, reactive } from 'vue';
   import { ComponentStateModel, DbsNavigationViewModel } from './Models/ViewModels';
   import { NModal, useNotification, NInput, NPopover } from 'naive-ui';
-  import { useCollectionTabsStore } from '../../stores/collection-tabs';
+  import { useCollectionTabsStore } from '../../../stores/Common/collection-tabs';
   import { useRouter } from 'vue-router';
   import { v4 as uid } from 'uuid';
-  import { useRefreshEventsStore } from '../../stores/refresh-events';
-  import { useDatabaseCollectionsStore } from '../../stores/db-collections'; 
-  import { MongoDbService } from '../../services/data/mongo-service';  
-  import { StoreService } from '../../services/store-service'; 
-  import { SqlLiteService } from '../../services/data/sqlLite-service';
-  import { useConnectionEventsStore } from '../../stores/connection-events';
-  import { extractMessageFromMongoError } from '../../utilities/message-extract';
-  import { useCollectionDocumentsStore } from '../../stores/collection-documents';
-  import GenericSkeleton from '../Common/GenericSkeleton.vue';
+  import { useRefreshEventsStore } from '../../../stores/Common/refresh-events';
+  import { useDatabaseCollectionsStore } from '../../../stores/Common/db-collections'; 
+  import { MongoDbService } from '../../../services/MongoDB/mongo-service';  
+  import { StoreService } from '../../../services/Common/store-service'; 
+  import { SqlLiteService } from '../../../services/SqlLite/sqlLite-service';
+  import { useConnectionEventsStore } from '../../../stores/Common/connection-events';
+  import { extractMessageFromMongoError } from '../../../utilities/MongoDB/message-extract';
+  import { useCollectionDocumentsStore } from '../../../stores/collection-documents';
+  import GenericSkeleton from '../../Common/Skeleton/GenericSkeleton.vue';
   import OperationSummary from '../OperationSummary/OperationSummary.vue';
 
   const documentsStore = useCollectionDocumentsStore();

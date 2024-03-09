@@ -1,4 +1,4 @@
-import { ConnectionInfo } from './../../types/DbConnections/db-connection';
+import { ConnectionInfo } from '../../types/Common/db-connection';
 import { invoke } from "@tauri-apps/api";
 import { ImportExportSummary } from "../../types/OperationSummary/import-export-summary";
 import { ErrorResult } from '../../types/OperationSummary/error-result';

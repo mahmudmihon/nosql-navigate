@@ -43,10 +43,10 @@
 <script setup lang="ts">
   import { reactive } from 'vue';
   import { ComponentStateModel } from './Models/ViewModels';
-  import { useRefreshEventsStore } from '../../stores/refresh-events';
-  import { SqlLiteService } from '../../services/data/sqlLite-service';
+  import { useRefreshEventsStore } from '../../../stores/Common/refresh-events';
+  import { SqlLiteService } from '../../../services/SqlLite/sqlLite-service';
   import { NTag } from 'naive-ui';
-  import GenericSkeleton from '../Common/GenericSkeleton.vue';
+  import GenericSkeleton from '../../Common/Skeleton/GenericSkeleton.vue';
 
   const refreshEventsStore = useRefreshEventsStore();
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { DatabaseCollections } from '../types/DbCollections/db-collections';
+import { DatabaseCollections } from '../../types/DbCollections/db-collections';
 
 interface DatabaseCollectionsState {
     dbCollections:  DatabaseCollections[];

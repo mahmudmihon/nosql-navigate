@@ -17,9 +17,9 @@
 <script setup lang="ts">
   import { reactive } from 'vue';
   import { ComponentStateModel } from './Models/ViewModels';
-  import { useRefreshEventsStore } from '../../stores/refresh-events'; 
-  import { MongoDbService } from '../../services/data/mongo-service';
-  import GenericSkeleton from '../Common/GenericSkeleton.vue';
+  import { useRefreshEventsStore } from '../../../stores/Common/refresh-events'; 
+  import { MongoDbService } from '../../../services/MongoDB/mongo-service';
+  import GenericSkeleton from '../../Common/Skeleton/GenericSkeleton.vue';
 
   const refreshEventsStore = useRefreshEventsStore();
 

@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api";
-import { useDatabaseCollectionsStore } from "../stores/db-collections"
+import { useDatabaseCollectionsStore } from "../stores/Common/db-collections"
 
 export class CollectionsAndDocumentsService {
     static getDbCollectionNames = (dbName: string): string[] => {

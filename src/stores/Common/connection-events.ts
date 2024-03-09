@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ConnectionInfo } from "../types/DbConnections/db-connection";
+import { ConnectionInfo } from "../../types/Common/db-connection";
 
 interface ConnectionEventsState {
   connectionSaved: boolean;
@@ -12,7 +12,7 @@ export const useConnectionEventsStore = defineStore("connection-crud", {
     return {
       connectionSaved: false,
       connectedUrl: '',
-      selectedConnection: { id: '', name: '', url: '' },
+      selectedConnection: { id: '', name: '', url: '', provider: '' }
     };
   },
   actions: {

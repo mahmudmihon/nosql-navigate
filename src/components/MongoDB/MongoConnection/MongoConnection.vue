@@ -42,10 +42,10 @@
   import { ButtonActionType, ComponentStateModel } from "./Models/ViewModels";
   import { useRouter } from 'vue-router';
   import { useNotification } from 'naive-ui';
-  import { CommonConsts } from '../../utilities/common-consts';
-  import { SqlLiteService } from '../../services/data/sqlLite-service';
-  import { useConnectionEventsStore } from '../../stores/connection-events';
-  import { MongoDbService } from '../../services/data/mongo-service';
+  import { CommonConsts } from '../../../utilities/MongoDB/common-consts';
+  import { SqlLiteService } from '../../../services/SqlLite/sqlLite-service';
+  import { useConnectionEventsStore } from '../../../stores/Common/connection-events';
+  import { MongoDbService } from '../../../services/MongoDB/mongo-service';
  
   const router = useRouter();
   const notification = useNotification();
@@ -86,20 +86,20 @@
     if(connected) {
       switch(actionType) {
         case ButtonActionType.ValidateAndShowMessage: {
-          notification.success({title: 'Connected successfully.'});
-          componentState.testButtonLoading = false;
-          break;
+			notification.success({title: 'Connected successfully.'});
+			componentState.testButtonLoading = false;
+			break;
         }
 
         case ButtonActionType.ValidateAndRedirectToHomePage: {
-          componentState.connectButtonLoading = false;
-          connectionEventsStore.updateConnectedUrl(componentState.connectionUrl);
-          router.push({path: '/dashboard'});
-          break;
+			componentState.connectButtonLoading = false;
+			connectionEventsStore.updateConnectedUrl(componentState.connectionUrl);
+			router.push({path: '/mongoDB'});
+			break;
         }
 
         default: {
-          return;
+          	return;
         }
       }
     }

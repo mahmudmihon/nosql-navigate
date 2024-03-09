@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { CollectionTab } from '../types/CollectionTabs/collection-tabs';
+import { CollectionTab } from '../../types/Common/collection-tabs';
 
 
 interface CollectionTabsState {

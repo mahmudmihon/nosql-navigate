@@ -1,22 +1,22 @@
-import DashboardInterface from '../components/DashboardInterface/DashboardInterface.vue';
-import ConnectionInterface from '../components/ConnectionInterface/ConnectionInterface.vue';
-import DatabasesSummary from '../components/DatabasesSummary/DatabasesSummary.vue';
-import CollectionTabs from '../components/CollectionTabs/CollectionTabs.vue';
+import ConnectionInterface from '../components/Common/ConnectionInterface/ConnectionInterface.vue';
 import { createRouter, createMemoryHistory  } from 'vue-router';
+import MongoDashboardInterface from '../components/MongoDB/MongoDashboardInterface/MongoDashboardInterface.vue';
+import MongoDatabasesSummary from '../components/MongoDB/MongoDatabasesSummary/MongoDatabasesSummary.vue';
+import MongoCollectionTabs from '../components/MongoDB/MongoCollectionTabs/MongoCollectionTabs.vue';
 
 const routes = [
     { name: '', path: '/', component: ConnectionInterface },
     { 
-        path: '/dashboard', 
-        component: DashboardInterface,
+        path: '/mongoDB', 
+        component: MongoDashboardInterface,
         children: [
             {
                 path: '',
-                component: DatabasesSummary
+                component: MongoDatabasesSummary
             },
             {
                 path: '/collection-tabs',
-                component: CollectionTabs
+                component: MongoCollectionTabs
             }
         ]
     }  
